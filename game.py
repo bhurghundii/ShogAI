@@ -22,15 +22,15 @@ class startGame():
         print('Doing warm up functions like checking settings and params')
 
     def moveLegalGO(self, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY, Matrix):
-        print('Value is' + Matrix)
+        print('Value is' + str(Matrix))
         Matrix[0][0] = 'BW'
         self.cells[(0, 0)].configure(text='BW')
-        #self.DrawBoard(Matrix)
+        print('Value is' + str(Matrix))
+
 
 
     def click(self, pos, row, col, Matrix):
         global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY
-        print Matrix
         if GAMESTATE == 1:
             self.cells[(row, col)].configure(background='blue')
             newMatrixPosX = row
@@ -44,7 +44,7 @@ class startGame():
             GAMESTATE = 1
 
         if newMatrixPosX != None and newMatrixPosY != None:
-            self.moveLegalGO(Matrix, pos, oldMatrixPosX, oldMatrixPosY,  newMatrixPosX, newMatrixPosY)
+            self.moveLegalGO(pos, oldMatrixPosX, oldMatrixPosY,  newMatrixPosX, newMatrixPosY, Matrix)
 
         print("you clicked row %s column %s with %s" % (row, col, pos))
 
