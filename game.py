@@ -11,40 +11,111 @@ newMatrixPosX = None
 newMatrixPosY = None
 oldMatrixPosX = None
 oldMatrixPosY = None
+posToMove = None
+possibleMoveMatrix = []
 
-class ruleChecker():
-    def moveLegalGO():
-        Matrix[0][0] = 'BW';
+gameMatrix = None
+#class turnStateManager():
 
-class startGame():
+
+
+class GameManager():
 
     def init(self):
         print('Doing warm up functions like checking settings and params')
 
-    def moveLegalGO(self, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY, Matrix):
-        print('Value is' + str(Matrix))
-        Matrix[0][0] = 'BW'
-        self.cells[(0, 0)].configure(text='BW')
-        print('Value is' + str(Matrix))
+    def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal):
+        print possibleMoveMatrix
+        global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix
+        print 'Checking if ' + pos + ' originally on square (' + str(oldMatrixPosXlocal) + ',' + str(oldMatrixPosYlocal) + ') can move to square (' + str(newMatrixPosXlocal) + ',' + str(newMatrixPosYlocal) + ')'
+        if ((newMatrixPosXlocal,newMatrixPosYlocal)) in possibleMoveMatrix:
+            print 'It is legal'
+            gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
+            gameMatrix[oldMatrixPosXlocal][oldMatrixPosYlocal] = '0'
+            self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text='')
+            self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=pos[-1:])
+
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    self.cells[(i, j)].configure(background='white')
+
+
+            newMatrixPosX = None
+            newMatrixPosY = None
+            oldMatrixPosX = None
+            oldMatrixPosY = None
+            posToMove = None
+            GAMESTATE = 0
+
+        else:
+            print 'That move is NOT legal!'
+
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    self.cells[(i, j)].configure(background='white')
+
+            newMatrixPosX = None
+            newMatrixPosY = None
+            oldMatrixPosX = None
+            oldMatrixPosY = None
+            posToMove = None
+            GAMESTATE = 0
 
 
 
-    def click(self, pos, row, col, Matrix):
-        global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY
+    def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos):
+        global BLACKTURN
+
+        #if (BLACKTURN == True and pos[:-1] == 'B') or (BLACKTURN == False and pos[:-1] == 'W'):
+
+
+        if (pos[-1:] == 'f'):
+            difference_y = 0
+            difference_x = 1
+            if pos[:-1] == 'B':
+                difference_x = -1
+            if pos[:-1] == 'W':
+                difference_x = 1
+            self.cells[(oldMatrixPosX + difference_x, oldMatrixPosY )].configure(background='orange')
+            possibleMoveMatrix.append((oldMatrixPosX + difference_x, oldMatrixPosY))
+
+
+        '''
+        with open('movesets.txt') as f:
+            content = f.readlines()
+            for index in range(len(content)):
+                if pos[-1:] in content[index]:
+                    movesets = content[index].split('=')[1]
+                    #cast movesets to array
+                    print array(movesets)[0]
+
+        '''
+
+
+
+    def click(self, row, col):
+        global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix
+        pos = gameMatrix[row][col]
+
         if GAMESTATE == 1:
             self.cells[(row, col)].configure(background='blue')
             newMatrixPosX = row
             newMatrixPosY = col
             GAMESTATE = 2
+
         if GAMESTATE == 0:
             self.cells[(row, col)].configure(background='yellow')
             oldMatrixPosX = row
             oldMatrixPosY = col
-            #self.cells[(row, col)].configure(text='TEST')
+            posToMove = pos
+            self.getPossibleMoves(oldMatrixPosX, oldMatrixPosY, pos)
             GAMESTATE = 1
 
-        if newMatrixPosX != None and newMatrixPosY != None:
-            self.moveLegalGO(pos, oldMatrixPosX, oldMatrixPosY,  newMatrixPosX, newMatrixPosY, Matrix)
+
+        if newMatrixPosX != None and newMatrixPosY != None and posToMove != None:
+            #checkRules = ruleChecker()
+            #checkRules.
+            self.moveLegalGO(posToMove, oldMatrixPosX, oldMatrixPosY,  newMatrixPosX, newMatrixPosY)
 
         print("you clicked row %s column %s with %s" % (row, col, pos))
 
@@ -57,7 +128,6 @@ class startGame():
         return Matrix[(h-1)][(w-1)]
 
     def DrawBoard(self, Matrix):
-        #print Matrix
         root = Tk()
         root.title('ShogAI')
         root.geometry('909x909')
@@ -79,7 +149,7 @@ class startGame():
         #since python sets variables as references to variables, and we have a 2d array, we use deepcopy
         #becasue its easier than just loopcopying
 
-        drawMatrix = copy.deepcopy(Matrix)
+        drawMatrix = copy.deepcopy(gameMatrix)
         for row in range(9):
             for column in range(9):
                 cell = Frame(center)
@@ -92,7 +162,7 @@ class startGame():
                 else:
                     drawMatrix[row][column] = (drawMatrix[row][column])[1:]
                 square_board = Button(cell, text=drawMatrix[row][column], bg='white', highlightbackground="black",
-                             highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda pos=Matrix[row][column], row=row, col=column, Matr=Matrix: self.click(pos, row, col, Matr))
+                             highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda row=row, col=column: self.click(row, col))
                 square_board.pack()
                 self.cells[(row, column)] = square_board
 
@@ -103,30 +173,30 @@ class startGame():
         map_size = 9
         #h is in numbers, w is in alphabets
         w, h = map_size, map_size
-        Matrix = [[0 for  x in range(w)] for y in range(h)]
         #Load from standardlayout and place here
-
+        global gameMatrix
+        gameMatrix = [[0 for  x in range(w)] for y in range(h)]
         with open('standardlayout.txt') as f:
             content = f.readlines()
             if (content[0].split(' ')[0] == '[BLACK]'):
                 print ('Setting black')
                 for i in range(1, len(content[0].split(' '))):
                     x = list(content[0].split(' ')[i])
-                    Matrix[int(x[1]) -1][int(x[2]) - 1] = 'B' + x[0].lower()
+                    gameMatrix[int(x[1]) -1][int(x[2]) - 1] = 'B' + x[0].lower()
 
             if (content[1].split(' ')[0] == '[WHITE]'):
                 print ('Setting white')
                 for i in range(1, len(content[1].split(' '))):
                     x = list(content[1].split(' ')[i])
-                    Matrix[int(x[1]) - 1][int(x[2]) - 1] = 'W' + x[0].lower()
+                    gameMatrix[int(x[1]) - 1][int(x[2]) - 1] = 'W' + x[0].lower()
 
             #Even though we use a 0 - 8 array, games are recorded using 1 - 9
             #Rather than overloading, we just subtract 1 from user input
-            self.DrawBoard(Matrix)
-            print (self.getPieceFrmPos(Matrix, 1, 1))
+            self.DrawBoard(gameMatrix)
+            print (self.getPieceFrmPos(gameMatrix, 1, 1))
 
 
 
 if __name__ == '__main__':
-    gameInstanceBegins = startGame()
+    gameInstanceBegins = GameManager()
     gameInstanceBegins.run()

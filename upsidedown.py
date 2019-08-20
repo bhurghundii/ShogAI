@@ -3,6 +3,7 @@
 import sys
 
 #is there a better method?
+#hold over method, from github ==> get source for reference!
 def convChartoUpsideDown(line):
     conv = {
 
