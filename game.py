@@ -87,7 +87,6 @@ class GameManager():
     def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos):
         global BLACKTURN
 
-        print pos[:-1]
         if (BLACKTURN == True and pos[:-1] == 'B') or (BLACKTURN == False and pos[:-1] == 'W'):
             with open('movesets.txt') as f:
                 content = f.readlines()
@@ -109,11 +108,17 @@ class GameManager():
                                 y_dif = 1 * y_dif
 
 
-
                             try:
-                                self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='orange')
-                                possibleMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
-                            except:
+                                print 'Pieces nearby are: ' + str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))
+                                if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and BLACKTURN == True):
+                                    self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='orange')
+                                    possibleMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
+                                if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and BLACKTURN == False):
+                                    self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='orange')
+                                    possibleMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
+
+                            except Exception as e:
+                                print (e)
                                 print('Move not on board so ignoring')
             return 1
         else:
@@ -246,8 +251,6 @@ class GameManager():
             #Even though we use a 0 - 8 array, games are recorded using 1 - 9
             #Rather than overloading, we just subtract 1 from user input
             self.DrawBoard(gameMatrix)
-            print (self.getPieceFrmPos(gameMatrix, 1, 1))
-
 
 
 if __name__ == '__main__':
