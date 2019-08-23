@@ -36,8 +36,6 @@ class GameManager():
         global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix, BLACKTURN
         print 'Checking if ' + pos + ' originally on square (' + str(oldMatrixPosXlocal) + ',' + str(oldMatrixPosYlocal) + ') can move to square (' + str(newMatrixPosXlocal) + ',' + str(newMatrixPosYlocal) + ')'
         if ((newMatrixPosXlocal,newMatrixPosYlocal)) in possibleMoveMatrix:
-            print 'It is legal'
-
             if (gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
                 print 'Captured: ' + gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
 
@@ -96,7 +94,6 @@ class GameManager():
                         #cast movesets to array
                         possiblemovelayouts =  eval(movesets)
                         for j in range(len(possiblemovelayouts)):
-                            print (possiblemovelayouts[j])
                             x_dif = int((possiblemovelayouts[j])[0])
                             y_dif = int((possiblemovelayouts[j])[1])
 
@@ -109,13 +106,25 @@ class GameManager():
 
 
                             try:
-                                print 'Pieces nearby are: ' + str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))
+                                if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and BLACKTURN == True):
+                                    break
+
+                                if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and BLACKTURN == False):
+                                    break
+
                                 if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and BLACKTURN == True):
                                     self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='orange')
                                     possibleMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
+
                                 if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and BLACKTURN == False):
                                     self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='orange')
                                     possibleMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
+
+                                if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and BLACKTURN == True):
+                                    break
+
+                                if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and BLACKTURN == False):
+                                    break
 
                             except Exception as e:
                                 print (e)
@@ -152,8 +161,6 @@ class GameManager():
             #checkRules.
             self.resetBoardGraphics()
             self.moveLegalGO(posToMove, oldMatrixPosX, oldMatrixPosY,  newMatrixPosX, newMatrixPosY)
-
-        print("you clicked row %s column %s with %s" % (row, col, pos))
 
 
 
