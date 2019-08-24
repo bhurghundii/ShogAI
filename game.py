@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import upsidedown
 from tkinter import *
+from tkinter import messagebox
 import copy
 
 #-------------------------------
@@ -16,6 +17,9 @@ possibleMoveMatrix = []
 blackcaptured = []
 whitecaptured = []
 gameMatrix = None
+
+with open('configure.txt') as f:
+    size_board = int(f.read())
 #class turnStateManager():
 
 
@@ -26,22 +30,55 @@ class GameManager():
         print('Doing warm up functions like checking settings and params')
 
     def resetBoardGraphics(self):
-        for i in range(0, 9):
-            for j in range(0, 9):
+        for i in range(0, size_board):
+            for j in range(0, size_board):
                 self.cells[(i, j)].configure(background='white')
+
+    def dropPiece(self):
+        pass
+
+    def promotion(self, pos):
+        print pos[-1:]
+        if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
+            MsgBox = messagebox.askquestion("Promotion!", "You have reached promotion. Would you like to promote your piece?")
+            if MsgBox == 'yes':
+                return pos.upper()
+            else:
+                return pos
+        else:
+            return pos
 
     def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal):
         global possibleMoveMatrix
-        print possibleMoveMatrix
         global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix, BLACKTURN
-        print 'Checking if ' + pos + ' originally on square (' + str(oldMatrixPosXlocal) + ',' + str(oldMatrixPosYlocal) + ') can move to square (' + str(newMatrixPosXlocal) + ',' + str(newMatrixPosYlocal) + ')'
         if ((newMatrixPosXlocal,newMatrixPosYlocal)) in possibleMoveMatrix:
+
+            print newMatrixPosYlocal
+            if (BLACKTURN == True and newMatrixPosXlocal <= 2):
+                pos = self.promotion(pos)
+            if (BLACKTURN == False and newMatrixPosXlocal >= 6):
+                pos = self.promotion(pos)
+
             if (gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
                 print 'Captured: ' + gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
+                if BLACKTURN == True:
+                    blackcaptured.append(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal].lower())
+                    newButton = Button(self.dropBlacks, text= 'B' + str(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:])
+                    newButton.pack()
+                    self.dropBlacksPieces.append(newButton)
+
+                if BLACKTURN == False:
+                    whitecaptured.append(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal].lower())
+                    newButton = Button(self.dropWhites, text= 'W' + str(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:])
+                    newButton.pack()
+                    self.dropWhitePieces.append(newButton)
+
+
 
             gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
             gameMatrix[oldMatrixPosXlocal][oldMatrixPosYlocal] = 0
             self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text='')
+            print blackcaptured, whitecaptured
 
             if (BLACKTURN == True):
                 self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=pos[-1:])
@@ -59,10 +96,10 @@ class GameManager():
             GAMESTATE = 0
 
             if (BLACKTURN == True):
-                self.optionButtons.configure(text='White Turn')
+                self.turnIndicator.configure(text='White Turn')
                 BLACKTURN = False
             else:
-                self.optionButtons.configure(text='Black Turn')
+                self.turnIndicator.configure(text='Black Turn')
                 BLACKTURN = True
 
 
@@ -127,7 +164,6 @@ class GameManager():
                                     break
 
                             except Exception as e:
-                                print (e)
                                 print('Move not on board so ignoring')
             return 1
         else:
@@ -177,19 +213,27 @@ class GameManager():
     def DrawBoard(self, Matrix):
         root = Tk()
         root.title('ShogAI')
-        root.geometry('909x1009')
+        root.geometry('1009x1009')
         self.cells = {}
-        self.optionButtons = None
+        self.turnIndicator = None
+        self.dropBlacksPieces = []
+        self.dropWhitePieces = []
 
         # create main container
         center = Frame(root, bg='white', width=900, height=900, padx=3, pady=3)
-        bottom = Frame(root, bg='yellow', width=900, height=200, padx=3, pady=3)
+        bottom = Frame(root, bg='yellow', width=200, height=900, padx=3, pady=3)
+        right = Frame(root, bg='black', width=900, height=200, padx=3, pady=3)
+        left = Frame(root, bg='gray', width=900, height=200, padx=3, pady=3)
 
         # layout all of the main containers
-        root.grid_rowconfigure(9, weight=1)
-        root.grid_columnconfigure(9, weight=1)
-        center.grid(row=1, sticky="nsew")
-        bottom.grid(row=2, sticky="nsew")
+        root.grid_rowconfigure(size_board, weight=1)
+        root.grid_columnconfigure(size_board, weight=1)
+
+        center.grid(row=1, column = 1, sticky="nsew")
+        bottom.grid(row=2, column=1, sticky="nsew")
+        right.grid(column=2, row=1, sticky="nsew")
+        left.grid(column=0, row=1, sticky="nsew")
+
 
 
         # create the center widgets
@@ -197,14 +241,20 @@ class GameManager():
         center.grid_columnconfigure(1, weight=1)
 
         bottom.grid_rowconfigure(0, weight=1)
-        bottom.grid_columnconfigure(1, weight=1)
+        bottom.grid_columnconfigure(0, weight=1)
+
+        right.grid_rowconfigure(0, weight=1)
+        right.grid_columnconfigure(1, weight=1)
+
+        left.grid_rowconfigure(0, weight=1)
+        left.grid_columnconfigure(0, weight=1)
         #we copy the matrix to another one purely for drawing because we want this to be used again
         #since python sets variables as references to variables, and we have a 2d array, we use deepcopy
         #becasue its easier than just loopcopying
 
         drawMatrix = copy.deepcopy(gameMatrix)
-        for row in range(9):
-            for column in range(9):
+        for row in range(size_board):
+            for column in range(size_board):
                 cell = Frame(center)
                 cell.grid(row=row, column=column)
 
@@ -220,22 +270,30 @@ class GameManager():
                 self.cells[(row, column)] = square_board
 
 
-        options = Frame(bottom)
-        options.grid(row=row, column=column)
+        self.options = Frame(bottom)
+        self.options.grid(column=0)
 
-        DropAPiece = Button(options, text='Drop a piece', bg='white', highlightbackground="black",
-                     highlightcolor="black", highlightthickness=1, height=3, width=9)
+        self.dropBlacks = Frame(right)
+        self.dropBlacks.grid(column=0)
 
-        TurnIndicator = Label(options, text='Blacks Turn', bg='white', highlightbackground="black",
-                     highlightcolor="black", highlightthickness=1, height=3, width=9)
+        self.dropWhites = Frame(left)
+        self.dropWhites.grid(column=0)
+
+
+
+        TurnIndicator = Label(self.options, text='Blacks Turn', bg='white', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=3, width=9)
 
         TurnIndicator.pack()
-        DropAPiece.pack()
-        self.optionButtons = TurnIndicator
+        self.turnIndicator = TurnIndicator
         root.mainloop()
 
+
+
     def initStandardGame(self):
-        map_size = 9
+        with open('configure.txt') as f:
+            content = f.read()
+        map_size = int(content)
+
         #h is in numbers, w is in alphabets
         w, h = map_size, map_size
         #Load from standardlayout and place here
