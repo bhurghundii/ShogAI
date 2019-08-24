@@ -37,27 +37,29 @@ class GameManager():
     def dropPiece(self):
         pass
 
-    def promotion(self, pos):
+    def promotion(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
         print pos[-1:]
-        if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
+        if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True and  (self.getNumberPossibleMoves(newMatrixPosXlocal,newMatrixPosYlocal, pos) != 0):
             MsgBox = messagebox.askquestion("Promotion!", "You have reached promotion. Would you like to promote your piece?")
             if MsgBox == 'yes':
                 return pos.upper()
             else:
                 return pos
         else:
-            return pos
+            if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True and  (self.getNumberPossibleMoves(newMatrixPosXlocal,newMatrixPosYlocal, pos) == 0):
+                return pos.upper()
+
+        return pos
 
     def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal):
         global possibleMoveMatrix
         global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix, BLACKTURN
         if ((newMatrixPosXlocal,newMatrixPosYlocal)) in possibleMoveMatrix:
 
-            print newMatrixPosYlocal
             if (BLACKTURN == True and newMatrixPosXlocal <= 2):
-                pos = self.promotion(pos)
+                pos = self.promotion(pos, newMatrixPosXlocal, newMatrixPosYlocal)
             if (BLACKTURN == False and newMatrixPosXlocal >= 6):
-                pos = self.promotion(pos)
+                pos = self.promotion(pos, newMatrixPosXlocal, newMatrixPosYlocal)
 
             if (gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
                 print 'Captured: ' + gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
@@ -169,6 +171,50 @@ class GameManager():
         else:
             print 'It is not your turn yet'
             return 0
+
+
+    def getNumberPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos):
+        count = 0
+        with open('movesets.txt') as f:
+            content = f.readlines()
+            for index in range(len(content)):
+                if pos[-1:] in content[index]:
+                    movesets = content[index].split('=')[1]
+                    #cast movesets to array
+                    possiblemovelayouts =  eval(movesets)
+                    for j in range(len(possiblemovelayouts)):
+                        x_dif = int((possiblemovelayouts[j])[0])
+                        y_dif = int((possiblemovelayouts[j])[1])
+
+                        if pos[:-1] == 'B':
+                            x_dif = -1 * x_dif
+                            y_dif = -1 * y_dif
+                        if pos[:-1] == 'W':
+                            x_dif = 1 * x_dif
+                            y_dif = 1 * y_dif
+
+                        try:
+                            if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and BLACKTURN == True):
+                                break
+
+                            if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and BLACKTURN == False):
+                                break
+
+                            if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and BLACKTURN == True):
+                                count = count + 1
+
+                            if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and BLACKTURN == False):
+                                count = count + 1
+
+                            if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and BLACKTURN == True):
+                                break
+
+                            if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and BLACKTURN == False):
+                                break
+
+                        except Exception as e:
+                            print('Move not on board so ignoring')
+        return count
 
 
 
