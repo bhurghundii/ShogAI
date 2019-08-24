@@ -37,18 +37,14 @@ class GameManager():
     def dropPiece(self):
         pass
 
-    def promotion(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
+    def promotion(self, pos):
         print pos[-1:]
-        if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True and  (self.getNumberPossibleMoves(newMatrixPosXlocal,newMatrixPosYlocal, pos) != 0):
+        if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
             MsgBox = messagebox.askquestion("Promotion!", "You have reached promotion. Would you like to promote your piece?")
             if MsgBox == 'yes':
                 return pos.upper()
             else:
                 return pos
-        else:
-            if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True and  (self.getNumberPossibleMoves(newMatrixPosXlocal,newMatrixPosYlocal, pos) == 0):
-                return pos.upper()
-
         return pos
 
     def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal):
@@ -57,9 +53,12 @@ class GameManager():
         if ((newMatrixPosXlocal,newMatrixPosYlocal)) in possibleMoveMatrix:
 
             if (BLACKTURN == True and newMatrixPosXlocal <= 2):
-                pos = self.promotion(pos, newMatrixPosXlocal, newMatrixPosYlocal)
+                if (pos[-1:] == 'f' and newMatrixPosXlocal <= 0) or (pos[-1:] == 'n' and newMatrixPosXlocal <= 1):
+                    pos = pos.upper()
+                else:
+                    pos = self.promotion(pos)
             if (BLACKTURN == False and newMatrixPosXlocal >= 6):
-                pos = self.promotion(pos, newMatrixPosXlocal, newMatrixPosYlocal)
+                pos = self.promotion(pos)
 
             if (gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
                 print 'Captured: ' + gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
