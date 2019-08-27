@@ -15,16 +15,13 @@ oldMatrixPosX = None
 oldMatrixPosY = None
 posToMove = None
 possibleMoveMatrix = []
-checkMoveMatrix = []
 blackcaptured = []
 whitecaptured = []
 gameMatrix = None
+isMoveDropPiece = False
 
 with open('configure.txt') as f:
     size_board = int(f.read())
-#class turnStateManager():
-
-
 
 class GameManager():
 
@@ -36,8 +33,17 @@ class GameManager():
             for j in range(0, size_board):
                 self.cells[(i, j)].configure(background='white')
 
-    def dropPiece(self):
-        pass
+    def dropPiece(self, pos):
+        print (pos)
+        if pos == 'p':
+            pass
+
+    def clickDrop(self, row):
+        global isMoveDropPiece, GAMESTATE
+        self.dropPiece(blackcaptured[row - 1])
+        isMoveDropPiece = True
+        GAMESTATE = 3
+
 
     def isKingUnderCheck(self, oldMatrixPosX, oldMatrixPosY, pos):
         global BLACKTURN, GAMESTATE, isCheck
@@ -76,7 +82,6 @@ class GameManager():
                                             isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
-                                        checkMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
 
 
 
@@ -86,8 +91,7 @@ class GameManager():
                                             print 'WHITE CHECK!'
                                             isCheck = True
 
-                                        self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='pink')
-                                        checkMoveMatrix.append((oldMatrixPosX + x_dif, oldMatrixPosY + y_dif))
+                                        self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
 
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and BLACKTURN == True):
                                         break
@@ -101,7 +105,6 @@ class GameManager():
         else:
             return 0
 
-
     def promotion(self, pos):
         if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
             MsgBox = messagebox.askquestion("Promotion!", "You have reached promotion. Would you like to promote your piece?")
@@ -112,9 +115,11 @@ class GameManager():
         return pos
 
     def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal):
-        global possibleMoveMatrix, checkMoveMatrix, isCheck
+        global possibleMoveMatrix, isCheck
         global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix, BLACKTURN
         if ((newMatrixPosXlocal,newMatrixPosYlocal)) in possibleMoveMatrix:
+
+
 
             #Get current pre-move position we are moving to
             old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
@@ -153,59 +158,84 @@ class GameManager():
             self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text='')
 
 
+
             #Check for checks
             #This method. Is. perfect.
-            print 'Now that the opponents move has been made, lets check if check is still valid'
-            BLACKTURN = not BLACKTURN
-            checkMoveMatrix *= 0
-            print checkMoveMatrix
-            for i in range(0, size_board):
-                for j in range(0, size_board):
-                    p = self.getPieceFrmPos(i + 1, j + 1)
-                    #print (i,j, p)
-                    if p != 0:
-                        self.isKingUnderCheck(i, j, p)
-
-            #reminder: [y axis][x axis]
-
-            kingcolor = self.cells[self.getPosFromPiece('Wk')].cget('background')
-
-            if (kingcolor == 'cyan') :
-                print 'Still in check, Restart that move'
-                old_fill = old_state_pos
-                if old_fill == 0:
-                    old_fill = ''
-
-                print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
-                #Load back or direct drop?
-                if (BLACKTURN == True):
-                    print str(old_fill)[-1:]
-                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=str(old_fill)[-1:])
-                    self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text=str(pos)[-1:])
-                else:
-                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(str(old_fill)[-1:]))
-                    self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(str(pos)[-1:]))
-
-                    #self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
+            if isCheck == False:
+                #Does our move reveal a check for the other team?
                 BLACKTURN = not BLACKTURN
-                gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = old_state_pos
-                gameMatrix[oldMatrixPosXlocal][oldMatrixPosYlocal] = pos
-                self.resetBoardGraphics()
+                for i in range(0, size_board):
+                    for j in range(0, size_board):
+                        p = self.getPieceFrmPos(i + 1, j + 1)
+                        if p != 0:
+                            self.isKingUnderCheck(i, j, p)
 
-                newMatrixPosX = None
-                newMatrixPosY = None
-                oldMatrixPosX = None
-                oldMatrixPosY = None
-                posToMove = None
-                GAMESTATE = 0
+                            if isCheck == True:
+                                print 'ILLEGAL MOVE: Reveals check'
+                                break
 
-                return
+                    if isCheck == True:
+                        break
+                BLACKTURN = not BLACKTURN
+
+            if isCheck == False:
+                #Does our move give a check?
+                for i in range(0, size_board):
+                    for j in range(0, size_board):
+                        p = self.getPieceFrmPos(i + 1, j + 1)
+                        if p != 0:
+                            self.isKingUnderCheck(i, j, p)
 
             else:
-                print 'King is out of check, continue play'
-                isCheck = False
-                checkMoveMatrix *= 0
+                #Does our move get us out of a check?
+                print 'Now that the opponents move has been made, lets check if check is still valid'
                 BLACKTURN = not BLACKTURN
+                for i in range(0, size_board):
+                    for j in range(0, size_board):
+                        p = self.getPieceFrmPos(i + 1, j + 1)
+                        if p != 0:
+                            self.isKingUnderCheck(i, j, p)
+
+                #reminder: [y axis][x axis]
+                if BLACKTURN == True:
+                    kingcolor = self.cells[self.getPosFromPiece('Wk')].cget('background')
+                else:
+                    kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
+
+                if (kingcolor == 'cyan') :
+                    print 'Still in check, Restart that move'
+                    old_fill = old_state_pos
+                    if old_fill == 0:
+                        old_fill = ''
+
+                    print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                    #Load back or direct drop?
+                    if (BLACKTURN == True):
+                        self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(str(old_fill)[-1:]))
+                        self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(str(pos)[-1:]))
+                    else:
+                        self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=str(old_fill)[-1:])
+                        self.cells[(oldMatrixPosXlocal, oldMatrixPosYlocal)].configure(text=str(pos)[-1:])
+
+                        #self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
+                    BLACKTURN = not BLACKTURN
+                    gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = old_state_pos
+                    gameMatrix[oldMatrixPosXlocal][oldMatrixPosYlocal] = pos
+                    self.resetBoardGraphics()
+
+                    newMatrixPosX = None
+                    newMatrixPosY = None
+                    oldMatrixPosX = None
+                    oldMatrixPosY = None
+                    posToMove = None
+                    GAMESTATE = 0
+
+                    return
+
+                else:
+                    print 'King is out of check, continue play'
+                    isCheck = False
+                    BLACKTURN = not BLACKTURN
 
 
 
@@ -301,7 +331,6 @@ class GameManager():
             print 'It is not your turn yet'
             return 0
 
-
     def getNumberPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos):
         count = 0
         with open('movesets.txt') as f:
@@ -345,11 +374,16 @@ class GameManager():
                             print('Move not on board so ignoring')
         return count
 
-
-
     def click(self, row, col):
         global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix
         pos = gameMatrix[row][col]
+
+
+        if GAMESTATE == 3:
+            self.cells[(row, col)].configure(background='RED')
+            newMatrixPosX = row
+            newMatrixPosY = col
+
 
 
         if GAMESTATE == 1:
@@ -466,8 +500,6 @@ class GameManager():
         self.turnIndicator = TurnIndicator
         root.mainloop()
 
-
-
     def initStandardGame(self):
         with open('configure.txt') as f:
             content = f.read()
@@ -495,7 +527,6 @@ class GameManager():
             #Even though we use a 0 - 8 array, games are recorded using 1 - 9
             #Rather than overloading, we just subtract 1 from user input
             self.DrawBoard(gameMatrix)
-
 
 if __name__ == '__main__':
     gameInstanceBegins = GameManager()
