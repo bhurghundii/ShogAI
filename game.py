@@ -20,6 +20,9 @@ whitecaptured = []
 gameMatrix = None
 isMoveDropPiece = False
 
+#Drop Pieces
+droprank = ''
+
 with open('configure.txt') as f:
     size_board = int(f.read())
 
@@ -33,16 +36,18 @@ class GameManager():
             for j in range(0, size_board):
                 self.cells[(i, j)].configure(background='white')
 
-    def dropPiece(self, pos):
-        print (pos)
-        if pos == 'p':
-            pass
 
-    def clickDrop(self, row):
-        global isMoveDropPiece, GAMESTATE
-        self.dropPiece(blackcaptured[row - 1])
-        isMoveDropPiece = True
-        GAMESTATE = 3
+
+    def clickDrop(self, row, piece):
+        global isMoveDropPiece, GAMESTATE, droprank
+        if (BLACKTURN == True and piece == 'B') or (BLACKTURN == False and piece == 'W'):
+            isMoveDropPiece = True
+            droprank = row - 1
+            GAMESTATE = 3
+        else:
+            print 'You can not drop your opponents pieces'
+            self.resetBoardGraphics()
+            GAMESTATE = 0
 
 
     def isKingUnderCheck(self, oldMatrixPosX, oldMatrixPosY, pos):
@@ -137,15 +142,16 @@ class GameManager():
             #Capture
             if (gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
                 print 'Captured: ' + gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
+                cap_piece = gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
                 if BLACKTURN == True:
-                    blackcaptured.append(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal].lower())
-                    newButton = Button(self.dropBlacks, text= 'B' + str(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:])
+                    blackcaptured.append('B' + cap_piece[-1:].lower())
+                    newButton = Button(self.dropBlacks, text= 'B' + str(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:], command = lambda row=len(blackcaptured), piece='B': self.clickDrop(row, piece))
                     newButton.pack()
                     self.dropBlacksPieces.append(newButton)
 
                 if BLACKTURN == False:
-                    whitecaptured.append(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal].lower())
-                    newButton = Button(self.dropWhites, text= 'W' + str(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:])
+                    whitecaptured.append('W' + cap_piece[-1:].lower())
+                    newButton = Button(self.dropWhites, text= 'W' + str(gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:], command = lambda row=len(whitecaptured), piece='W': self.clickDrop(row, piece))
                     newButton.pack()
                     self.dropWhitePieces.append(newButton)
 
@@ -375,16 +381,154 @@ class GameManager():
         return count
 
     def click(self, row, col):
-        global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix
+        global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix, droprank, BLACKTURN
         pos = gameMatrix[row][col]
-
 
         if GAMESTATE == 3:
             self.cells[(row, col)].configure(background='RED')
             newMatrixPosX = row
             newMatrixPosY = col
+            pos = None
+            if BLACKTURN == True:
+                pos = blackcaptured[droprank]
+            else:
+                pos = whitecaptured[droprank]
+
+            print (row, col, pos)
+
+            if 'n' in pos:
+                if (row <= 1 and BLACKTURN == True) or (row >= 7 and BLACKTURN == False):
+                    print 'Too deep for knight'
+                    self.resetBoardGraphics()
+
+                    newMatrixPosX = None
+                    newMatrixPosY = None
+                    oldMatrixPosX = None
+                    oldMatrixPosY = None
+                    posToMove = None
+                    GAMESTATE = 0
+                else:
+                    gameMatrix[row][col] = pos
+                    self.cells[(row, col)].configure(text=str(pos)[-1:])
+                    if BLACKTURN == True:
+                        blackcaptured.pop(droprank)
+                        self.dropBlacksPieces[droprank].pack_forget()
+                    else:
+                        whitecaptured.pop(droprank)
+                        self.dropWhitePieces[droprank].pack_forget()
+                    self.ResetSwitchTurns()
 
 
+            if 'l' in pos:
+                if (row == 0 and BLACKTURN == True) or (row == 8 and BLACKTURN == False):
+                    print 'Too deep for lance'
+                    self.resetBoardGraphics()
+
+                    newMatrixPosX = None
+                    newMatrixPosY = None
+                    oldMatrixPosX = None
+                    oldMatrixPosY = None
+                    posToMove = None
+                    GAMESTATE = 0
+                else:
+                    gameMatrix[row][col] = pos
+                    self.cells[(row, col)].configure(text=str(pos)[-1:])
+                    if BLACKTURN == True:
+                        blackcaptured.pop(droprank)
+                        self.dropBlacksPieces[droprank].pack_forget()
+                    else:
+                        whitecaptured.pop(droprank)
+                        self.dropWhitePieces[droprank].pack_forget()
+                    self.ResetSwitchTurns()
+
+            #no 2 pawn rule
+            if 'f' in pos:
+                if (row == 8 and BLACKTURN == True) or (row == 0 and BLACKTURN == False):
+                    print 'Too deep for pawn'
+                    self.resetBoardGraphics()
+
+                    newMatrixPosX = None
+                    newMatrixPosY = None
+                    oldMatrixPosX = None
+                    oldMatrixPosY = None
+                    posToMove = None
+                    GAMESTATE = 0
+                else:
+                    colMat = []
+                    for y in range(0, size_board):
+                        colMat.append(gameMatrix[y][col])
+
+                    print colMat
+                    pawnTeam = 'f'
+                    if BLACKTURN == True:
+                        pawnTeam = 'B' + pawnTeam
+                    else:
+                        pawnTeam = 'W' + pawnTeam
+
+                    if pawnTeam in colMat:
+                        print 'There is a pawn on this column'
+                        self.resetBoardGraphics()
+
+                        newMatrixPosX = None
+                        newMatrixPosY = None
+                        oldMatrixPosX = None
+                        oldMatrixPosY = None
+                        posToMove = None
+                        GAMESTATE = 0
+
+                    else:
+                        #get pos of king
+                        kingTeam = 'k'
+                        if BLACKTURN == True:
+                            kingTeam = 'W' + kingTeam
+                        else:
+                            kingTeam = 'B' + kingTeam
+
+                        kingpos = self.getPosFromPiece(kingTeam)
+                        print (kingpos[0] + 1, kingpos[1])
+
+                        if (row, col) != (kingpos[0] + 1, kingpos[1]) and isCheck == False:
+                            print 'PUTTING PAWN'
+                            gameMatrix[row][col] = pawnTeam
+                            self.cells[(row, col)].configure(text=str(pawnTeam)[-1:])
+
+                            if BLACKTURN == True:
+                                blackcaptured.pop(droprank)
+                                self.dropBlacksPieces[droprank].pack_forget()
+                            else:
+                                whitecaptured.pop(droprank)
+                                self.dropWhitePieces[droprank].pack_forget()
+                            self.ResetSwitchTurns()
+
+                        else:
+                            print 'Pawn cannot checkmate'
+                            self.resetBoardGraphics()
+
+                            newMatrixPosX = None
+                            newMatrixPosY = None
+                            oldMatrixPosX = None
+                            oldMatrixPosY = None
+                            posToMove = None
+                            GAMESTATE = 0
+
+            if 'f' not in pos and 'l' not in pos and 'n' not in pos:
+                pos = pos[-1:]
+                if BLACKTURN == True:
+                    pos = 'B' + pos
+                else:
+                    pos = 'W' + pos
+
+                gameMatrix[row][col] = pos
+                self.cells[(row, col)].configure(text=str(pos)[-1:])
+
+                if BLACKTURN == True:
+                    blackcaptured.pop(droprank)
+                    self.dropBlacksPieces[droprank].pack_forget()
+                else:
+                    whitecaptured.pop(droprank)
+                    self.dropWhitePieces[droprank].pack_forget()
+
+                self.ResetSwitchTurns()
 
         if GAMESTATE == 1:
             self.cells[(row, col)].configure(background='blue')
@@ -404,8 +548,31 @@ class GameManager():
         if newMatrixPosX != None and newMatrixPosY != None and posToMove != None:
             #checkRules = ruleChecker()
             #checkRules.
+            print 'Tricky'
             self.resetBoardGraphics()
             self.moveLegalGO(posToMove, oldMatrixPosX, oldMatrixPosY,  newMatrixPosX, newMatrixPosY)
+
+    def ResetSwitchTurns(self):
+        global GAMESTATE, newMatrixPosX, newMatrixPosY, oldMatrixPosX, oldMatrixPosY, posToMove, gameMatrix, BLACKTURN
+
+        self.resetBoardGraphics()
+
+        newMatrixPosX = None
+        newMatrixPosY = None
+        oldMatrixPosX = None
+        oldMatrixPosY = None
+        posToMove = None
+
+        global BLACKTURN
+
+        if (BLACKTURN == True):
+            self.turnIndicator.configure(text='White Turn')
+            BLACKTURN = False
+        else:
+            self.turnIndicator.configure(text='Black Turn')
+            BLACKTURN = True
+
+        GAMESTATE = 0
 
     def run(self):
         self.initStandardGame()
@@ -435,8 +602,8 @@ class GameManager():
         # create main container
         center = Frame(root, bg='white', width=900, height=900, padx=3, pady=3)
         bottom = Frame(root, bg='yellow', width=200, height=900, padx=3, pady=3)
-        right = Frame(root, bg='black', width=900, height=200, padx=3, pady=3)
-        left = Frame(root, bg='gray', width=900, height=200, padx=3, pady=3)
+        right = Frame(root, width=900, height=200, padx=3, pady=3)
+        left = Frame(root, width=900, height=200, padx=3, pady=3)
 
         # layout all of the main containers
         root.grid_rowconfigure(size_board, weight=1)
