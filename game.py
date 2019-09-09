@@ -39,8 +39,6 @@ class GameManager():
             for j in range(0, size_board):
                 self.cells[(i, j)].configure(background='white')
 
-
-
     def clickDrop(self, row, piece):
         global isMoveDropPiece, GAMESTATE, droprank
         if (BLACKTURN == True and piece == 'B') or (BLACKTURN == False and piece == 'W'):
@@ -52,6 +50,168 @@ class GameManager():
             self.resetBoardGraphics()
             GAMESTATE = 0
 
+    def moveLegalDrop(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
+        global possibleMoveMatrix, isCheck
+        global GAMESTATE, newMatrixPosX, newMatrixPosY, posToMove, gameMatrix, BLACKTURN
+        #Get current pre-move position we are moving to
+        old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
+        print old_state_pos
+
+
+        #No Capturing or Promotion
+
+
+        GAMESTATE = 0
+
+
+        gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
+
+        #Check for checks
+        #This method. Is. perfect.
+        if isCheck == False:
+            #Does our move reveal a check for the other team?
+            BLACKTURN = not BLACKTURN
+            for i in range(0, size_board):
+                for j in range(0, size_board):
+                    p = self.getPieceFrmPos(i + 1, j + 1)
+                    if p != 0:
+                        self.isKingUnderCheck(i, j, p)
+
+                        if isCheck == True:
+                            print 'ILLEGAL MOVE: Reveals check'
+                            break
+
+                if isCheck == True:
+                    break
+            BLACKTURN = not BLACKTURN
+
+        if isCheck == False:
+            #Does our move give a check?
+            for i in range(0, size_board):
+                for j in range(0, size_board):
+                    p = self.getPieceFrmPos(i + 1, j + 1)
+                    if p != 0:
+                        self.isKingUnderCheck(i, j, p)
+
+        else:
+            #Does our move get us out of a check?
+            print 'Now that the opponents move has been made, lets check if check is still valid'
+            BLACKTURN = not BLACKTURN
+            for i in range(0, size_board):
+                for j in range(0, size_board):
+                    p = self.getPieceFrmPos(i + 1, j + 1)
+                    if p != 0:
+                        self.isKingUnderCheck(i, j, p)
+
+            #reminder: [y axis][x axis]
+            if BLACKTURN == True:
+                kingcolor = self.cells[self.getPosFromPiece('Wk')].cget('background')
+            else:
+                kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
+
+            if (kingcolor == 'cyan') :
+                print 'Still in check, Restart that move'
+                old_fill = old_state_pos
+                if old_fill == 0:
+                    old_fill = ''
+
+                print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                #Load back or direct drop?
+                if (BLACKTURN == True):
+                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
+                else:
+                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
+
+                    #self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
+                BLACKTURN = not BLACKTURN
+                gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = old_state_pos
+                self.resetBoardGraphics()
+
+                newMatrixPosX = None
+                newMatrixPosY = None
+                posToMove = None
+                GAMESTATE = 0
+
+                return
+
+            else:
+                print 'King is out of check, continue play'
+                isCheck = False
+                BLACKTURN = not BLACKTURN
+
+
+
+
+        if (BLACKTURN == True):
+            self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=pos[-1:])
+        else:
+            self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
+
+        self.resetBoardGraphics()
+
+
+
+        newMatrixPosX = None
+        newMatrixPosY = None
+        posToMove = None
+
+
+
+        if (BLACKTURN == True):
+            self.turnIndicator.configure(text='White Turn')
+            BLACKTURN = False
+        else:
+            self.turnIndicator.configure(text='Black Turn')
+            BLACKTURN = True
+
+        possibleMoveMatrix *= 0
+
+        #Now we check if its a checkmate
+        if (isCheck == True):
+
+            #Get all of your available moves
+            resetMatrix = copy.deepcopy(gameMatrix)
+            for i in range(0, size_board):
+                for j in range(0, size_board):
+                    self.populateSimulMoveArrays(i, j, str(gameMatrix[i][j]), True)
+
+            global simulMoveMatrix, simulMoveMatrixPre
+
+            for i in range(0, len(simulMoveMatrix)):
+                if (self.simulateMove (simulMoveMatrixPre[i][0], simulMoveMatrixPre[i][1], simulMoveMatrixPre[i][2], simulMoveMatrix[i][0], simulMoveMatrix[i][1], i) == False):
+                    print i
+                    break
+                print (i, len(simulMoveMatrix))
+                if i == (len(simulMoveMatrix) - 1):
+                    if ('f' not in pos):
+                        print 'Checkmate!'
+                    else:
+                        print 'You can not check mate by dropping a pawn'
+                        old_fill = old_state_pos
+                        if old_fill == 0:
+                            old_fill = ''
+
+                        print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                        #Load back or direct drop?
+                        if (BLACKTURN == True):
+                            self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
+                        else:
+                            self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
+
+                            #self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
+                        BLACKTURN = not BLACKTURN
+                        gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = old_state_pos
+                        self.resetBoardGraphics()
+
+                        newMatrixPosX = None
+                        newMatrixPosY = None
+                        posToMove = None
+                        GAMESTATE = 0
+
+                        return
+
+            simulMoveMatrixPre *= 0
+            simulMoveMatrix *= 0
 
     def isKingUnderCheck(self, oldMatrixPosX, oldMatrixPosY, pos):
         global BLACKTURN, GAMESTATE, isCheck
@@ -646,14 +806,16 @@ class GameManager():
                     posToMove = None
                     GAMESTATE = 0
                 else:
-                    gameMatrix[row][col] = pos
-                    self.cells[(row, col)].configure(text=str(pos)[-1:])
+                    self.moveLegalDrop(pos, row, col)
+
+                    BLACKTURN = not BLACKTURN
                     if BLACKTURN == True:
                         blackcaptured.pop(droprank)
                         self.dropBlacksPieces[droprank].pack_forget()
                     else:
                         whitecaptured.pop(droprank)
                         self.dropWhitePieces[droprank].pack_forget()
+
                     self.ResetSwitchTurns()
 
 
@@ -669,14 +831,17 @@ class GameManager():
                     posToMove = None
                     GAMESTATE = 0
                 else:
-                    gameMatrix[row][col] = pos
-                    self.cells[(row, col)].configure(text=str(pos)[-1:])
+
+                    self.moveLegalDrop(pos, row, col)
+
+                    BLACKTURN = not BLACKTURN
                     if BLACKTURN == True:
                         blackcaptured.pop(droprank)
                         self.dropBlacksPieces[droprank].pack_forget()
                     else:
                         whitecaptured.pop(droprank)
                         self.dropWhitePieces[droprank].pack_forget()
+
                     self.ResetSwitchTurns()
 
             #no 2 pawn rule
@@ -722,32 +887,21 @@ class GameManager():
                         else:
                             kingTeam = 'B' + kingTeam
 
-                        kingpos = self.getPosFromPiece(kingTeam)
-                        print (kingpos[0] + 1, kingpos[1])
+                        print 'PUTTING PAWN'
 
-                        if (row, col) != (kingpos[0] + 1, kingpos[1]) and isCheck == False:
-                            print 'PUTTING PAWN'
-                            gameMatrix[row][col] = pawnTeam
-                            self.cells[(row, col)].configure(text=str(pawnTeam)[-1:])
+                        self.moveLegalDrop(pawnTeam, row, col)
 
-                            if BLACKTURN == True:
-                                blackcaptured.pop(droprank)
-                                self.dropBlacksPieces[droprank].pack_forget()
-                            else:
-                                whitecaptured.pop(droprank)
-                                self.dropWhitePieces[droprank].pack_forget()
-                            self.ResetSwitchTurns()
-
+                        BLACKTURN = not BLACKTURN
+                        if BLACKTURN == True:
+                            blackcaptured.pop(droprank)
+                            self.dropBlacksPieces[droprank].pack_forget()
                         else:
-                            print 'Pawn cannot checkmate'
-                            self.resetBoardGraphics()
+                            whitecaptured.pop(droprank)
+                            self.dropWhitePieces[droprank].pack_forget()
 
-                            newMatrixPosX = None
-                            newMatrixPosY = None
-                            oldMatrixPosX = None
-                            oldMatrixPosY = None
-                            posToMove = None
-                            GAMESTATE = 0
+                        self.ResetSwitchTurns()
+
+
 
             if 'f' not in pos and 'l' not in pos and 'n' not in pos:
                 pos = pos[-1:]
@@ -756,9 +910,9 @@ class GameManager():
                 else:
                     pos = 'W' + pos
 
-                gameMatrix[row][col] = pos
-                self.cells[(row, col)].configure(text=str(pos)[-1:])
+                self.moveLegalDrop(pos, row, col)
 
+                BLACKTURN = not BLACKTURN
                 if BLACKTURN == True:
                     blackcaptured.pop(droprank)
                     self.dropBlacksPieces[droprank].pack_forget()
