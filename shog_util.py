@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import upsidedown
-from tkinter import *
+import tkinter import *
 from tkinter import messagebox
 import copy
 
