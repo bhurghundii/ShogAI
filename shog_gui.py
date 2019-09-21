@@ -2,10 +2,12 @@ from tkinter import *
 from tkinter import messagebox
 import copy
 import upsidedown
+from shog_logic import shog_logic
 
 class shog_gui():
 
     def __init__(self, gameState):
+        self.gameState = gameState
         self.board_size = gameState.board_size
         self.gameMatrix = gameState.gameMatrix
 
@@ -18,7 +20,7 @@ class shog_gui():
         self.dropBlacksPieces = []
         self.dropWhitePieces = []
 
-        # create main container
+        # create main containers for board, like dropped pieces, actual board etc.
         center = Frame(root, bg='white', width=900, height=900, padx=3, pady=3)
         bottom = Frame(root, bg='yellow', width=200, height=900, padx=3, pady=3)
         right = Frame(root, width=900, height=200, padx=3, pady=3)
@@ -52,6 +54,9 @@ class shog_gui():
         #becasue its easier than just loopcopying
 
         drawMatrix = copy.deepcopy(self.gameMatrix)
+
+        #We grab the class for logic and load it, ready for the square buttons to be used.
+
         for row in range(self.board_size):
             for column in range(self.board_size):
                 cell = Frame(center)
@@ -64,7 +69,7 @@ class shog_gui():
                 else:
                     drawMatrix[row][column] = (drawMatrix[row][column])[1:]
                 square_board = Button(cell, text=drawMatrix[row][column], bg='white', highlightbackground="black",
-                             highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda row=row, col=column: self.click(row, col))
+                             highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda row=row, col=column: gameLogic.click(row, col))
                 square_board.pack()
                 self.cells[(row, column)] = square_board
 
@@ -78,8 +83,12 @@ class shog_gui():
         self.dropWhites = Frame(left)
         self.dropWhites.grid(column=0)
 
+
         TurnIndicator = Label(self.options, text='Blacks Turn', bg='white', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=3, width=9)
 
         TurnIndicator.pack()
         self.turnIndicator = TurnIndicator
+
+        gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces)
+
         root.mainloop()

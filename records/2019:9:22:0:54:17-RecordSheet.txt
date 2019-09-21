@@ -1,0 +1,6 @@
+1	f7F	2	f3D
+3	b6F	4	b4D
+5	bx4D	6	f7D
+7	b5E	8	f6D
+9	b*7G	10	f5D
+11	b6D6F	

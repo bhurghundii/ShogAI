@@ -1,7 +1,7 @@
 class shog_gamestate():
     def __init__(self, board_size, gameMatrix):
             self.board_size = board_size
-            self.isBlackTurn = False
+            self.isBlackTurn = True
             self.isCheck = False
             self.gameState = 0
             self.newMatrixPosX = None
@@ -11,7 +11,8 @@ class shog_gamestate():
             self.pieceSelected = None
             self.possibleMoveMatrix = []
             self.gameMatrix = gameMatrix
+            self.blackcaptured = []
+            self.whitecaptured = []
+            self.droprank = 0
 
-    def run(self):
-        print self.board_size
-        print self.gameMatrix
+    

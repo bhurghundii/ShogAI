@@ -1,31 +1,49 @@
 from tkinter import *
 import tkFont
+import os
+from shog_start import GameInitializer
+from tkinter import filedialog
 
-root = Tk()
-root.title("ShogAI")
-root.geometry("1009x1009")
-center = Frame(root, bg='white', width=300, height=100, padx=460, pady=400)
+def sel():
+   selection = "You selected the option " + str(var.get())
+   if (var.get() == 2):
+       GameInitializer().run()
 
+   if (var.get() == 3):
+       root.filename =  filedialog.askopenfilename(initialdir = "/home/ubuntu/Documents/Shogi-DISS/src/records/",title = "Select file",filetypes = (("txt files","*.txt"),("all files","*.*")))
+       print (root.filename)
 
-helv36 = tkFont.Font(family="Helvetica",size=36,weight="bold")
+       f = open(root.filename, "r")
+       replaygame = f.read()
+       f.close()
 
-center.grid(row=2, column =2, sticky="nsew")
-cell = Frame(center)
+       f = open('ext_data/load_game.txt', "w")
+       f.write(replaygame)
+       f.close()
+       GameInitializer().run()
 
-cell.grid(row=0, column=0)
-square_board = Label(cell, text='ShogAI', bg='white',font=helv36)
-square_board.pack()
+   label.config(text = selection)
 
-cell.grid(row=1, column=1)
-square_board = Button(cell, text='Vs 2 Player', bg='grey', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=6, width=9)
-square_board.pack()
+try:
+    root = Tk()
+    root.title("ShogAI: A Dissertation by Vikram Chhapwale")
 
-cell.grid(row=2, column=2)
-square_board = Button(cell, text='Vs AI', bg='grey', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=6, width=9)
-square_board.pack()
+    var = IntVar()
 
-# create the center widgets
-center.grid_rowconfigure(0, weight=1)
-center.grid_columnconfigure(1, weight=1)
+    T1 = Label(root, text="Game Mode")
+    T1.pack( anchor = W )
 
-root.mainloop()
+    R1 = Radiobutton(root, text="VS AI", variable=var, value=1, command=sel)
+    R1.pack( anchor = W )
+
+    R2 = Radiobutton(root, text="VS Another Player", variable=var, value=2, command=sel)
+    R2.pack( anchor = W )
+
+    R3 = Radiobutton(root, text="Load a game", variable=var, value=3, command=sel)
+    R3.pack( anchor = W )
+
+    label = Label(root)
+    label.pack()
+    root.mainloop()
+except:
+    print('Caught exception CTRL-C: Terminating ShogAI gracefully')
