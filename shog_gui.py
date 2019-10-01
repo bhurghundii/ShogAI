@@ -58,20 +58,38 @@ class shog_gui():
         #We grab the class for logic and load it, ready for the square buttons to be used.
 
         for row in range(self.board_size):
-            for column in range(self.board_size):
+            for column in range(self.board_size + 1):
                 cell = Frame(center)
                 cell.grid(row=row, column=column)
 
-                if (drawMatrix[row][column] == 0):
-                    drawMatrix[row][column] = ''
-                if ('W' in drawMatrix[row][column]):
-                    drawMatrix[row][column] = upsidedown.convChartoUpsideDown(drawMatrix[row][column])[:-1]
-                else:
-                    drawMatrix[row][column] = (drawMatrix[row][column])[1:]
-                square_board = Button(cell, text=drawMatrix[row][column], bg='white', highlightbackground="black",
-                             highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda row=row, col=column: gameLogic.click(row, col))
-                square_board.pack()
-                self.cells[(row, column)] = square_board
+                if column == self.board_size:
+                    T2 = Label(cell, text= (chr(row + 65), row), background='white')
+                    T2.pack( anchor = E )
+                try:
+                    if (drawMatrix[row][column] == 0):
+                        drawMatrix[row][column] = ''
+                    if ('W' in drawMatrix[row][column]):
+                        drawMatrix[row][column] = upsidedown.convChartoUpsideDown(drawMatrix[row][column])[:-1]
+                    else:
+                        drawMatrix[row][column] = (drawMatrix[row][column])[1:]
+
+                    if row == 0:
+                        T1 = Label(cell, text= (10 - (column + 1), column))
+                        T1.pack( anchor = N )
+
+
+
+                    square_board = Button(cell, text=drawMatrix[row][column], bg='white', highlightbackground="black",
+                                 highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda row=row, col=column: gameLogic.click(row, col))
+                    square_board.pack()
+
+
+
+                    self.cells[(row, column)] = square_board
+                except:
+                    pass
+
+
 
 
         self.options = Frame(bottom)

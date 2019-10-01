@@ -4,6 +4,12 @@ import datetime
 
 class shog_play_external_moves():
 
+    def isThereAMoveToPlay_ext(self):
+        with open('ext_data/movetoplay.txt') as f:
+            turnMove = f.read()
+
+        return (lambda turnMove: True if (len(turnMove) != 0) else False)(turnMove)
+
     def getTurnFromFile(self):
         with open('ext_data/movetoplay.txt') as f:
             turnMove = f.read()
@@ -11,8 +17,59 @@ class shog_play_external_moves():
 
     def convertTurnToGameMatrixCompatible(self):
         convMove = self.getTurnFromFile()
-        print convMove
 
+        if ('☗' in convMove):
+            IsBlackMove = False
+            convMove = convMove.replace('☗', '')
+        else:
+            IsBlackMove = True
+            convMove = convMove.replace('☖', '')
+
+        if ('-' in convMove):
+            convMove = convMove.replace('-', '')
+
+        if ('x' in convMove):
+            convMove = convMove.replace('x', '')
+
+
+        if ('*' in convMove):
+            convertedMove.append('D')
+
+        if ('+' in convMove[0]):
+            #Get Piece
+            pos = (convMove[1])
+            convMove = convMove.replace(convMove[1], '')
+        else:
+            #Get Piece
+            pos = (convMove[0].lower())
+            convMove = convMove.replace(convMove[0], '')
+
+        convMove = convMove.strip()
+
+        if (len(convMove) == 4):
+            oldMatrixPosY =  int(convMove[0])
+            oldMatrixPosX = self.LetterToNumber(convMove[1])
+
+            newMatrixPosY =  int(convMove[2])
+            newMatrixPosX = self.LetterToNumber(convMove[3])
+        else:
+            oldMatrixPosY = None
+            oldMatrixPosX = None
+
+            newMatrixPosY = 9 - int(convMove[0])
+            newMatrixPosX = self.LetterToNumber(convMove[1])
+
+        return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
+
+    def LetterToNumber(self, Letter):
+        for chrval in range(97, 123):
+            if (Letter == chr(chrval)):
+                return chrval - 97
+
+    def ShogNotationToY(self, num):
+        return 9 - num
+
+        #Now that we got the move... let's grab the matrix and find out who could've made the move!
 
 class shog_recorder():
 
@@ -45,7 +102,7 @@ class shog_recorder():
         return (lambda isDrop : '*' if isDrop == True else '')(isDrop)
 
     def getTurn(self, piece):
-        return (lambda isTurn : '☗' if isTurn == 'B' else '☖')(piece[:-1])
+        return (lambda isTurn : '☖' if isTurn == 'B' else '☗')(piece[:-1])
 
     def YValueToShogNotation(self, num):
         return 9 - num
@@ -65,5 +122,3 @@ class gameTurn:
      now = datetime.datetime.now()
      gameTurn.recordSheet = "records/" + str(now.year) + ":" + str(now.month) + ":" + str(now.day) + ":" + str(now.hour) + ":" + str(now.minute) + ":" + str(now.second) + '-RecordSheet.txt'
      f = open(gameTurn.recordSheet, "w")
-
-shog_play_external_moves().convertTurnToGameMatrixCompatible()

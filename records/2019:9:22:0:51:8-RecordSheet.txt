@@ -1,5 +1,0 @@
-1	f7F	2	f3D
-3	b7G	4	b4D
-5	bx4D	6	f6D
-7	b*7G	8	f5D
-9	b4D5E	

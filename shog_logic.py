@@ -4,7 +4,7 @@ from tkinter import messagebox
 import random
 import copy
 from shog_ext import shog_recorder
-
+from shog_ext import shog_play_external_moves
 class shog_logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces):
         self.gameState = gameState
@@ -152,14 +152,62 @@ class shog_logic:
             self.gameState.gameState = 2
 
         elif self.gameState.gameState == 0:
-            if pos != 0:
-                self.cells[(row, col)].configure(background='yellow')
-                self.gameState.oldMatrixPosX = row
-                self.gameState.oldMatrixPosY = col
-                self.gameState.pieceSelected = pos
-                self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+
+            #AI parts
+
+            shog_ext = shog_play_external_moves()
+
+
+            if (shog_ext.isThereAMoveToPlay_ext()):
+                moveRead = shog_ext.convertTurnToGameMatrixCompatible()
+                print 'Hallo' + str(moveRead)
+                possiblepcs = []
+                for i in range(0, self.gameState.board_size):
+                    for j in range(0, self.gameState.board_size):
+                        p = self.getPieceFrmPos(i + 1, j + 1)
+                        if p != 0:
+                            possiblepc = self.getPosWhichCanMakeMove(i, j, p, moveRead[4] + 1, moveRead[5] + 1)
+                            if possiblepc != '':
+                                possiblepcs.append((possiblepc, i, j))
+
+                print 'PRE-MOVE: ' + str(possiblepcs)
+                if len(possiblepcs) == 1:
+                    pos = possiblepcs[0][0]
+                    self.gameState.oldMatrixPosX = possiblepcs[0][1]
+                    self.gameState.oldMatrixPosY = possiblepcs[0][2]
+                    self.gameState.newMatrixPosX = moveRead[4]
+                    self.gameState.newMatrixPosY = moveRead[5]
+                    self.gameState.pieceSelected = pos
+                    self.gameState.gameState = 2
+                    self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+                    open('ext_data/movetoplay.txt', 'w').close()
+                else:
+                    for c in range(0, len(possiblepcs)):
+
+                        if possiblepcs[c][0] == 'B' + moveRead[1]:
+                            print 'This is the one'
+                            pos = moveRead[1]
+                            self.gameState.oldMatrixPosX = moveRead[2]
+                            self.gameState.oldMatrixPosY = moveRead[3]
+                            self.gameState.newMatrixPosX = moveRead[4]
+                            self.gameState.newMatrixPosY = moveRead[5]
+                            self.gameState.pieceSelected = moveRead[1]
+                            self.gameState.gameState = 2
+                            self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+                            open('ext_data/movetoplay.txt', 'w').close()
+                        print possiblepcs[c]
+
+
+            else:
+                if pos != 0:
+                    self.cells[(row, col)].configure(background='yellow')
+                    self.gameState.oldMatrixPosX = row
+                    self.gameState.oldMatrixPosY = col
+                    self.gameState.pieceSelected = pos
+                    self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
 
         if self.gameState.newMatrixPosX != None and self.gameState.newMatrixPosY != None and self.gameState.pieceSelected != None:
+            print 'TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY))
             self.resetBoardGraphics()
             self.moveLegalGO(self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)
 
