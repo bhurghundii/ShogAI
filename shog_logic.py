@@ -22,22 +22,22 @@ class shog_logic:
 
         if self.gameState.gameState == 3:
             self.cells[(row, col)].configure(background='RED')
-            print 'PIECE DROP:' + str(self.getPieceFrmPos(row + 1, col + 1))
+            print(('PIECE DROP:' + str(self.getPieceFrmPos(row + 1, col + 1))))
 
             if (str(self.getPieceFrmPos(row + 1, col + 1)) == '0'):
                 self.gameState.newMatrixPosX = row
                 self.gameState.newMatrixPosY = col
                 pos = None
                 if self.gameState.isBlackTurn == True:
-                    print ('BLACK', len(self.gameState.blackcaptured), self.gameState.droprank, self.gameState.blackcaptured)
+                    print(('BLACK', len(self.gameState.blackcaptured), self.gameState.droprank, self.gameState.blackcaptured))
                     pos = self.gameState.blackcaptured[self.gameState.droprank]
                 else:
-                    print ('WHITE', len(self.gameState.whitecaptured), self.gameState.droprank, self.gameState.whitecaptured)
+                    print(('WHITE', len(self.gameState.whitecaptured), self.gameState.droprank, self.gameState.whitecaptured))
                     pos = self.gameState.whitecaptured[self.gameState.droprank]
 
                 if 'n' in pos:
                     if (row <= 1 and self.gameState.isBlackTurn == True) or (row >= 7 and self.gameState.isBlackTurn == False):
-                        print 'Too deep for knight'
+                        print('Too deep for knight')
                         self.resetBoardGraphics()
                         pos = None
                         self.softReset()
@@ -56,7 +56,7 @@ class shog_logic:
 
                 elif 'l' in pos:
                     if (row == 0 and self.gameState.isBlackTurn == True) or (row == 8 and self.gameState.isBlackTurn == False):
-                        print 'Too deep for lance'
+                        print('Too deep for lance')
                         self.resetBoardGraphics()
                         pos = None
                         self.softReset()
@@ -76,7 +76,7 @@ class shog_logic:
                 #no 2 pawn rule
                 elif 'p' in pos:
                     if (row == 8 and self.gameState.isBlackTurn == True) or (row == 0 and self.gameState.isBlackTurn == False):
-                        print 'Too deep for pawn'
+                        print('Too deep for pawn')
                         self.resetBoardGraphics()
                         self.softReset()
                         pos = None
@@ -85,7 +85,7 @@ class shog_logic:
                         for y in range(0, self.gameState.board_size):
                             colMat.append(self.gameState.gameMatrix[y][col])
 
-                        print colMat
+                        print(colMat)
                         pawnTeam = 'p'
                         if self.gameState.isBlackTurn == True:
                             pawnTeam = 'B' + pawnTeam
@@ -93,7 +93,7 @@ class shog_logic:
                             pawnTeam = 'W' + pawnTeam
 
                         if pawnTeam in colMat:
-                            print 'There is a pawn on this column'
+                            print('There is a pawn on this column')
                             pos = None
                             self.resetBoardGraphics()
                             self.softReset()
@@ -111,12 +111,12 @@ class shog_logic:
 
 
                             if self.gameState.isBlackTurn == True:
-                                print 'Removing from Black stack'
+                                print('Removing from Black stack')
                                 #self.gameState.blackcaptured.pop(self.gameState.droprank)
                                 self.dropBlacksPieces[self.gameState.droprank].pack_forget()
 
                             else:
-                                print 'Removing from White stack'
+                                print('Removing from White stack')
                                 #self.gameState.whitecaptured.pop(self.gameState.droprank)
                                 self.dropWhitePieces[self.gameState.droprank].pack_forget()
 
@@ -142,7 +142,7 @@ class shog_logic:
                         self.dropWhitePieces[self.gameState.droprank].pack_forget()
                     self.ResetSwitchTurns()
             else:
-                print 'A piece is already there. Move illegal.'
+                print('A piece is already there. Move illegal.')
                 self.resetBoardGraphics()
 
         elif self.gameState.gameState == 1:
@@ -160,7 +160,7 @@ class shog_logic:
 
             if (shog_ext.isThereAMoveToPlay_ext()):
                 moveRead = shog_ext.convertTurnToGameMatrixCompatible()
-                print 'Hallo' + str(moveRead)
+                print('Hallo' + str(moveRead))
                 possiblepcs = []
                 for i in range(0, self.gameState.board_size):
                     for j in range(0, self.gameState.board_size):
@@ -170,7 +170,7 @@ class shog_logic:
                             if possiblepc != '':
                                 possiblepcs.append((possiblepc, i, j))
 
-                print 'PRE-MOVE: ' + str(possiblepcs)
+                print('PRE-MOVE: ' + str(possiblepcs))
                 if len(possiblepcs) == 1:
                     pos = possiblepcs[0][0]
                     self.gameState.oldMatrixPosX = possiblepcs[0][1]
@@ -185,7 +185,7 @@ class shog_logic:
                     for c in range(0, len(possiblepcs)):
 
                         if possiblepcs[c][0] == 'B' + moveRead[1]:
-                            print 'This is the one'
+                            print('This is the one')
                             pos = moveRead[1]
                             self.gameState.oldMatrixPosX = moveRead[2]
                             self.gameState.oldMatrixPosY = moveRead[3]
@@ -195,7 +195,7 @@ class shog_logic:
                             self.gameState.gameState = 2
                             self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
                             open('ext_data/movetoplay.txt', 'w').close()
-                        print possiblepcs[c]
+                        print(possiblepcs[c])
 
 
             else:
@@ -207,7 +207,7 @@ class shog_logic:
                     self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
 
         if self.gameState.newMatrixPosX != None and self.gameState.newMatrixPosY != None and self.gameState.pieceSelected != None:
-            print 'TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY))
+            print('TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)))
             self.resetBoardGraphics()
             self.moveLegalGO(self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)
 
@@ -290,11 +290,11 @@ class shog_logic:
                                     break
 
                             except Exception as e:
-                                print e
+                                print(e)
                                 print('Move not on board so ignoring')
             return 1
         else:
-            print 'It is not your turn yet'
+            print('It is not your turn yet')
             return 0
 
     def getNumberPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos):
@@ -360,7 +360,7 @@ class shog_logic:
                         if possiblepc != '':
                             possiblepcs.append(possiblepc)
 
-            print possiblepcs
+            print(possiblepcs)
             #Get current pre-move position we are moving to
             old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
 
@@ -380,18 +380,18 @@ class shog_logic:
 
             #Capture
             if (self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
-                print 'Captured: ' + self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
+                print('Captured: ' + self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal])
                 cap_piece = self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
                 if self.gameState.isBlackTurn == True:
                     self.gameState.blackcaptured.append('B' + cap_piece[-1:].lower())
-                    print ('Adding to black: ' + str(len(self.gameState.blackcaptured)))
+                    print(('Adding to black: ' + str(len(self.gameState.blackcaptured))))
                     newButton = Button(self.dropBlacks, text= 'B' + str(self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:], command = lambda row=len(self.gameState.blackcaptured), piece='B' : self.clickDrop(row, piece))
                     newButton.pack()
                     self.dropBlacksPieces.append(newButton)
                     resultCapture = True
 
                 if self.gameState.isBlackTurn == False:
-                    print ('Adding to white: ' + str(len(self.gameState.whitecaptured)))
+                    print(('Adding to white: ' + str(len(self.gameState.whitecaptured))))
                     self.gameState.whitecaptured.append('W' + cap_piece[-1:].lower())
                     newButton = Button(self.dropWhites, text= 'W' + str(self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[-1:], command = lambda row=len(self.gameState.whitecaptured), piece='W' : self.clickDrop(row, piece))
                     newButton.pack()
@@ -420,7 +420,7 @@ class shog_logic:
                             self.isKingUnderCheck(i, j, p)
 
                             if self.gameState.isCheck == True:
-                                print 'ILLEGAL MOVE: Reveals check'
+                                print('ILLEGAL MOVE: Reveals check')
                                 break
 
                     if self.gameState.isCheck == True:
@@ -437,7 +437,7 @@ class shog_logic:
 
             else:
                 #Does our move get us out of a check?
-                print 'Now that the opponents move has been made, lets check if check is still valid'
+                print('Now that the opponents move has been made, lets check if check is still valid')
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
                 for i in range(0, self.gameState.board_size):
                     for j in range(0, self.gameState.board_size):
@@ -452,12 +452,12 @@ class shog_logic:
                     kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
 
                 if (kingcolor == 'cyan') :
-                    print 'Still in check, Restart that move'
+                    print('Still in check, Restart that move')
                     old_fill = old_state_pos
                     if old_fill == 0:
                         old_fill = ''
 
-                    print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                    print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
                     #Load back or direct drop?
                     if (self.gameState.isBlackTurn == True):
                         self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(str(old_fill)[-1:]))
@@ -477,7 +477,7 @@ class shog_logic:
                     return
 
                 else:
-                    print 'King is out of check, continue play'
+                    print('King is out of check, continue play')
                     self.gameState.isCheck = False
                     self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -515,7 +515,7 @@ class shog_logic:
 
 
         else:
-            print 'That move is NOT legal!'
+            print('That move is NOT legal!')
 
             self.resetBoardGraphics()
             self.softReset()
@@ -537,13 +537,13 @@ class shog_logic:
                 if (self.simulateMove (self.simulMoveMatrixPre[i][0], self.simulMoveMatrixPre[i][1], self.simulMoveMatrixPre[i][2], self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1], i) == False):
                     print (i)
                     break
-                print (i, len(self.simulMoveMatrix))
+                print((i, len(self.simulMoveMatrix)))
                 if i == (len(self.simulMoveMatrix) - 1):
                     #Check if we can drop a piece to cover the check
                     for k in range(0, len(self.simulMoveMatrix)):
 
                         if 'k' in self.simulMoveMatrix[k][2]:
-                            print self.simulMoveMatrix[k]
+                            print(self.simulMoveMatrix[k])
                             if (self.gameState.isBlackTurn == True):
                                 if (self.simulateDrop('Wp', self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1]) == False):
                                     break
@@ -551,7 +551,7 @@ class shog_logic:
                                 if (self.simulateDrop('Bp', self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1]) == False):
                                     break
 
-                        print 'Checkmate!'
+                        print('Checkmate!')
 
             self.simulMoveMatrixPre *= 0
             self.simulMoveMatrix *= 0
@@ -632,7 +632,7 @@ class shog_logic:
 
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and self.gameState.isBlackTurn == True):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Wk':
-                                            print 'BLACK CHECK!'
+                                            print('BLACK CHECK!')
                                             self.gameState.isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
@@ -641,8 +641,8 @@ class shog_logic:
 
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Bk':
-                                            print(oldMatrixPosX + x_dif , oldMatrixPosY + y_dif, pos )
-                                            print 'WHITE CHECK!'
+                                            print((oldMatrixPosX + x_dif , oldMatrixPosY + y_dif, pos ))
+                                            print('WHITE CHECK!')
                                             self.gameState.isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
@@ -670,7 +670,7 @@ class shog_logic:
 
     def clickDrop(self, row, piece):
 
-        print ('DROPPING: ', row, piece)
+        print(('DROPPING: ', row, piece))
 
         with open('configure.txt') as f:
             configContent = f.readlines()
@@ -682,7 +682,7 @@ class shog_logic:
                 self.gameState.droprank = row - 1
                 self.gameState.gameState = 3
             else:
-                print 'You can not drop your opponents pieces'
+                print('You can not drop your opponents pieces')
                 self.resetBoardGraphics()
                 self.gameState.gameState = 0
 
@@ -690,7 +690,7 @@ class shog_logic:
         global isCheck, GAMESTATE, newMatrixPosX, newMatrixPosY, posToMove, gameMatrix, BLACKTURN
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
-        print old_state_pos
+        print(old_state_pos)
 
         #For the game recorder
         resultPromotion = False
@@ -715,7 +715,7 @@ class shog_logic:
                         self.isKingUnderCheck(i, j, p)
 
                         if self.gameState.isCheck == True:
-                            print 'ILLEGAL MOVE: Reveals check'
+                            print('ILLEGAL MOVE: Reveals check')
                             break
 
                 if self.gameState.isCheck == True:
@@ -732,7 +732,7 @@ class shog_logic:
 
         else:
             #Does our move get us out of a check?
-            print 'Now that the opponents move has been made, lets check if check is still valid'
+            print('Now that the opponents move has been made, lets check if check is still valid')
             self.gameState.isBlackTurn = not self.gameState.isBlackTurn
             for i in range(0, self.gameState.board_size):
                 for j in range(0, self.gameState.board_size):
@@ -747,12 +747,12 @@ class shog_logic:
                 kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
 
             if (kingcolor == 'cyan') :
-                print 'Still in check, Restart that move'
+                print('Still in check, Restart that move')
                 old_fill = old_state_pos
                 if old_fill == 0:
                     old_fill = ''
 
-                print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
                 #Load back or direct drop?
                 if (self.gameState.isBlackTurn == True):
                     self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
@@ -769,7 +769,7 @@ class shog_logic:
                 return
 
             else:
-                print 'King is out of check, continue play'
+                print('King is out of check, continue play')
                 self.gameState.isCheck = False
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -814,19 +814,19 @@ class shog_logic:
 
             for i in range(0, len(self.simulMoveMatrix)):
                 if (self.simulateMove (self.simulMoveMatrixPre[i][0], self.simulMoveMatrixPre[i][1], self.simulMoveMatrixPre[i][2], self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1], i) == False):
-                    print i
+                    print(i)
                     break
-                print (i, len(self.simulMoveMatrix))
+                print((i, len(self.simulMoveMatrix)))
                 if i == (len(self.simulMoveMatrix) - 1):
                     if ('p' not in pos):
-                        print 'Checkmate!'
+                        print('Checkmate!')
                     else:
-                        print 'You can not check mate by dropping a pawn'
+                        print('You can not check mate by dropping a pawn')
                         old_fill = old_state_pos
                         if old_fill == 0:
                             old_fill = ''
 
-                        print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                        print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
                         #Load back or direct drop?
                         if (self.gameState.isBlackTurn == True):
                             self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
@@ -913,11 +913,11 @@ class shog_logic:
             return 0
 
     def simulateMove(self, oldMatrixPosXlocal, oldMatrixPosYlocal, pos, newMatrixPosXlocal, newMatrixPosYlocal, iteration):
-        print 'ITERATION: ' + str(iteration) + ' USING ' + str((oldMatrixPosXlocal, oldMatrixPosYlocal, pos, newMatrixPosXlocal, newMatrixPosYlocal))
+        print('ITERATION: ' + str(iteration) + ' USING ' + str((oldMatrixPosXlocal, oldMatrixPosYlocal, pos, newMatrixPosXlocal, newMatrixPosYlocal)))
 
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
-        print old_state_pos
+        print(old_state_pos)
 
         self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
         self.gameState.gameMatrix[oldMatrixPosXlocal][oldMatrixPosYlocal] = 0
@@ -935,7 +935,7 @@ class shog_logic:
                         self.isKingUnderCheck(i, j, p)
 
                         if self.gameState.isCheck == True:
-                            print 'ILLEGAL MOVE: Reveals check'
+                            print('ILLEGAL MOVE: Reveals check')
                             break
 
                 if self.gameState.isCheck == True:
@@ -952,7 +952,7 @@ class shog_logic:
 
         else:
             #Does our move get us out of a check?
-            print 'Now that the opponents move has been made, lets check if check is still valid'
+            print('Now that the opponents move has been made, lets check if check is still valid')
             self.gameState.isBlackTurn = not self.gameState.isBlackTurn
             for i in range(0, self.gameState.board_size):
                 for j in range(0, self.gameState.board_size):
@@ -967,12 +967,12 @@ class shog_logic:
                 kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
 
             if (kingcolor == 'cyan') :
-                print 'Still in check, Restart that move'
+                print('Still in check, Restart that move')
                 old_fill = old_state_pos
                 if old_fill == 0:
                     old_fill = ''
 
-                print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
                 #Load back or direct drop?
                 if (self.gameState.board_size == True):
                     self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(str(old_fill)[-1:]))
@@ -1011,7 +1011,7 @@ class shog_logic:
 
                 self.softReset()
 
-                print 'King is out of check, continue play'
+                print('King is out of check, continue play')
                 self.gameState.isCheck = False
                 return False
 
@@ -1047,7 +1047,7 @@ class shog_logic:
     def simulateDrop(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
-        print old_state_pos
+        print(old_state_pos)
 
         #No Capturing or Promotion
         self.gameState.gameState = 0
@@ -1067,7 +1067,7 @@ class shog_logic:
                         self.isKingUnderCheck(i, j, p)
 
                         if self.gameState.isCheck == True:
-                            print 'ILLEGAL MOVE: Reveals check'
+                            print('ILLEGAL MOVE: Reveals check')
                             break
 
                 if self.gameState.isCheck == True:
@@ -1084,7 +1084,7 @@ class shog_logic:
 
         else:
             #Does our move get us out of a check?
-            print 'Now that the opponents move has been made, lets check if check is still valid'
+            print('Now that the opponents move has been made, lets check if check is still valid')
             self.gameState.isBlackTurn = not self.gameState.isBlackTurn
             for i in range(0, self.gameState.board_size):
                 for j in range(0, self.gameState.board_size):
@@ -1099,12 +1099,12 @@ class shog_logic:
                 kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
 
             if (kingcolor == 'cyan') :
-                print 'Still in check, Restart that move'
+                print('Still in check, Restart that move')
                 old_fill = old_state_pos
                 if old_fill == 0:
                     old_fill = ''
 
-                print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
                 #Load back or direct drop?
                 if (self.gameState.isBlackTurn == True):
                     self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
@@ -1121,13 +1121,13 @@ class shog_logic:
                 return True
 
             else:
-                print 'King is out of check, continue play'
+                print('King is out of check, continue play')
 
                 old_fill = old_state_pos
                 if old_fill == 0:
                     old_fill = ''
 
-                print 'Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal'
+                print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
                 #Load back or direct drop?
                 if (self.gameState.isBlackTurn == True):
                     self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')

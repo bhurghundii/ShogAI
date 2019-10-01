@@ -55,8 +55,8 @@ class shog_play_external_moves():
         else:
             oldMatrixPosY = None
             oldMatrixPosX = None
-
-            newMatrixPosY = 9 - int(convMove[0])
+            
+            newMatrixPosY = (9 - int(convMove[0]))
             newMatrixPosX = self.LetterToNumber(convMove[1])
 
         return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
@@ -79,7 +79,7 @@ class shog_recorder():
 
         gameTurn.updateGameTurn()
 
-        f = open(gameTurn.recordSheet, "a")
+        f = open(gameTurn.recordSheet, "a", encoding='utf-8')
 
         if (i == None and j == None):
             f.write(str(gameTurn.gameTurn) + ': ' + self.getTurn(piece) + self.getPiece(piece, isPromotion) + self.getSimpleMove(isPromotion, isCapture, isDrop) + self.getCaptureSymbol(isCapture) + self.getDropSymbol(isDrop) + str(self.YValueToShogNotation(newMatrixPosY)) + self.numberToLetter(newMatrixPosX) + self.getPromotionSymbol(isPromotion) + '\n')
@@ -120,5 +120,5 @@ class gameTurn:
 
     def initRecordSheetFile(self):
      now = datetime.datetime.now()
-     gameTurn.recordSheet = "records/" + str(now.year) + ":" + str(now.month) + ":" + str(now.day) + ":" + str(now.hour) + ":" + str(now.minute) + ":" + str(now.second) + '-RecordSheet.txt'
+     gameTurn.recordSheet = r'records/' + str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now.hour) + "_" + str(now.minute) + "_" + str(now.second) + "-RecordSheet.txt"
      f = open(gameTurn.recordSheet, "w")

@@ -39,7 +39,7 @@ class GameInitializer():
         with open('configure.txt') as f:
             configContent = f.readlines()
         board_size = int(configContent[0])
-        print 'Setting board size of ' + str(board_size)
+        print(('Setting board size of ' + str(board_size)))
         return board_size
 
     def run(self):

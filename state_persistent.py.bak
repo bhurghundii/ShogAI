@@ -7,4 +7,4 @@ class state_persistent():
 
     def getGameState():
         with open('AI_layer/movetoplay.txt') as f:
-            print(f.read())
+            print f.read()
