@@ -21,9 +21,11 @@ class shog_play_external_moves():
         if ('☗' in convMove):
             IsBlackMove = False
             convMove = convMove.replace('☗', '')
+            pos = 'W'
         else:
             IsBlackMove = True
             convMove = convMove.replace('☖', '')
+            pos = 'B'
 
         if ('-' in convMove):
             convMove = convMove.replace('-', '')
@@ -37,25 +39,25 @@ class shog_play_external_moves():
 
         if ('+' in convMove[0]):
             #Get Piece
-            pos = (convMove[1])
+            pos += (convMove[1])
             convMove = convMove.replace(convMove[1], '')
         else:
             #Get Piece
-            pos = (convMove[0].lower())
+            pos += (convMove[0].lower())
             convMove = convMove.replace(convMove[0], '')
 
         convMove = convMove.strip()
 
         if (len(convMove) == 4):
-            oldMatrixPosY =  int(convMove[0])
+            oldMatrixPosY = (9 - int(convMove[0]))
             oldMatrixPosX = self.LetterToNumber(convMove[1])
 
-            newMatrixPosY =  int(convMove[2])
+            newMatrixPosY = (9 - int(convMove[2]))
             newMatrixPosX = self.LetterToNumber(convMove[3])
         else:
             oldMatrixPosY = None
             oldMatrixPosX = None
-            
+
             newMatrixPosY = (9 - int(convMove[0]))
             newMatrixPosX = self.LetterToNumber(convMove[1])
 

@@ -160,7 +160,6 @@ class shog_logic:
 
             if (shog_ext.isThereAMoveToPlay_ext()):
                 moveRead = shog_ext.convertTurnToGameMatrixCompatible()
-                print('Hallo' + str(moveRead))
                 possiblepcs = []
                 for i in range(0, self.gameState.board_size):
                     for j in range(0, self.gameState.board_size):
@@ -171,6 +170,7 @@ class shog_logic:
                                 possiblepcs.append((possiblepc, i, j))
 
                 print('PRE-MOVE: ' + str(possiblepcs))
+
                 if len(possiblepcs) == 1:
                     pos = possiblepcs[0][0]
                     self.gameState.oldMatrixPosX = possiblepcs[0][1]
@@ -182,20 +182,19 @@ class shog_logic:
                     self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
                     open('ext_data/movetoplay.txt', 'w').close()
                 else:
-                    for c in range(0, len(possiblepcs)):
 
-                        if possiblepcs[c][0] == 'B' + moveRead[1]:
-                            print('This is the one')
-                            pos = moveRead[1]
-                            self.gameState.oldMatrixPosX = moveRead[2]
-                            self.gameState.oldMatrixPosY = moveRead[3]
+                    for c in range(0, len(possiblepcs)):
+                        print(possiblepcs[c])
+                        if possiblepcs[c][0] == moveRead[1]:
+                            pos = possiblepcs[c][0]
+                            self.gameState.oldMatrixPosX = possiblepcs[c][1]
+                            self.gameState.oldMatrixPosY = possiblepcs[c][2]
                             self.gameState.newMatrixPosX = moveRead[4]
                             self.gameState.newMatrixPosY = moveRead[5]
                             self.gameState.pieceSelected = moveRead[1]
                             self.gameState.gameState = 2
                             self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
                             open('ext_data/movetoplay.txt', 'w').close()
-                        print(possiblepcs[c])
 
 
             else:
