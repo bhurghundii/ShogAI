@@ -3,8 +3,7 @@ from tkinter import Button
 from tkinter import messagebox
 import random
 import copy
-from shog_ext import shog_recorder
-from shog_ext import shog_play_external_moves
+from shog_ext import *
 class shog_logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces):
         self.gameState = gameState
@@ -156,7 +155,8 @@ class shog_logic:
             #AI parts
 
             shog_ext = shog_play_external_moves()
-
+            print('TURN: ' + str(gameTurn().gameTurn))
+            shog_ext.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
 
             if (shog_ext.isThereAMoveToPlay_ext()):
                 moveRead = shog_ext.convertTurnToGameMatrixCompatible()

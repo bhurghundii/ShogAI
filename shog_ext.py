@@ -7,7 +7,6 @@ class shog_play_external_moves():
     def isThereAMoveToPlay_ext(self):
         with open('ext_data/movetoplay.txt') as f:
             turnMove = f.read()
-
         return (lambda turnMove: True if (len(turnMove) != 0) else False)(turnMove)
 
     def getTurnFromFile(self):
@@ -63,6 +62,20 @@ class shog_play_external_moves():
 
         return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
 
+    def updateMoveToPlayIfNotEmpty(self, turn):
+        try:
+            with open('ext_data/load_game.txt') as f:
+                turnMove = f.readlines()
+
+            movetoreplay = (turnMove[turn][2:].strip())
+            f = open('ext_data/movetoplay.txt', "w", encoding='utf-8')
+            f.write(movetoreplay)
+            f.close()
+        except:
+            f = open('ext_data/load_game.txt', "w", encoding='utf-8')
+            f.close()
+            print('Done playing back. Resuming game')
+
     def LetterToNumber(self, Letter):
         for chrval in range(97, 123):
             if (Letter == chr(chrval)):
@@ -76,6 +89,7 @@ class shog_play_external_moves():
 class shog_recorder():
 
     def recordMove(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None):
+
         if gameTurn.gameTurn == 0:
             gameTurn().initRecordSheetFile()
 
