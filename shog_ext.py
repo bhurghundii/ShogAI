@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import datetime
+from threading import Timer, Thread, Event
 
 class shog_play_external_moves():
 
@@ -13,6 +14,15 @@ class shog_play_external_moves():
         with open('ext_data/movetoplay.txt') as f:
             turnMove = f.read()
         return turnMove
+
+    def getLengthOfPlay(self):
+        with open('ext_data/load_game.txt') as f:
+            turnMove = f.readlines()
+        return len(turnMove)
+
+    def clearLoadGame(self):
+        f = open('ext_data/load_game.txt', "w", encoding='utf-8')
+        f.close()
 
     def convertTurnToGameMatrixCompatible(self):
         convMove = self.getTurnFromFile()

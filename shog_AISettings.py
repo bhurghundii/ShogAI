@@ -33,28 +33,32 @@ def sel():
 try:
     root = tk.Tk()
     root.title("ShogAI: A Dissertation by Vikram Chhapwale")
-    root.geometry('600x500')
+    root.geometry('600x200')
     var = IntVar()
 
-    path = "assets/INTRO.png"
-    image = tk.PhotoImage(file=path)
-    label = tk.Label(image=image)
-    label.pack()
-
-    T0 = Label(root, text="Welcome to ShogAI, a Dissertation by Vikramaditya Chhapwale from Nottingham")
+    T0 = Label(root, text="Choose your color")
     T0.pack( anchor = W )
 
-    T1 = Label(root, text="Pick a Game Mode")
-    T1.pack( anchor = W )
-
-    R1 = Radiobutton(root, text="VS AI", variable=var, value=1, command=sel)
+    R1 = Radiobutton(root, text="Black", variable=var, value=1, command=sel)
     R1.pack( anchor = W )
 
-    R2 = Radiobutton(root, text="VS Another Player", variable=var, value=2, command=sel)
+    R2 = Radiobutton(root, text="White", variable=var, value=2, command=sel)
     R2.pack( anchor = W )
 
-    R3 = Radiobutton(root, text="Load a game", variable=var, value=3, command=sel)
+    T1 = Label(root, text="Pick the AI difficulty")
+    T1.pack( anchor = W )
+
+    R3 = Radiobutton(root, text="Easy", variable=var, value=1, command=sel)
     R3.pack( anchor = W )
+
+    R4 = Radiobutton(root, text="Medium", variable=var, value=2, command=sel)
+    R4.pack( anchor = W )
+
+    R5 = Radiobutton(root, text="Hard", variable=var, value=3, command=sel)
+    R5.pack( anchor = W )
+
+    square_board = Button(root, text='Start the game', height=6, width=9)
+    square_board.pack()
 
     label = Label(root)
     label.pack()

@@ -4,6 +4,8 @@ from tkinter import messagebox
 import random
 import copy
 from shog_ext import *
+from shog_ext import shog_play_external_moves as spem
+
 class shog_logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces):
         self.gameState = gameState
@@ -16,7 +18,36 @@ class shog_logic:
         self.simulMoveMatrix = []
         self.simulMoveMatrixPre = []
 
-    def click(self, row, col):
+    def singleStepPlay(self):
+        if (self.gameState.isLoad != True):
+            print ('Single Step is not available because load not selected')
+        else:
+            print ('Single Step')
+            self.gameState.gameState = 0
+            self.click(0, 0, True)
+            shog_ext = shog_play_external_moves()
+            if (gameTurn().gameTurn >= shog_ext.getLengthOfPlay()):
+                self.gameState.isLoad = False
+
+    def singlePlayNextMove_ext(self):
+        self.gameState.isLoad = True
+        print ('Single Step')
+        self.gameState.gameState = 0
+        self.click(0, 0, True)
+        self.gameState.isLoad = False
+
+    def fullStepPlay(self):
+        if (self.gameState.isLoad != True):
+            print ('Full Step is not available because load not selected')
+        else:
+            print ('Full Step')
+            shog_ext = shog_play_external_moves()
+            for l in range(0, shog_ext.getLengthOfPlay()):
+                self.click(0, 0, True)
+            shog_ext.clearLoadGame()
+            self.gameState.isLoad = False
+
+    def click(self, row, col, isLoad = None):
         pos = self.gameState.gameMatrix[row][col]
 
         if self.gameState.gameState == 3:
@@ -151,52 +182,54 @@ class shog_logic:
             self.gameState.gameState = 2
 
         elif self.gameState.gameState == 0:
-
             #AI parts
-
             shog_ext = shog_play_external_moves()
-            print('TURN: ' + str(gameTurn().gameTurn))
-            shog_ext.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
 
-            if (shog_ext.isThereAMoveToPlay_ext()):
-                moveRead = shog_ext.convertTurnToGameMatrixCompatible()
-                possiblepcs = []
-                for i in range(0, self.gameState.board_size):
-                    for j in range(0, self.gameState.board_size):
-                        p = self.getPieceFrmPos(i + 1, j + 1)
-                        if p != 0:
-                            possiblepc = self.getPosWhichCanMakeMove(i, j, p, moveRead[4] + 1, moveRead[5] + 1)
-                            if possiblepc != '':
-                                possiblepcs.append((possiblepc, i, j))
+            if (self.gameState.isLoad == True and isLoad == True) or shog_ext.isThereAMoveToPlay_ext():
+                print('TURN: ' + str(gameTurn().gameTurn + 1))
+                shog_ext.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
 
-                print('PRE-MOVE: ' + str(possiblepcs))
+                if (shog_ext.isThereAMoveToPlay_ext()):
+                    moveRead = shog_ext.convertTurnToGameMatrixCompatible()
+                    possiblepcs = []
+                    for i in range(0, self.gameState.board_size):
+                        for j in range(0, self.gameState.board_size):
+                            p = self.getPieceFrmPos(i + 1, j + 1)
+                            if p != 0:
+                                possiblepc = self.getPosWhichCanMakeMove(i, j, p, moveRead[4] + 1, moveRead[5] + 1)
+                                if possiblepc != '':
+                                    possiblepcs.append((possiblepc, i, j))
 
-                if len(possiblepcs) == 1:
-                    pos = possiblepcs[0][0]
-                    self.gameState.oldMatrixPosX = possiblepcs[0][1]
-                    self.gameState.oldMatrixPosY = possiblepcs[0][2]
-                    self.gameState.newMatrixPosX = moveRead[4]
-                    self.gameState.newMatrixPosY = moveRead[5]
-                    self.gameState.pieceSelected = pos
-                    self.gameState.gameState = 2
-                    self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
-                    open('ext_data/movetoplay.txt', 'w').close()
+                    #print('PRE-MOVE: ' + str(possiblepcs))
+
+                    if len(possiblepcs) == 1:
+                        pos = possiblepcs[0][0]
+                        self.gameState.oldMatrixPosX = possiblepcs[0][1]
+                        self.gameState.oldMatrixPosY = possiblepcs[0][2]
+                        self.gameState.newMatrixPosX = moveRead[4]
+                        self.gameState.newMatrixPosY = moveRead[5]
+                        self.gameState.pieceSelected = pos
+                        self.gameState.gameState = 2
+                        self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+                        open('ext_data/movetoplay.txt', 'w').close()
+                    else:
+
+                        for c in range(0, len(possiblepcs)):
+                            print(possiblepcs[c])
+                            if possiblepcs[c][0] == moveRead[1]:
+                                pos = possiblepcs[c][0]
+                                self.gameState.oldMatrixPosX = possiblepcs[c][1]
+                                self.gameState.oldMatrixPosY = possiblepcs[c][2]
+                                self.gameState.newMatrixPosX = moveRead[4]
+                                self.gameState.newMatrixPosY = moveRead[5]
+                                self.gameState.pieceSelected = moveRead[1]
+                                self.gameState.gameState = 2
+                                self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+                                open('ext_data/movetoplay.txt', 'w').close()
                 else:
-
-                    for c in range(0, len(possiblepcs)):
-                        print(possiblepcs[c])
-                        if possiblepcs[c][0] == moveRead[1]:
-                            pos = possiblepcs[c][0]
-                            self.gameState.oldMatrixPosX = possiblepcs[c][1]
-                            self.gameState.oldMatrixPosY = possiblepcs[c][2]
-                            self.gameState.newMatrixPosX = moveRead[4]
-                            self.gameState.newMatrixPosY = moveRead[5]
-                            self.gameState.pieceSelected = moveRead[1]
-                            self.gameState.gameState = 2
-                            self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
-                            open('ext_data/movetoplay.txt', 'w').close()
-
-
+                    print ('As there are no more moves to load, proceed')
+                    self.gameState.isLoad = False
+                    isLoad = False
             else:
                 if pos != 0:
                     self.cells[(row, col)].configure(background='yellow')
@@ -204,9 +237,11 @@ class shog_logic:
                     self.gameState.oldMatrixPosY = col
                     self.gameState.pieceSelected = pos
                     self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+                    self.gameState.isLoad = False
+                    isLoad = False
 
         if self.gameState.newMatrixPosX != None and self.gameState.newMatrixPosY != None and self.gameState.pieceSelected != None:
-            print('TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)))
+            #print('TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)))
             self.resetBoardGraphics()
             self.moveLegalGO(self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)
 
@@ -359,7 +394,7 @@ class shog_logic:
                         if possiblepc != '':
                             possiblepcs.append(possiblepc)
 
-            print(possiblepcs)
+            #print(possiblepcs)
             #Get current pre-move position we are moving to
             old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
 
@@ -526,7 +561,7 @@ class shog_logic:
         if (self.gameState.isCheck == True):
 
             #Get all of your available moves
-            print('Check if it is a checkmate')
+            print('JUDGE: Checking if it is a checkmate')
             resetMatrix = copy.deepcopy(self.gameState.gameMatrix)
             for i in range(0, self.gameState.board_size):
                 for j in range(0, self.gameState.board_size):
@@ -534,15 +569,12 @@ class shog_logic:
 
             for i in range(0, len(self.simulMoveMatrix)):
                 if (self.simulateMove (self.simulMoveMatrixPre[i][0], self.simulMoveMatrixPre[i][1], self.simulMoveMatrixPre[i][2], self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1], i) == False):
-                    print (i)
                     break
-                print((i, len(self.simulMoveMatrix)))
                 if i == (len(self.simulMoveMatrix) - 1):
                     #Check if we can drop a piece to cover the check
                     for k in range(0, len(self.simulMoveMatrix)):
 
                         if 'k' in self.simulMoveMatrix[k][2]:
-                            print(self.simulMoveMatrix[k])
                             if (self.gameState.isBlackTurn == True):
                                 if (self.simulateDrop('Wp', self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1]) == False):
                                     break
@@ -550,7 +582,7 @@ class shog_logic:
                                 if (self.simulateDrop('Bp', self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1]) == False):
                                     break
 
-                        print('Checkmate!')
+                        print('RESULT: Checkmate! GAMEOVER')
 
             self.simulMoveMatrixPre *= 0
             self.simulMoveMatrix *= 0
@@ -640,7 +672,6 @@ class shog_logic:
 
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Bk':
-                                            print((oldMatrixPosX + x_dif , oldMatrixPosY + y_dif, pos ))
                                             print('WHITE CHECK!')
                                             self.gameState.isCheck = True
 
@@ -813,9 +844,7 @@ class shog_logic:
 
             for i in range(0, len(self.simulMoveMatrix)):
                 if (self.simulateMove (self.simulMoveMatrixPre[i][0], self.simulMoveMatrixPre[i][1], self.simulMoveMatrixPre[i][2], self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1], i) == False):
-                    print(i)
                     break
-                print((i, len(self.simulMoveMatrix)))
                 if i == (len(self.simulMoveMatrix) - 1):
                     if ('p' not in pos):
                         print('Checkmate!')
@@ -916,7 +945,6 @@ class shog_logic:
 
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
-        print(old_state_pos)
 
         self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
         self.gameState.gameMatrix[oldMatrixPosXlocal][oldMatrixPosYlocal] = 0
@@ -1046,7 +1074,6 @@ class shog_logic:
     def simulateDrop(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
-        print(old_state_pos)
 
         #No Capturing or Promotion
         self.gameState.gameState = 0
@@ -1141,3 +1168,22 @@ class shog_logic:
                 self.softReset()
 
                 return False
+
+class AI_watcher(Thread, spem, shog_logic):
+    def __init__(self, event, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces):
+        self.gameState = gameState
+        self.cells = cells
+        self.turnIndicator = turnIndicator
+        self.dropBlacks = dropBlacks
+        self.dropWhites = dropWhites
+        self.dropBlacksPieces = dropBlacksPieces
+        self.dropWhitePieces = dropWhitePieces
+        self.simulMoveMatrix = []
+        self.simulMoveMatrixPre = []
+        Thread.__init__(self)
+        self.stopped = event
+
+    def run(self):
+        while not self.stopped.wait(0.5):
+            if (self.getLengthOfPlay() != 0):
+                shog_logic.singlePlayNextMove_ext(self)

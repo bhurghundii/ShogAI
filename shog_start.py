@@ -5,8 +5,10 @@ from state_persistent import state_persistent
 
 class GameManager():
 
-    def __init__(self, board_size):
+    def __init__(self, board_size, load = None, AI = None):
         self.board_size = board_size
+        self.load = load
+        self.AI = AI
 
     def run(self):
         #Load game board from standardlayout.txt and place here
@@ -25,12 +27,11 @@ class GameManager():
                     x = list(content[1].split(' ')[i])
                     gameMatrix[int(x[1]) - 1][int(x[2]) - 1] = 'W' + x[0].lower()
 
-
             gameState = shog_gamestate(self.board_size, gameMatrix)
-
+            gameState.isLoad = self.load
+            gameState.isAI = self.AI
             boardGraphic = shog_gui(gameState)
             shog_gui.drawInitialBoard(boardGraphic)
-
 
 class GameInitializer():
     def readConfig(self):
@@ -42,14 +43,22 @@ class GameInitializer():
         print(('Setting board size of ' + str(board_size)))
         return board_size
 
-    def run(self):
+    def run(self, load = None, AI = None):
+        print('====================GAME SET UP===========================')
         print('Doing warm up functions like checking settings and params')
+
+        if load == True and AI == False:
+            print('Loading a game from file selected')
+        if load == False and AI == True:
+            print('AI selected. Waking up listener')
+        if load == False and AI == False:
+            print('Vanilla 2P selected')
+
         board_size = self.readConfig()
-        gameInstanceBegins = GameManager(board_size)
+        gameInstanceBegins = GameManager(board_size, load, AI)
         gameInstanceBegins.run()
 
 if __name__ == '__main__':
-    print('Doing warm up functions like checking settings and params')
     board_size = GameInitializer().readConfig()
     gameInstanceBegins = GameManager(board_size)
     gameInstanceBegins.run()

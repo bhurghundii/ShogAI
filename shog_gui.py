@@ -1,8 +1,11 @@
 from tkinter import *
 from tkinter import messagebox
+import tkinter as tk
 import copy
 import upsidedown
 from shog_logic import shog_logic
+from shog_logic import AI_watcher
+from threading import Timer, Thread, Event
 
 class shog_gui():
 
@@ -89,9 +92,6 @@ class shog_gui():
                 except:
                     pass
 
-
-
-
         self.options = Frame(bottom)
         self.options.grid(column=0)
 
@@ -101,12 +101,25 @@ class shog_gui():
         self.dropWhites = Frame(left)
         self.dropWhites.grid(column=0)
 
-
         TurnIndicator = Label(self.options, text='Blacks Turn', bg='white', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=3, width=9)
+        TurnIndicator.pack(padx=10, side=tk.LEFT)
 
-        TurnIndicator.pack()
         self.turnIndicator = TurnIndicator
 
         gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces)
+
+        if self.gameState.isAI == True:
+            stopFlag = Event()
+            print('Starting the AI watcher')
+            thread = AI_watcher(stopFlag, self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces)
+            thread.start()
+
+        Load1Step = Button(self.options, text='>', bg='white', highlightbackground="black",
+                     highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.singleStepPlay())
+        Load1Step.pack(padx=10, side=tk.LEFT)
+
+        Load2Step = Button(self.options, text='>>', bg='white', highlightbackground="black",
+                     highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.fullStepPlay())
+        Load2Step.pack(padx=10, side=tk.LEFT)
 
         root.mainloop()

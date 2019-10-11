@@ -14,5 +14,5 @@ class shog_gamestate():
             self.blackcaptured = []
             self.whitecaptured = []
             self.droprank = 0
-
-    
+            self.isLoad = False
+            self.isAI = False
