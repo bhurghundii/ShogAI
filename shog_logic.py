@@ -539,6 +539,7 @@ class shog_logic:
             else:
                 shog_recorder().recordMove(pos, resultPromotion, resultCapture, resultDrop, newMatrixPosYlocal, newMatrixPosXlocal)
 
+            self.gameState.recordingFile = shog_recorder().getFileRecord()
 
             if (self.gameState.isBlackTurn == True):
                 self.turnIndicator.configure(text='White Turn')
@@ -1170,7 +1171,7 @@ class shog_logic:
                 return False
 
 class AI_watcher(Thread, spem, shog_logic):
-    def __init__(self, event, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces):
+    def __init__(self, event, gameState):
         self.gameState = gameState
         self.cells = cells
         self.turnIndicator = turnIndicator
@@ -1182,8 +1183,10 @@ class AI_watcher(Thread, spem, shog_logic):
         self.simulMoveMatrixPre = []
         Thread.__init__(self)
         self.stopped = event
-
+        self.gameState = gameState
     def run(self):
         while not self.stopped.wait(0.5):
+            #Grab record sheet so far...
+            print (self.gameState.recordingFile)
             if (self.getLengthOfPlay() != 0):
                 shog_logic.singlePlayNextMove_ext(self)

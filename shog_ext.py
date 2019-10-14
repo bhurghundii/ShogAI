@@ -136,6 +136,9 @@ class shog_recorder():
     def numberToLetter(self, num):
         return chr(num + 65).lower()
 
+    def getFileRecord(self):
+        return gameTurn.recordSheet
+
 class gameTurn:
     gameTurn = 0
     recordSheet = ''

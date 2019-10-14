@@ -16,3 +16,4 @@ class shog_gamestate():
             self.droprank = 0
             self.isLoad = False
             self.isAI = False
+            self.recordingFile = ''
