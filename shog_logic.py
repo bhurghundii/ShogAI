@@ -1172,21 +1172,17 @@ class shog_logic:
 
 class AI_watcher(Thread, spem, shog_logic):
     def __init__(self, event, gameState):
-        self.gameState = gameState
-        self.cells = cells
-        self.turnIndicator = turnIndicator
-        self.dropBlacks = dropBlacks
-        self.dropWhites = dropWhites
-        self.dropBlacksPieces = dropBlacksPieces
-        self.dropWhitePieces = dropWhitePieces
-        self.simulMoveMatrix = []
-        self.simulMoveMatrixPre = []
         Thread.__init__(self)
         self.stopped = event
         self.gameState = gameState
     def run(self):
         while not self.stopped.wait(0.5):
             #Grab record sheet so far...
-            print (self.gameState.recordingFile)
-            if (self.getLengthOfPlay() != 0):
-                shog_logic.singlePlayNextMove_ext(self)
+            try:
+                file = open(self.gameState.recordingFile, 'r')
+                print (file.read())
+                file.close()
+                if (self.getLengthOfPlay() != 0):
+                    shog_logic.singlePlayNextMove_ext(self)
+            except:
+                print('Game has not started yet - AI on standby')
