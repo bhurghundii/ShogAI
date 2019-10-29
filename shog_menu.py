@@ -5,11 +5,10 @@ from tkinter import filedialog
 import tkinter as tk
 
 def sel():
-   selection = "You selected the option " + str(var.get())
-
    if (var.get() == 1):
        'Playing against the AI'
-       GameInitializer().run(False, True)
+       #GameInitializer().run(False, True)
+       import shog_AISettings
 
    if (var.get() == 2):
        GameInitializer().run(False, False)
@@ -27,8 +26,6 @@ def sel():
        f.write(replaygame)
        f.close()
        GameInitializer().run(True, False)
-
-   label.config(text = selection)
 
 try:
     root = tk.Tk()

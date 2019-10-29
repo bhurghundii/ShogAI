@@ -48,6 +48,9 @@ class shog_logic:
             self.gameState.isLoad = False
 
     def click(self, row, col, isLoad = None):
+        print('YOU ARE:' + self.gameState.playerSelected + ' USING AI? ' + str(self.gameState.isAI))
+
+        #if ((self.gameState.isAI == True) and self.gameState.playerSelected != None)):
         pos = self.gameState.gameMatrix[row][col]
 
         if self.gameState.gameState == 3:

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
-
 import datetime
 from threading import Timer, Thread, Event
+from shog_showRecord import showRecordGUI
 
 class shog_play_external_moves():
 
@@ -150,4 +150,10 @@ class gameTurn:
     def initRecordSheetFile(self):
      now = datetime.datetime.now()
      gameTurn.recordSheet = r'records/' + str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now.hour) + "_" + str(now.minute) + "_" + str(now.second) + "-RecordSheet.txt"
+
      f = open(gameTurn.recordSheet, "w")
+     f.close()
+
+     t = showRecordGUI(gameTurn.recordSheet)
+     t.setDaemon(True)
+     t.start()

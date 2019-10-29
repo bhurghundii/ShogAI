@@ -5,7 +5,8 @@ from state_persistent import state_persistent
 
 class GameManager():
 
-    def __init__(self, board_size, load = None, AI = None):
+    def __init__(self, board_size, load = None, AI = None, pc = None):
+        self.playerSelected = pc
         self.board_size = board_size
         self.load = load
         self.AI = AI
@@ -30,6 +31,7 @@ class GameManager():
             gameState = shog_gamestate(self.board_size, gameMatrix)
             gameState.isLoad = self.load
             gameState.isAI = self.AI
+            gameState.playerSelected = self.playerSelected
             boardGraphic = shog_gui(gameState)
             shog_gui.drawInitialBoard(boardGraphic)
 
@@ -43,7 +45,7 @@ class GameInitializer():
         print(('Setting board size of ' + str(board_size)))
         return board_size
 
-    def run(self, load = None, AI = None):
+    def run(self, load = None, AI = None, pc = None):
         print('====================GAME SET UP===========================')
         print('Doing warm up functions like checking settings and params')
 
@@ -55,7 +57,7 @@ class GameInitializer():
             print('Vanilla 2P selected')
 
         board_size = self.readConfig()
-        gameInstanceBegins = GameManager(board_size, load, AI)
+        gameInstanceBegins = GameManager(board_size, load, AI, pc)
         gameInstanceBegins.run()
 
 if __name__ == '__main__':

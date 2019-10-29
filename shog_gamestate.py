@@ -17,3 +17,4 @@ class shog_gamestate():
             self.isLoad = False
             self.isAI = False
             self.recordingFile = ''
+            self.playerSelected = None

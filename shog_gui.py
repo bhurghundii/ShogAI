@@ -111,7 +111,9 @@ class shog_gui():
         if self.gameState.isAI == True:
             stopFlag = Event()
             print('Starting the AI watcher')
+
             thread = AI_watcher(stopFlag, self.gameState)
+            thread.daemon = True
             thread.start()
 
         Load1Step = Button(self.options, text='>', bg='white', highlightbackground="black",
