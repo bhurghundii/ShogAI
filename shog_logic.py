@@ -6,8 +6,9 @@ import copy
 from shog_ext import *
 from shog_ext import shog_play_external_moves as spem
 
+
 class shog_logic:
-    def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces):
+    def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
         self.gameState = gameState
         self.cells = cells
         self.turnIndicator = turnIndicator
@@ -17,6 +18,7 @@ class shog_logic:
         self.dropWhitePieces = dropWhitePieces
         self.simulMoveMatrix = []
         self.simulMoveMatrixPre = []
+        self.CheckIndicator = CheckIndicator
 
     def singleStepPlay(self):
         if (self.gameState.isLoad != True):
@@ -47,10 +49,29 @@ class shog_logic:
             shog_ext.clearLoadGame()
             self.gameState.isLoad = False
 
-    def click(self, row, col, isLoad = None):
-        print('YOU ARE:' + self.gameState.playerSelected + ' USING AI? ' + str(self.gameState.isAI))
+    def isEven(self, n):
+        if (n % 2) == 0:
+            return True
+        else:
+            return False
 
-        #if ((self.gameState.isAI == True) and self.gameState.playerSelected != None)):
+    def click(self, row, col, isLoad = None):
+        movesPlayed = shog_recorder().getGameLength()
+        print('MOVES PLAYED:', movesPlayed)
+        if (self.gameState.isAI == True):
+            print('YOU ARE:', self.gameState.playerSelected, ' USING AI? ', str(self.gameState.isAI))
+            if (self.gameState.playerSelected == 'Black' and self.isEven(movesPlayed) == False):
+                self.actionSquare(row, col, isLoad)
+            else:
+                print('It is not your move yet!')
+            if (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed) == True):
+                self.actionSquare(row, col, isLoad)
+            else:
+                print('It is not your move yet!')
+        else:
+            self.actionSquare(row, col, isLoad)
+
+    def actionSquare(self, row, col, isLoad = None):
         pos = self.gameState.gameMatrix[row][col]
 
         if self.gameState.gameState == 3:
@@ -515,6 +536,7 @@ class shog_logic:
 
                 else:
                     print('King is out of check, continue play')
+                    self.CheckIndicator.configure(text='NO CHECK')
                     self.gameState.isCheck = False
                     self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -668,6 +690,7 @@ class shog_logic:
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and self.gameState.isBlackTurn == True):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Wk':
                                             print('BLACK CHECK!')
+                                            self.CheckIndicator.configure(text='BLACK CHECK')
                                             self.gameState.isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
@@ -677,6 +700,7 @@ class shog_logic:
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Bk':
                                             print('WHITE CHECK!')
+                                            self.CheckIndicator.configure(text='WHITE CHECK')
                                             self.gameState.isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
@@ -804,6 +828,7 @@ class shog_logic:
 
             else:
                 print('King is out of check, continue play')
+                self.CheckIndicator.configure(text='NO CHECK')
                 self.gameState.isCheck = False
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -1043,6 +1068,7 @@ class shog_logic:
                 self.softReset()
 
                 print('King is out of check, continue play')
+                self.CheckIndicator.configure(text='NO CHECK')
                 self.gameState.isCheck = False
                 return False
 
@@ -1152,7 +1178,7 @@ class shog_logic:
 
             else:
                 print('King is out of check, continue play')
-
+                self.CheckIndicator.configure(text='NO CHECK')
                 old_fill = old_state_pos
                 if old_fill == 0:
                     old_fill = ''
@@ -1188,4 +1214,4 @@ class AI_watcher(Thread, spem, shog_logic):
                 if (self.getLengthOfPlay() != 0):
                     shog_logic.singlePlayNextMove_ext(self)
             except:
-                print('Game has not started yet - AI on standby')
+                print('Game has not started yet or AI has not started making a move')

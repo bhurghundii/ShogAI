@@ -20,6 +20,7 @@ class shog_gui():
         root.geometry('1009x1009')
         self.cells = {}
         self.turnIndicator = None
+        self.CheckIndicator = None
         self.dropBlacksPieces = []
         self.dropWhitePieces = []
 
@@ -106,7 +107,12 @@ class shog_gui():
 
         self.turnIndicator = TurnIndicator
 
-        gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces)
+        CheckIndicator = Label(self.options, text='NO CHECK', bg='white', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=3, width=9)
+        CheckIndicator.pack(padx=10, side=tk.RIGHT)
+
+
+
+        gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
 
         if self.gameState.isAI == True:
             stopFlag = Event()

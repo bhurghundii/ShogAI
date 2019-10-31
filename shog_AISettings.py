@@ -5,27 +5,28 @@ from tkinter import filedialog
 import tkinter as tk
 
 def sel():
-  if (var.get() == 1):
-      print('Going black')
-      GameInitializer().run(False, True, 'Black')
+  print('Going black')
+  GameInitializer().run(False, True, 'Black')
 
-  if (var.get() == 2):
-      print('Going white')
-      GameInitializer().run(False, True, 'White')
+def sel1():
+  print('Going black')
+  GameInitializer().run(False, True, 'Black')
+
+
 
 try:
     root = tk.Tk()
     root.title("ShogAI: A Dissertation by Vikram Chhapwale")
     root.geometry('600x200')
-    var = IntVar()
+    var0 = IntVar()
 
     T0 = Label(root, text="Choose your color")
     T0.pack( anchor = W )
 
-    R1 = Radiobutton(root, text="Black", variable=var, value=1, command=sel)
+    R1 = Radiobutton(root, text="Black", variable=var0, value=1, command=sel)
     R1.pack( anchor = W )
 
-    R2 = Radiobutton(root, text="White", variable=var, value=2, command=sel)
+    R2 = Radiobutton(root, text="White", variable=var0, value=2, command=sel1)
     R2.pack( anchor = W )
 
     label = Label(root)

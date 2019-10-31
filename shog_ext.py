@@ -139,6 +139,14 @@ class shog_recorder():
     def getFileRecord(self):
         return gameTurn.recordSheet
 
+    def getGameLength(self):
+        try:
+            f = open(gameTurn.recordSheet, "r", encoding='utf-8')
+            return (len(f.readlines()) + 1)
+        except:
+            return 1
+
+
 class gameTurn:
     gameTurn = 0
     recordSheet = ''
