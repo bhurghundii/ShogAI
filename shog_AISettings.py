@@ -9,8 +9,8 @@ def sel():
   GameInitializer().run(False, True, 'Black')
 
 def sel1():
-  print('Going black')
-  GameInitializer().run(False, True, 'Black')
+  print('Going white')
+  GameInitializer().run(False, True, 'White')
 
 
 

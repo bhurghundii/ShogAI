@@ -62,9 +62,7 @@ class shog_logic:
             print('YOU ARE:', self.gameState.playerSelected, ' USING AI? ', str(self.gameState.isAI))
             if (self.gameState.playerSelected == 'Black' and self.isEven(movesPlayed) == False):
                 self.actionSquare(row, col, isLoad)
-            else:
-                print('It is not your move yet!')
-            if (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed) == True):
+            elif (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed) == True):
                 self.actionSquare(row, col, isLoad)
             else:
                 print('It is not your move yet!')
