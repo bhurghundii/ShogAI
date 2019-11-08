@@ -1,3 +1,5 @@
 *.pyc
 *RecordSheet.txt
-ml/*
+ml/Data_Extraction
+ml/storage
+ml/tutorial

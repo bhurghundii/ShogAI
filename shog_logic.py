@@ -344,10 +344,10 @@ class shog_logic:
 
                                 if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == False):
                                     break
-
                             except Exception as e:
                                 print(e)
                                 print('Move not on board so ignoring')
+            #print(pos, (oldMatrixPosX), (oldMatrixPosY), oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)
             return 1
         else:
             print('It is not your turn yet')
@@ -1211,5 +1211,6 @@ class AI_watcher(Thread, spem, shog_logic):
                 file.close()
                 if (self.getLengthOfPlay() != 0):
                     shog_logic.singlePlayNextMove_ext(self)
+                print(self.gameState.gameMatrix)
             except:
                 print('Game has not started yet or AI has not started making a move')
