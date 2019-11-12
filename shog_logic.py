@@ -1254,19 +1254,28 @@ class AI_watcher(Thread, spem, shog_logic):
                 print (file.read())
                 file.close()
 
-                if ((self.getLengthOfPlay() + 1) != 0) or isEven(self.getLengthOfPlay() + 1)):
+                if (((self.getLengthOfPlay() + 1) != 0) or self.isEven(self.getLengthOfPlay() + 1)):
+                    mg = moveGeneration()
+                    #self.getLengthOfPlay() + 2) + ":" +
+                    moveToPlay = str( mg.GenRandomMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
+                    print('MOVE TO PLAY IS:', moveToPlay)
+                    mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
+
+
                     print('Checking if a move is loaded by the AI')
+
 
                     if os.stat("ext_data/movetoplay.txt").st_size != 0:
                         print('There is a move! Let us load it')
                         shog_logic.singlePlayNextMove_ext(self)
-                        return
+                        f = open('ext_data/load_game.txt', 'r+')
+                        f.truncate(0)
+                        f.close()
+                        f = open('ext_data/movetoplay.txt', 'r+')
+                        f.truncate(0)
+                        f.close()
+                        #return
 
-                mg = moveGeneration()
-                #self.getLengthOfPlay() + 2) + ":" +
-                moveToPlay = str( mg.GenRandomMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
-                print('MOVE TO PLAY IS:', moveToPlay)
-                mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
 
 
             except Exception as e:
