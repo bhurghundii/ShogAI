@@ -1,11 +1,11 @@
 import upsidedown
 from tkinter import Button
 from tkinter import messagebox
-import random
+import random, os
 import copy
 from shog_ext import *
 from shog_ext import shog_play_external_moves as spem
-
+from ml.move_gen import moveGeneration
 
 class shog_logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
@@ -32,11 +32,12 @@ class shog_logic:
                 self.gameState.isLoad = False
 
     def singlePlayNextMove_ext(self):
-        self.gameState.isLoad = True
-        print ('Single Step')
-        self.gameState.gameState = 0
-        self.click(0, 0, True)
-        self.gameState.isLoad = False
+        if os.stat("ext_data/movetoplay.txt").st_size != 0:
+            print('Playing the AI')
+            self.gameState.isLoad = True
+            self.click(0, 0, True)
+        else:
+            self.gameState.isLoad = False
 
     def fullStepPlay(self):
         if (self.gameState.isLoad != True):
@@ -64,12 +65,15 @@ class shog_logic:
                 self.actionSquare(row, col, isLoad)
             elif (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed) == True):
                 self.actionSquare(row, col, isLoad)
+            elif(isLoad == True):
+                print('AI MOVE')
+                self.actionSquare(row, col, isLoad, True)
             else:
                 print('It is not your move yet!')
         else:
             self.actionSquare(row, col, isLoad)
 
-    def actionSquare(self, row, col, isLoad = None):
+    def actionSquare(self, row, col, isLoad = None, isAILoad = None):
         pos = self.gameState.gameMatrix[row][col]
 
         if self.gameState.gameState == 3:
@@ -212,7 +216,11 @@ class shog_logic:
                 shog_ext.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
 
                 if (shog_ext.isThereAMoveToPlay_ext()):
+                    print('Playing from move')
+
                     moveRead = shog_ext.convertTurnToGameMatrixCompatible()
+                    print(moveRead)
+
                     possiblepcs = []
                     for i in range(0, self.gameState.board_size):
                         for j in range(0, self.gameState.board_size):
@@ -221,8 +229,6 @@ class shog_logic:
                                 possiblepc = self.getPosWhichCanMakeMove(i, j, p, moveRead[4] + 1, moveRead[5] + 1)
                                 if possiblepc != '':
                                     possiblepcs.append((possiblepc, i, j))
-
-                    #print('PRE-MOVE: ' + str(possiblepcs))
 
                     if len(possiblepcs) == 1:
                         pos = possiblepcs[0][0]
@@ -235,7 +241,6 @@ class shog_logic:
                         self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
                         open('ext_data/movetoplay.txt', 'w').close()
                     else:
-
                         for c in range(0, len(possiblepcs)):
                             print(possiblepcs[c])
                             if possiblepcs[c][0] == moveRead[1]:
@@ -262,8 +267,21 @@ class shog_logic:
                     self.gameState.isLoad = False
                     isLoad = False
 
+        if isAILoad == True:
+            print('LOADING AI', moveRead)
+            #LOADING AI (False, 'Wk', 0, 4, 1, 4)
+
+            self.gameState.oldMatrixPosX = moveRead[2]
+            self.gameState.oldMatrixPosY = moveRead[3]
+            self.gameState.newMatrixPosX = moveRead[4]
+            self.gameState.newMatrixPosY = moveRead[5]
+            self.gameState.pieceSelected = moveRead[1]
+
+            self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
+            self.gameState.isLoad = False
+
         if self.gameState.newMatrixPosX != None and self.gameState.newMatrixPosY != None and self.gameState.pieceSelected != None:
-            #print('TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)))
+            print('TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)))
             self.resetBoardGraphics()
             self.moveLegalGO(self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)
 
@@ -466,6 +484,7 @@ class shog_logic:
 
             #Check for checks
             #This method. Is. perfect.
+            print('CHECK??', self.gameState.isCheck)
             if self.gameState.isCheck == False:
                 #Does our move reveal a check for the other team?
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
@@ -534,7 +553,7 @@ class shog_logic:
 
                 else:
                     print('King is out of check, continue play')
-                    self.CheckIndicator.configure(text='NO CHECK')
+                    #self.CheckIndicator.configure(text='NO CHECK')
                     self.gameState.isCheck = False
                     self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -688,7 +707,7 @@ class shog_logic:
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and self.gameState.isBlackTurn == True):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Wk':
                                             print('BLACK CHECK!')
-                                            self.CheckIndicator.configure(text='BLACK CHECK')
+                                            #self.CheckIndicator.configure(text='BLACK CHECK')
                                             self.gameState.isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
@@ -698,7 +717,7 @@ class shog_logic:
                                     if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
                                         if str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)) == 'Bk':
                                             print('WHITE CHECK!')
-                                            self.CheckIndicator.configure(text='WHITE CHECK')
+                                            #self.CheckIndicator.configure(text='WHITE CHECK')
                                             self.gameState.isCheck = True
 
                                         self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='cyan')
@@ -710,6 +729,7 @@ class shog_logic:
                                         break
 
                             except Exception as e:
+                                print(e)
                                 pass
             return 1
         else:
@@ -826,7 +846,7 @@ class shog_logic:
 
             else:
                 print('King is out of check, continue play')
-                self.CheckIndicator.configure(text='NO CHECK')
+                #self.CheckIndicator.configure(text='NO CHECK')
                 self.gameState.isCheck = False
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -1066,7 +1086,7 @@ class shog_logic:
                 self.softReset()
 
                 print('King is out of check, continue play')
-                self.CheckIndicator.configure(text='NO CHECK')
+                #self.CheckIndicator.configure(text='NO CHECK')
                 self.gameState.isCheck = False
                 return False
 
@@ -1176,7 +1196,7 @@ class shog_logic:
 
             else:
                 print('King is out of check, continue play')
-                self.CheckIndicator.configure(text='NO CHECK')
+                #self.CheckIndicator.configure(text='NO CHECK')
                 old_fill = old_state_pos
                 if old_fill == 0:
                     old_fill = ''
@@ -1198,19 +1218,57 @@ class shog_logic:
                 return False
 
 class AI_watcher(Thread, spem, shog_logic):
-    def __init__(self, event, gameState):
+    def __init__(self, event, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
         Thread.__init__(self)
         self.stopped = event
         self.gameState = gameState
+        self.cells = cells
+        self.turnIndicator = turnIndicator
+        self.dropBlacks = dropBlacks
+        self.dropWhites = dropWhites
+        self.dropBlacksPieces = dropBlacksPieces
+        self.dropWhitePieces = dropWhitePieces
+        self.simulMoveMatrix = []
+        self.simulMoveMatrixPre = []
+        self.CheckIndicator = CheckIndicator
+
+        f = open('ext_data/load_game.txt', 'r+')
+        f.truncate(0)
+        f.close()
+        f = open('ext_data/movetoplay.txt', 'r+')
+        f.truncate(0)
+        f.close()
+
+
+    def isEven(self, n):
+        if (n % 2) == 0:
+            return True
+        else:
+            return False
+
     def run(self):
-        while not self.stopped.wait(0.5):
+        while not self.stopped.wait(5):
             #Grab record sheet so far...
             try:
                 file = open(self.gameState.recordingFile, 'r')
                 print (file.read())
                 file.close()
-                if (self.getLengthOfPlay() != 0):
-                    shog_logic.singlePlayNextMove_ext(self)
-                print(self.gameState.gameMatrix)
-            except:
+
+                if ((self.getLengthOfPlay() + 1) != 0) or isEven(self.getLengthOfPlay() + 1)):
+                    print('Checking if a move is loaded by the AI')
+
+                    if os.stat("ext_data/movetoplay.txt").st_size != 0:
+                        print('There is a move! Let us load it')
+                        shog_logic.singlePlayNextMove_ext(self)
+                        return
+
+                mg = moveGeneration()
+                #self.getLengthOfPlay() + 2) + ":" +
+                moveToPlay = str( mg.GenRandomMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
+                print('MOVE TO PLAY IS:', moveToPlay)
+                mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
+
+
+            except Exception as e:
+                print(e)
                 print('Game has not started yet or AI has not started making a move')

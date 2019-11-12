@@ -110,6 +110,13 @@ class shog_gui():
         CheckIndicator = Label(self.options, text='NO CHECK', bg='white', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=3, width=9)
         CheckIndicator.pack(padx=10, side=tk.RIGHT)
 
+        Load1Step = Button(self.options, text='>', bg='white', highlightbackground="black",
+                     highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.singleStepPlay())
+        Load1Step.pack(padx=10, side=tk.LEFT)
+
+        Load2Step = Button(self.options, text='>>', bg='white', highlightbackground="black",
+                     highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.fullStepPlay())
+        Load2Step.pack(padx=10, side=tk.LEFT)
 
 
         gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
@@ -118,16 +125,10 @@ class shog_gui():
             stopFlag = Event()
             print('Starting the AI watcher')
 
-            thread = AI_watcher(stopFlag, self.gameState)
+            thread = AI_watcher(stopFlag, self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
             thread.daemon = True
             thread.start()
 
-        Load1Step = Button(self.options, text='>', bg='white', highlightbackground="black",
-                     highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.singleStepPlay())
-        Load1Step.pack(padx=10, side=tk.LEFT)
 
-        Load2Step = Button(self.options, text='>>', bg='white', highlightbackground="black",
-                     highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.fullStepPlay())
-        Load2Step.pack(padx=10, side=tk.LEFT)
 
         root.mainloop()

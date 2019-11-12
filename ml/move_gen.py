@@ -1,77 +1,125 @@
 #☖G6i5h
 #Get all available moves so far
 #class AIListener():
-import random
+import random, copy
 
-def getPossibleMoves(oldMatrixPosX, oldMatrixPosY, pos, gameMatrix, isBlackTurn):
-    possibleMoveMatrix = []
-    with open('movesets.txt') as f:
-        content = f.readlines()
-        for index in range(len(content)):
-            if pos[-1:] in content[index]:
-                movesets = content[index].split('=')[1]
-                #cast movesets to array
-                possiblemovelayouts =  eval(movesets)
-                for j in range(len(possiblemovelayouts)):
-                    x_dif = int((possiblemovelayouts[j])[0])
-                    y_dif = int((possiblemovelayouts[j])[1])
+class moveGeneration():
+    def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos, gameMatrix, isBlackTurn):
+        localMatrix = copy.deepcopy(gameMatrix)
+        possibleMoveMatrix = []
+        with open('movesets.txt') as f:
+            content = f.readlines()
+            for index in range(len(content)):
+                if pos[-1:] in content[index]:
+                    movesets = content[index].split('=')[1]
+                    #cast movesets to array
+                    possiblemovelayouts =  eval(movesets)
+                    for j in range(len(possiblemovelayouts)):
+                        x_dif = int((possiblemovelayouts[j])[0])
+                        y_dif = int((possiblemovelayouts[j])[1])
 
-                    if pos[:-1] == 'B':
-                        x_dif = -1 * x_dif
-                        y_dif = -1 * y_dif
-                    if pos[:-1] == 'W':
-                        x_dif = 1 * x_dif
-                        y_dif = 1 * y_dif
+                        if pos[:-1] == 'B':
+                            x_dif = -1 * x_dif
+                            y_dif = -1 * y_dif
+                        if pos[:-1] == 'W':
+                            x_dif = 1 * x_dif
+                            y_dif = 1 * y_dif
 
-                    try:
-                        if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'B') and isBlackTurn == True):
-                            break
+                        try:
+                            if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'B') and isBlackTurn == True):
+                                break
 
-                        if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == False):
-                            break
+                            if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == False):
+                                break
 
-                        if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'B') and isBlackTurn == True):
-                            possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos))
+                            if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'B') and isBlackTurn == True):
+                                localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
+                                localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
+                                possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
 
-                        if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'W') and isBlackTurn == False):
-                            possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos))
+                            if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'W') and isBlackTurn == False):
+                                localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
+                                localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
+                                possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
 
-                        if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == True):
-                            break
+                            if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == True):
+                                break
 
-                        if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'B') and isBlackTurn == False):
-                            break
-                    except Exception as e:
-                        print(e)
-                        print('Move not on board so ignoring')
-    #Remove duplicates
-    possibleMoveMatrix = list(dict.fromkeys(possibleMoveMatrix))
+                            if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'B') and isBlackTurn == False):
+                                break
+                        except Exception as e:
+                            #print(e)
+                            #print('Move not on board so ignoring')
+                            pass
+        #Remove duplicates
+        #possibleMoveMatrix = list(dict.fromkeys(possibleMoveMatrix))
 
-    #Remove negatives
-    possibleMoveMatrix = [item for item in possibleMoveMatrix if item[0] >= 0 and item[1] >= 0]
-    print(possibleMoveMatrix)
-    return possibleMoveMatrix
-    #print(pos, (oldMatrixPosX), (oldMatrixPosY), oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)
+        #Remove negatives
+        possibleMoveMatrix = [item for item in possibleMoveMatrix if item[0] >= 0 and item[1] >= 0]
+        return possibleMoveMatrix
 
-def convMoveToNotation(moveToPlay):
-    #Add move to convert into standard notation
+    def convMoveToNotation(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None):
 
-#TEST CASE
-gameMatrix = [['Wl', 'Wn', 'Ws', 'Wg', 'Wk', 'Wg', 'Ws', 'Wn', 'Wl'], [0, 'Wr', 0, 0, 0, 0, 0, 'Wb', 0], ['Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp', 'Wp'], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 'Bp', 0, 0, 0, 0, 0], ['Bp', 'Bp', 'Bp', 0, 'Bp', 'Bp', 'Bp', 'Bp', 'Bp'], [0, 'Bb', 0, 0, 0, 0, 0, 'Br', 0], ['Bl', 'Bn', 'Bs', 'Bg', 'Bk', 'Bg', 'Bs', 'Bn', 'Bl']]
+        if (i == None and j == None):
+            return(self.getTurn(piece) + self.getPiece(piece, isPromotion) + self.getSimpleMove(isPromotion, isCapture, isDrop) + self.getCaptureSymbol(isCapture) + self.getDropSymbol(isDrop) + str(self.YValueToShogNotation(newMatrixPosY)) + self.numberToLetter(newMatrixPosX) + self.getPromotionSymbol(isPromotion) + '\n')
+        else:
+            return(self.getTurn(piece) + self.getPiece(piece, isPromotion) + str(self.YValueToShogNotation(i)) + self.numberToLetter(j) + self.getCaptureSymbol(isCapture) + self.getDropSymbol(isDrop) + str(self.YValueToShogNotation(newMatrixPosY)) + self.numberToLetter(newMatrixPosX) + self.getPromotionSymbol(isPromotion) + '\n')
 
-#Iterate through gameMatrix
-possibleMoves = []
-for i in range(0, 9):
-            for j in range(0, 9):
-                pos = (gameMatrix[i][j])
-                try:
-                    if pos[:-1] == 'W':
-                        gameTurn = False
-                    else:
-                        gameTurn = True
-                    print(pos)
-                    possibleMoves += getPossibleMoves(i,j, pos, gameMatrix, gameTurn)
-                except:
-                    pass
+    def getSimpleMove(self, isPromotion, isCapture, isDrop):
+        return (lambda isPromotion, isCapture, isDrop : '-'  if (isPromotion, isCapture, isDrop) == (False, False, False) else '')(isPromotion, isCapture, isDrop)
 
-print(possibleMoves[random.randint(0,len(possibleMoves) - 1)] )
+    def getPiece(self, piece, isPromotion):
+        return (lambda piece, isPromotion : '+' + piece[1:].upper() if (piece[1:].isupper() and isPromotion == False) else piece[1:].upper())(piece, isPromotion)
+
+    def getPromotionSymbol(self, isPromotion):
+        return (lambda isPromotion : '+' if isPromotion == True else '')(isPromotion)
+
+    def getCaptureSymbol(self, isCapture):
+        return (lambda isCapture : 'x' if isCapture == True else '')(isCapture)
+
+    def getDropSymbol(self, isDrop):
+        return (lambda isDrop : '*' if isDrop == True else '')(isDrop)
+
+    def getTurn(self, piece):
+        return (lambda isTurn : '☖' if isTurn == 'B' else '☗')(piece[:-1])
+
+    def YValueToShogNotation(self, num):
+        return 9 - num
+
+    def numberToLetter(self, num):
+        return chr(num + 65).lower()
+        #Add move to convert into standard notation
+
+    def pickARandomMove(self, length):
+         return random.randint(0,length - 1)
+    
+    def writeMoveToBuffer(self, move, FILEPATH):
+        f = open(FILEPATH, "w")
+        f.write(move)
+        f.close()
+
+    def GenRandomMoves(self, gameMatrix, isBlack):
+        #Iterate through gameMatrix
+        possibleMoves = []
+
+        print(isBlack)
+        for i in range(0, 9):
+                    for j in range(0, 9):
+                        pos = (gameMatrix[i][j])
+                        try:
+                            if (pos[:-1] == 'W') and isBlack == False:
+                                possibleMoves += self.getPossibleMoves(i,j, pos, gameMatrix, isBlack)
+                            elif (pos[:-1] == 'B') and isBlack == True:
+                                possibleMoves += self.getPossibleMoves(i,j, pos, gameMatrix, isBlack)
+                        except:
+                            pass
+            
+        randomIndex = self.pickARandomMove(len(possibleMoves))
+        self.convMoveToNotation(possibleMoves[randomIndex][4], False, False, False, possibleMoves[randomIndex][3], possibleMoves[randomIndex][2], possibleMoves[randomIndex][1], possibleMoves[randomIndex][0])
+        return (self.convMoveToNotation(possibleMoves[randomIndex][4], False, False, False, possibleMoves[randomIndex][3], possibleMoves[randomIndex][2], possibleMoves[randomIndex][1], possibleMoves[randomIndex][0]))
+
+    #orgx orgy newx newy pos matrix
+    #  0   1   2     3   4    5
+
+
+
