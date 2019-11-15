@@ -44,18 +44,22 @@ class shog_play_external_moves():
 
 
         if ('*' in convMove):
-            convertedMove.append('D')
+            convMove.append('D')
 
+        #If piece is promoted, parse differently
         if ('+' in convMove[0]):
             #Get Piece
-            pos += (convMove[1])
-            convMove = convMove.replace(convMove[1], '')
+            pos += (convMove[1].upper())
+            convMove = (convMove.replace('+', ''))
+            convMove = convMove.replace(convMove[0], '')
         else:
             #Get Piece
             pos += (convMove[0].lower())
             convMove = convMove.replace(convMove[0], '')
 
-        convMove = convMove.strip()
+        #Autopromote piece if it is required
+        
+
 
         if (len(convMove) == 4):
             oldMatrixPosY = (9 - int(convMove[0]))
@@ -66,7 +70,6 @@ class shog_play_external_moves():
         else:
             oldMatrixPosY = None
             oldMatrixPosX = None
-
             newMatrixPosY = (9 - int(convMove[0]))
             newMatrixPosX = self.LetterToNumber(convMove[1])
 

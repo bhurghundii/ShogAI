@@ -35,12 +35,14 @@ class moveGeneration():
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'B') and isBlackTurn == True):
                                 localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
                                 localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
-                                possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
+                                if (oldMatrixPosX >= 0 and oldMatrixPosY >= 0 and (oldMatrixPosX + x_dif) >= 0 and (oldMatrixPosY + y_dif) >= 0):
+                                    possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'W') and isBlackTurn == False):
                                 localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
                                 localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
-                                possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
+                                if (oldMatrixPosX >= 0 and oldMatrixPosY >= 0 and (oldMatrixPosX + x_dif) >= 0 and (oldMatrixPosY + y_dif) >= 0):
+                                    possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == True):
                                 break
@@ -98,7 +100,7 @@ class moveGeneration():
         f.write(move)
         f.close()
 
-    def GenRandomMoves(self, gameMatrix, isBlack):
+    def GenMoves(self, gameMatrix, isBlack):
         #Iterate through gameMatrix
         possibleMoves = []
 

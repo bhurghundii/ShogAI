@@ -269,7 +269,6 @@ class shog_logic:
 
         if isAILoad == True:
             print('LOADING AI', moveRead)
-            #LOADING AI (False, 'Wk', 0, 4, 1, 4)
 
             self.gameState.oldMatrixPosX = moveRead[2]
             self.gameState.oldMatrixPosY = moveRead[3]
@@ -1257,7 +1256,7 @@ class AI_watcher(Thread, spem, shog_logic):
                 if (((self.getLengthOfPlay() + 1) != 0) or self.isEven(self.getLengthOfPlay() + 1)):
                     mg = moveGeneration()
                     #self.getLengthOfPlay() + 2) + ":" +
-                    moveToPlay = str( mg.GenRandomMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
+                    moveToPlay = str( mg.GenMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
                     print('MOVE TO PLAY IS:', moveToPlay)
                     mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
 
