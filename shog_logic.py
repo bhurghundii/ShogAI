@@ -75,7 +75,8 @@ class shog_logic:
 
     def actionSquare(self, row, col, isLoad = None, isAILoad = None):
         pos = self.gameState.gameMatrix[row][col]
-
+        isPromote = None
+        
         if self.gameState.gameState == 3:
             self.cells[(row, col)].configure(background='RED')
             print(('PIECE DROP:' + str(self.getPieceFrmPos(row + 1, col + 1))))
@@ -210,7 +211,6 @@ class shog_logic:
         elif self.gameState.gameState == 0:
             #AI parts
             shog_ext = shog_play_external_moves()
-
             if (self.gameState.isLoad == True and isLoad == True) or shog_ext.isThereAMoveToPlay_ext():
                 print('TURN: ' + str(gameTurn().gameTurn + 1))
                 shog_ext.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
@@ -219,6 +219,7 @@ class shog_logic:
                     print('Playing from move')
 
                     moveRead = shog_ext.convertTurnToGameMatrixCompatible()
+                    isPromote = moveRead[6]
                     print(moveRead)
 
                     possiblepcs = []
@@ -282,7 +283,7 @@ class shog_logic:
         if self.gameState.newMatrixPosX != None and self.gameState.newMatrixPosY != None and self.gameState.pieceSelected != None:
             print('TRYING: ' + str((self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)))
             self.resetBoardGraphics()
-            self.moveLegalGO(self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY)
+            self.moveLegalGO(self.gameState.pieceSelected, self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY,  self.gameState.newMatrixPosX, self.gameState.newMatrixPosY, isPromote)
 
     def resetBoardGraphics(self):
         for i in range(0, self.gameState.board_size):
@@ -413,7 +414,7 @@ class shog_logic:
                             print('Move not on board so ignoring')
         return count
 
-    def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal):
+    def moveLegalGO(self, pos, oldMatrixPosXlocal, oldMatrixPosYlocal, newMatrixPosXlocal, newMatrixPosYlocal, isPromote = None):
 
         #For the game recorder
         resultPromotion = False
@@ -439,13 +440,13 @@ class shog_logic:
 
             #Promotion
             if (self.gameState.isBlackTurn == True and (newMatrixPosXlocal <= 2 or oldMatrixPosXlocal <= 2)):
-                if (pos[-1:] == 'p' and newMatrixPosXlocal <= 0) or (pos[-1:] == 'n' and newMatrixPosXlocal <= 1)  or (pos[-1:] == 'l' and newMatrixPosXlocal <= 0):
+                if (pos[-1:] == 'p' and newMatrixPosXlocal <= 0) or (pos[-1:] == 'n' and newMatrixPosXlocal <= 1)  or (pos[-1:] == 'l' and newMatrixPosXlocal <= 0) or (isPromote == True):
                     pos = pos.upper()
                     resultPromotion = True
                 else:
                     pos, resultPromotion = self.promotion(pos)
             if (self.gameState.isBlackTurn == False and (newMatrixPosXlocal >= 6 or oldMatrixPosXlocal >= 6)):
-                if (pos[-1:] == 'p' and newMatrixPosXlocal >= 8) or (pos[-1:] == 'n' and newMatrixPosXlocal >= 7)  or (pos[-1:] == 'l' and newMatrixPosXlocal >= 8):
+                if (pos[-1:] == 'p' and newMatrixPosXlocal >= 8) or (pos[-1:] == 'n' and newMatrixPosXlocal >= 7)  or (pos[-1:] == 'l' and newMatrixPosXlocal >= 8) or (isPromote == True):
                     pos = pos.upper()
                     resultPromotion = True
                 else:

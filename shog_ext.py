@@ -26,7 +26,7 @@ class shog_play_external_moves():
 
     def convertTurnToGameMatrixCompatible(self):
         convMove = self.getTurnFromFile()
-
+        isPromote = None
         if ('☗' in convMove):
             IsBlackMove = False
             convMove = convMove.replace('☗', '')
@@ -59,6 +59,8 @@ class shog_play_external_moves():
 
         #Autopromote piece if it is required
         
+        if ('+' in convMove[len(convMove) - 1]):
+            isPromote = True
 
         convMove = convMove.strip()
         if (len(convMove) == 4):
@@ -73,9 +75,7 @@ class shog_play_external_moves():
             newMatrixPosY = (9 - int(convMove[0]))
             newMatrixPosX = self.LetterToNumber(convMove[1])
         
-
-        print('TEST:', IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
-        return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
+        return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY, isPromote)
 
     def updateMoveToPlayIfNotEmpty(self, turn):
         try:
