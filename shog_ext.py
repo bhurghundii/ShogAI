@@ -60,7 +60,7 @@ class shog_play_external_moves():
         #Autopromote piece if it is required
         
 
-
+        convMove = convMove.strip()
         if (len(convMove) == 4):
             oldMatrixPosY = (9 - int(convMove[0]))
             oldMatrixPosX = self.LetterToNumber(convMove[1])
@@ -72,7 +72,9 @@ class shog_play_external_moves():
             oldMatrixPosX = None
             newMatrixPosY = (9 - int(convMove[0]))
             newMatrixPosX = self.LetterToNumber(convMove[1])
+        
 
+        print('TEST:', IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
         return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY)
 
     def updateMoveToPlayIfNotEmpty(self, turn):

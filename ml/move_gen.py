@@ -50,8 +50,6 @@ class moveGeneration():
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'B') and isBlackTurn == False):
                                 break
                         except Exception as e:
-                            #print(e)
-                            #print('Move not on board so ignoring')
                             pass
         #Remove duplicates
         #possibleMoveMatrix = list(dict.fromkeys(possibleMoveMatrix))
