@@ -27,6 +27,8 @@ class shog_play_external_moves():
     def convertTurnToGameMatrixCompatible(self):
         convMove = self.getTurnFromFile()
         isPromote = None
+        isDrop = None
+        print (convMove)
         if ('☗' in convMove):
             IsBlackMove = False
             convMove = convMove.replace('☗', '')
@@ -44,7 +46,8 @@ class shog_play_external_moves():
 
 
         if ('*' in convMove):
-            convMove.append('D')
+            convMove = convMove.replace('*', '')
+            isDrop = True
 
         #If piece is promoted, parse differently
         if ('+' in convMove[0]):
@@ -61,7 +64,9 @@ class shog_play_external_moves():
         
         if ('+' in convMove[len(convMove) - 1]):
             isPromote = True
+            convMove = (convMove.replace('+', ''))
 
+        print(convMove)
         convMove = convMove.strip()
         if (len(convMove) == 4):
             oldMatrixPosY = (9 - int(convMove[0]))
@@ -75,14 +80,14 @@ class shog_play_external_moves():
             newMatrixPosY = (9 - int(convMove[0]))
             newMatrixPosX = self.LetterToNumber(convMove[1])
         
-        return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY, isPromote)
+        return (IsBlackMove, pos, oldMatrixPosX, oldMatrixPosY, newMatrixPosX, newMatrixPosY, isPromote, isDrop)
 
     def updateMoveToPlayIfNotEmpty(self, turn):
         try:
             with open('ext_data/load_game.txt') as f:
                 turnMove = f.readlines()
 
-            movetoreplay = (turnMove[turn][2:].strip())
+            movetoreplay = (turnMove[turn].split(':')[1].strip())
             f = open('ext_data/movetoplay.txt', "w", encoding='utf-8')
             f.write(movetoreplay)
             f.close()

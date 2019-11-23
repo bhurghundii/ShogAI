@@ -66,127 +66,53 @@ class shog_logic:
             elif (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed) == True):
                 self.actionSquare(row, col, isLoad)
             elif(isLoad == True):
-                print('AI MOVE')
                 self.actionSquare(row, col, isLoad, True)
             else:
                 print('It is not your move yet!')
         else:
             self.actionSquare(row, col, isLoad)
 
-    def actionSquare(self, row, col, isLoad = None, isAILoad = None):
-        pos = self.gameState.gameMatrix[row][col]
-        isPromote = None
-        
-        if self.gameState.gameState == 3:
-            self.cells[(row, col)].configure(background='RED')
-            print(('PIECE DROP:' + str(self.getPieceFrmPos(row + 1, col + 1))))
+    def dropAction(self, row, col):
+        self.cells[(row, col)].configure(background='RED')
+        print(('PIECE DROP:' + str(self.getPieceFrmPos(row + 1, col + 1))))
 
-            if (str(self.getPieceFrmPos(row + 1, col + 1)) == '0'):
-                self.gameState.newMatrixPosX = row
-                self.gameState.newMatrixPosY = col
-                pos = None
-                if self.gameState.isBlackTurn == True:
-                    print(('BLACK', len(self.gameState.blackcaptured), self.gameState.droprank, self.gameState.blackcaptured))
-                    pos = self.gameState.blackcaptured[self.gameState.droprank]
+        if (str(self.getPieceFrmPos(row + 1, col + 1)) == '0'):
+            self.gameState.newMatrixPosX = row
+            self.gameState.newMatrixPosY = col
+            pos = None
+            if self.gameState.isBlackTurn == True:
+                print(('BLACK', len(self.gameState.blackcaptured), self.gameState.droprank, self.gameState.blackcaptured))
+                pos = self.gameState.blackcaptured[self.gameState.droprank]
+            else:
+                print(('WHITE', len(self.gameState.whitecaptured), self.gameState.droprank, self.gameState.whitecaptured))
+                pos = self.gameState.whitecaptured[self.gameState.droprank]
+
+            if 'n' in pos:
+                if (row <= 1 and self.gameState.isBlackTurn == True) or (row >= 7 and self.gameState.isBlackTurn == False):
+                    print('Too deep for knight')
+                    self.resetBoardGraphics()
+                    pos = None
+                    self.softReset()
                 else:
-                    print(('WHITE', len(self.gameState.whitecaptured), self.gameState.droprank, self.gameState.whitecaptured))
-                    pos = self.gameState.whitecaptured[self.gameState.droprank]
+                    self.moveLegalDrop(pos, row, col)
 
-                if 'n' in pos:
-                    if (row <= 1 and self.gameState.isBlackTurn == True) or (row >= 7 and self.gameState.isBlackTurn == False):
-                        print('Too deep for knight')
-                        self.resetBoardGraphics()
-                        pos = None
-                        self.softReset()
-                    else:
-                        self.moveLegalDrop(pos, row, col)
-
-                        self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                        if self.gameState.isBlackTurn == True:
-                            #self.gameState.blackcaptured.pop(self.gameState.droprank)
-                            self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-                        else:
-                            #self.gameState.whitecaptured.pop(self.gameState.droprank)
-                            self.dropWhitePieces[self.gameState.droprank].pack_forget()
-                        self.ResetSwitchTurns()
-
-
-                elif 'l' in pos:
-                    if (row == 0 and self.gameState.isBlackTurn == True) or (row == 8 and self.gameState.isBlackTurn == False):
-                        print('Too deep for lance')
-                        self.resetBoardGraphics()
-                        pos = None
-                        self.softReset()
-                    else:
-
-                        self.moveLegalDrop(pos, row, col)
-
-                        self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                        if self.gameState.isBlackTurn == True:
-                            #self.gameState.blackcaptured.pop(self.gameState.droprank)
-                            self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-                        else:
-                            #self.gameState.whitecaptured.pop(self.gameState.droprank)
-                            self.dropWhitePieces[self.gameState.droprank].pack_forget()
-                        self.ResetSwitchTurns()
-
-                #no 2 pawn rule
-                elif 'p' in pos:
-                    if (row == 8 and self.gameState.isBlackTurn == True) or (row == 0 and self.gameState.isBlackTurn == False):
-                        print('Too deep for pawn')
-                        self.resetBoardGraphics()
-                        self.softReset()
-                        pos = None
-                    else:
-                        colMat = []
-                        for y in range(0, self.gameState.board_size):
-                            colMat.append(self.gameState.gameMatrix[y][col])
-
-                        print(colMat)
-                        pawnTeam = 'p'
-                        if self.gameState.isBlackTurn == True:
-                            pawnTeam = 'B' + pawnTeam
-                        else:
-                            pawnTeam = 'W' + pawnTeam
-
-                        if pawnTeam in colMat:
-                            print('There is a pawn on this column')
-                            pos = None
-                            self.resetBoardGraphics()
-                            self.softReset()
-
-                        else:
-                            #get pos of king
-                            kingTeam = 'k'
-                            if self.gameState.isBlackTurn == True:
-                                kingTeam = 'W' + kingTeam
-                            else:
-                                kingTeam = 'B' + kingTeam
-
-                            self.moveLegalDrop(pawnTeam, row, col)
-                            self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-
-
-                            if self.gameState.isBlackTurn == True:
-                                print('Removing from Black stack')
-                                #self.gameState.blackcaptured.pop(self.gameState.droprank)
-                                self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-
-                            else:
-                                print('Removing from White stack')
-                                #self.gameState.whitecaptured.pop(self.gameState.droprank)
-                                self.dropWhitePieces[self.gameState.droprank].pack_forget()
-
-                            self.ResetSwitchTurns()
-
-
-
-                elif 'p' not in pos and 'l' not in pos and 'n' not in pos:
-                    pos = pos[-1:]
+                    self.gameState.isBlackTurn = not self.gameState.isBlackTurn
                     if self.gameState.isBlackTurn == True:
-                        pos = 'B' + pos
+                        #self.gameState.blackcaptured.pop(self.gameState.droprank)
+                        self.dropBlacksPieces[self.gameState.droprank].pack_forget()
                     else:
-                        pos = 'W' + pos
+                        #self.gameState.whitecaptured.pop(self.gameState.droprank)
+                        self.dropWhitePieces[self.gameState.droprank].pack_forget()
+                    self.ResetSwitchTurns()
+
+
+            elif 'l' in pos:
+                if (row == 0 and self.gameState.isBlackTurn == True) or (row == 8 and self.gameState.isBlackTurn == False):
+                    print('Too deep for lance')
+                    self.resetBoardGraphics()
+                    pos = None
+                    self.softReset()
+                else:
 
                     self.moveLegalDrop(pos, row, col)
 
@@ -198,9 +124,86 @@ class shog_logic:
                         #self.gameState.whitecaptured.pop(self.gameState.droprank)
                         self.dropWhitePieces[self.gameState.droprank].pack_forget()
                     self.ResetSwitchTurns()
-            else:
-                print('A piece is already there. Move illegal.')
-                self.resetBoardGraphics()
+
+            #no 2 pawn rule
+            elif 'p' in pos:
+                if (row == 8 and self.gameState.isBlackTurn == True) or (row == 0 and self.gameState.isBlackTurn == False):
+                    print('Too deep for pawn')
+                    self.resetBoardGraphics()
+                    self.softReset()
+                    pos = None
+                else:
+                    colMat = []
+                    for y in range(0, self.gameState.board_size):
+                        colMat.append(self.gameState.gameMatrix[y][col])
+
+                    print(colMat)
+                    pawnTeam = 'p'
+                    if self.gameState.isBlackTurn == True:
+                        pawnTeam = 'B' + pawnTeam
+                    else:
+                        pawnTeam = 'W' + pawnTeam
+
+                    if pawnTeam in colMat:
+                        print('There is a pawn on this column')
+                        pos = None
+                        self.resetBoardGraphics()
+                        self.softReset()
+
+                    else:
+                        #get pos of king
+                        kingTeam = 'k'
+                        if self.gameState.isBlackTurn == True:
+                            kingTeam = 'W' + kingTeam
+                        else:
+                            kingTeam = 'B' + kingTeam
+
+                        self.moveLegalDrop(pawnTeam, row, col)
+                        self.gameState.isBlackTurn = not self.gameState.isBlackTurn
+
+
+                        if self.gameState.isBlackTurn == True:
+                            print('Removing from Black stack')
+                            #self.gameState.blackcaptured.pop(self.gameState.droprank)
+                            self.dropBlacksPieces[self.gameState.droprank].pack_forget()
+
+                        else:
+                            print('Removing from White stack')
+                            #self.gameState.whitecaptured.pop(self.gameState.droprank)
+                            self.dropWhitePieces[self.gameState.droprank].pack_forget()
+
+                        self.ResetSwitchTurns()
+
+
+
+            elif 'p' not in pos and 'l' not in pos and 'n' not in pos:
+                pos = pos[-1:]
+                if self.gameState.isBlackTurn == True:
+                    pos = 'B' + pos
+                else:
+                    pos = 'W' + pos
+
+                self.moveLegalDrop(pos, row, col)
+
+                self.gameState.isBlackTurn = not self.gameState.isBlackTurn
+                if self.gameState.isBlackTurn == True:
+                    #self.gameState.blackcaptured.pop(self.gameState.droprank)
+                    self.dropBlacksPieces[self.gameState.droprank].pack_forget()
+                else:
+                    #self.gameState.whitecaptured.pop(self.gameState.droprank)
+                    self.dropWhitePieces[self.gameState.droprank].pack_forget()
+                self.ResetSwitchTurns()
+        else:
+            print('A piece is already there. Move illegal.')
+            self.resetBoardGraphics()
+                
+    def actionSquare(self, row, col, isLoad = None, isAILoad = None):
+        pos = self.gameState.gameMatrix[row][col]
+        isPromote = None
+        isDrop = None
+        
+        if self.gameState.gameState == 3:
+            self.dropAction(row,col)
 
         elif self.gameState.gameState == 1:
             self.cells[(row, col)].configure(background='blue')
@@ -220,8 +223,32 @@ class shog_logic:
 
                     moveRead = shog_ext.convertTurnToGameMatrixCompatible()
                     isPromote = moveRead[6]
-                    print(moveRead)
+                    isDrop = moveRead[7]
 
+                    print('ggg', moveRead)
+
+                    if isDrop == True:
+                        print('IS LOADING A DROP', row, col, isDrop)
+                        self.moveLegalDrop(moveRead[1], moveRead[4], moveRead[5])
+                        
+                        
+                        if (moveRead[1][:-1] == 'B'):
+                            for rank in range(0, len(self.dropBlacksPieces)):
+                                if moveRead[1] == self.dropBlacksPieces[rank].cget('text'):
+                                    self.dropBlacksPieces[rank].pack_forget()
+                        if (moveRead[1][:-1] == 'W'):
+                            for rank in range(0, len(self.dropWhitePieces)):
+                                if moveRead[1] == self.dropWhitePieces[rank].cget('text'):
+                                    self.dropWhitePieces[rank].pack_forget()
+                        
+                        open('ext_data/movetoplay.txt', 'w').close()
+                        
+                        self.resetBoardGraphics()
+                        self.softReset()
+
+                        
+                        return
+                        
                     possiblepcs = []
                     for i in range(0, self.gameState.board_size):
                         for j in range(0, self.gameState.board_size):
@@ -763,7 +790,6 @@ class shog_logic:
                 self.gameState.gameState = 0
 
     def moveLegalDrop(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
-        global isCheck, GAMESTATE, newMatrixPosX, newMatrixPosY, posToMove, gameMatrix, BLACKTURN
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
         print(old_state_pos)
@@ -1276,6 +1302,27 @@ class AI_watcher(Thread, spem, shog_logic):
                         f.close()
                         #return
 
+                if (((self.getLengthOfPlay() + 1) != 0) or (not self.isEven(self.getLengthOfPlay() + 1))):
+                    mg = moveGeneration()
+                    #self.getLengthOfPlay() + 2) + ":" +
+                    moveToPlay = str( mg.GenMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
+                    print('MOVE TO PLAY IS:', moveToPlay)
+                    mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
+
+
+                    print('Checking if a move is loaded by the AI')
+
+
+                    if os.stat("ext_data/movetoplay.txt").st_size != 0:
+                        print('There is a move! Let us load it')
+                        shog_logic.singlePlayNextMove_ext(self)
+                        f = open('ext_data/load_game.txt', 'r+')
+                        f.truncate(0)
+                        f.close()
+                        f = open('ext_data/movetoplay.txt', 'r+')
+                        f.truncate(0)
+                        f.close()
+                        #return
 
 
             except Exception as e:

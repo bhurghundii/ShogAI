@@ -28,6 +28,13 @@ def sel():
        GameInitializer().run(True, False)
 
 try:
+    f = open('ext_data/load_game.txt', "w", encoding='utf-8')
+    f.write('')
+    f.close
+    f = open('ext_data/movetoplay.txt', "w", encoding='utf-8')
+    f.write('')
+    f.close
+
     root = tk.Tk()
     root.title("ShogAI: A Dissertation by Vikram Chhapwale")
     root.geometry('600x500')
