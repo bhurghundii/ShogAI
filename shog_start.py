@@ -1,7 +1,6 @@
 # -*- coding: UTF-8 -*-
 from shog_gamestate import shog_gamestate
 from shog_gui import shog_gui
-from state_persistent import state_persistent
 
 class GameManager():
 

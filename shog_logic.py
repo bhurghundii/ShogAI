@@ -6,6 +6,7 @@ import copy
 from shog_ext import *
 from shog_ext import shog_play_external_moves as spem
 from ml.move_gen import moveGeneration
+import itertools
 
 class shog_logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
@@ -97,11 +98,9 @@ class shog_logic:
                     self.moveLegalDrop(pos, row, col)
 
                     self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                    if self.gameState.isBlackTurn == True:
-                        #self.gameState.blackcaptured.pop(self.gameState.droprank)
+                    if self.gameState.isBlackTurn == True:                     
                         self.dropBlacksPieces[self.gameState.droprank].pack_forget()
                     else:
-                        #self.gameState.whitecaptured.pop(self.gameState.droprank)
                         self.dropWhitePieces[self.gameState.droprank].pack_forget()
                     self.ResetSwitchTurns()
 
@@ -225,7 +224,7 @@ class shog_logic:
                     isPromote = moveRead[6]
                     isDrop = moveRead[7]
 
-                    print('ggg', moveRead)
+                    #print('ggg', moveRead)
 
                     if isDrop == True:
                         print('IS LOADING A DROP', row, col, isDrop)
@@ -246,7 +245,6 @@ class shog_logic:
                         self.resetBoardGraphics()
                         self.softReset()
 
-                        
                         return
                         
                     possiblepcs = []
@@ -281,6 +279,60 @@ class shog_logic:
                                 self.gameState.gameState = 2
                                 self.gameState.gameState = self.getPossibleMoves(self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
                                 open('ext_data/movetoplay.txt', 'w').close()
+                    
+                    dimCollected = 0
+                    file = open('configure.txt', 'r')
+                    dimCollected = (file.read().split('\n'))
+                    file.close()
+
+                    if dimCollected[2] == '1':
+                        #TODO: CONV THE PIECE NAMES INTO NUMS!
+                        whiteDrops, blackDrops = [], []
+                        for dropIndex in range(0, len(self.dropBlacksPieces)):
+                            if self.dropBlacksPieces[dropIndex].winfo_manager() == 'pack':
+                                blackDrops.append(self.dropBlacksPieces[dropIndex].cget('text'))
+                        
+                        for dropIndex in range(0, len(self.dropWhitePieces)):
+                            if self.dropWhitePieces[dropIndex].winfo_manager() == 'pack':
+                                whiteDrops.append(self.dropWhitePieces[dropIndex].cget('text'))
+
+                        while len(whiteDrops) != 19:
+                            whiteDrops.append('0')
+                        while len(blackDrops) != 19:
+                            blackDrops.append('0')
+
+                        rawMatrix = ([y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
+                        print(rawMatrix, len(rawMatrix))
+                        print('\n\n')
+                        # + list(int(self.gameState.isBlackTurn)
+                        pc2num = ''
+                        file = open('ml/eval_pcs.map', 'r')
+                        pc2num = (file.read().split('\n'))
+                        file.close()
+                        convMatrix = []
+                        for x in rawMatrix:
+                            for l in pc2num:
+                                try: 
+                                    if x[-1:] in l:
+                                        if x[0] == 'W':
+                                            convMatrix.append('-' + l.split('=')[1])
+                                            break
+                                        elif x[0] == 'B':
+                                            convMatrix.append(l.split('=')[1])
+                                            break
+                                        elif x[0] == '0':
+                                            convMatrix.append(l.split('=')[1])
+                                            break
+                                        
+                                except:
+                                    #sys.exit(0)
+                                    if (x == 0):
+                                        convMatrix.append(0)
+                                        break
+                        print(convMatrix, len(convMatrix))
+                        
+
+                    
                 else:
                     print ('As there are no more moves to load, proceed')
                     self.gameState.isLoad = False
