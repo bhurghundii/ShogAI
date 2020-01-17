@@ -513,7 +513,6 @@ class shog_logic:
                         if possiblepc != '':
                             possiblepcs.append(possiblepc)
 
-            #print(possiblepcs)
             #Get current pre-move position we are moving to
             old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
 
@@ -684,7 +683,6 @@ class shog_logic:
 
             #Get all of your available moves
             print('JUDGE: Checking if it is a checkmate')
-            resetMatrix = copy.deepcopy(self.gameState.gameMatrix)
             for i in range(0, self.gameState.board_size):
                 for j in range(0, self.gameState.board_size):
                     self.populateSimulMoveArrays(i, j, str(self.gameState.gameMatrix[i][j]), True)
@@ -694,27 +692,88 @@ class shog_logic:
             for i in range(0, len(self.simulMoveMatrix)):
                 if (self.simulateMove (self.simulMoveMatrixPre[i][0], self.simulMoveMatrixPre[i][1], self.simulMoveMatrixPre[i][2], self.simulMoveMatrix[i][0], self.simulMoveMatrix[i][1], i) == False):
                     break
-                if i == (len(self.simulMoveMatrix) - 1):
+            
+            if i == (len(self.simulMoveMatrix) - 1):
                     #Check if we can drop a piece to cover the check
-                    for k in range(0, len(self.simulMoveMatrix)):
-                        if (len(self.dropWhitePieces) != 0):
-                            if 'k' in self.simulMoveMatrix[k][2]:                           
-                                if (self.gameState.isBlackTurn == True):
-                                    self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                                    if (self.simulateDrop('Wp', self.simulMoveMatrix[k][0], self.simulMoveMatrix[k][1]) == False):
-                                        self.gameState.isBlackTurn = not (self.gameState.isBlackTurn)
-                                        break
-                                else:
-                                    self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                                    if (self.simulateDrop('Bp', self.simulMoveMatrix[k][0], self.simulMoveMatrix[k][1]) == False):
-                                        self.gameState.isBlackTurn = not (self.gameState.isBlackTurn)
-                                        break
+                    #nearestThreat = self.checkNearThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wp')
 
+                    potentialThreatPcsAr = self.checkDistanceThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wb')
+                    potentialThreatPcsAr = potentialThreatPcsAr + self.checkDistanceThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wr')
+                    
+                    print(potentialThreatPcsAr)
+                    if len(potentialThreatPcsAr) > 1:
                         print('RESULT: Checkmate! GAMEOVER')
+                    else:
+                        #Alright, so there is a move and only one threat
+                        #We can block. Right?
+                        dropAvailable = False
+                        
+                        #Get available drop pcs
+                        dropPcs = []
+                        for rank in range(0, len(self.dropWhitePieces)):
+                            if self.dropWhitePieces[rank].winfo_manager() == 'pack':
+                                dropPcs.append(self.dropWhitePieces[rank].cget('text'))
+                                
+                        print(dropPcs)
+                        for potentialThreats in potentialThreatPcsAr:
+                            if ('Wp' in dropPcs):
+                                if ((self.getPosFromPiece('Wk')[0] != 0) and potentialThreats[1] != 0):
+                                    print('No white pawn here!')
+                                else:
+                                    poissiblePawnDrops = (list(range(self.getPosFromPiece('Wk')[1], potentialThreats[2])))
+                                    for horiz in range(0,9):
+                                        for ver in range(0,9):
+                                            if (self.gameState.gameMatrix[ver][horiz]) == 'Wp':
+                                                if horiz in poissiblePawnDrops:
+                                                    poissiblePawnDrops.remove(horiz)
 
+                                    if len(poissiblePawnDrops) == 0:
+                                        filepcs = []
+                                        for ver in range(0,9):
+                                            filepcs.append(self.gameState.gameMatrix[ver][self.getPosFromPiece('Wk')[1]]) 
+                                        if ('Wp' in filepcs):
+                                            print('No white pawn can be dropped here')
+                                        else:
+                                            print('A white pawn can be played')
+                                            dropAvailable = True
+                                            break
+                                    else:
+                                        print('A white pawn can be played')
+                                        dropAvailable = True
+                                        break
+                            else:
+                                print('No white pawns are available')
+
+                            if ('Wn' in dropPcs):
+                                if ((self.getPosFromPiece('Wk')[0] <= 1) and potentialThreats[1] <= 1):
+                                    print('No white knight here!')
+                                else:
+                                    print('A white knight can be played')
+                                    dropAvailable = True
+                                    break
+                            else:
+                                print('No white knights are available')
+                        
+                            if ('Wl' in dropPcs):
+                                if ((self.getPosFromPiece('Wk')[0] != 0) and potentialThreats[1] != 0):
+                                    print('No white lance here!')
+                                else: 
+                                    print('A white lance can be played')
+                                    dropAvailable = True
+                                    break
+                            else:
+                                print('No white lance are available')
+                        
+                        
+
+                        if dropAvailable == True:
+                            print('Moves available. Continue play.')
+                        else:
+                            print('RESULT: Checkmate! GAMEOVER')
+                    
             self.simulMoveMatrixPre *= 0
             self.simulMoveMatrix *= 0
-
+        
     def getPosWhichCanMakeMove(self, oldMatrixPosX, oldMatrixPosY, pos, newMatrixPosX, newMatrixPosY):
         if (self.gameState.isBlackTurn == True and pos[:-1] == 'B') or (self.gameState.isBlackTurn == False and pos[:-1] == 'W'):
             with open('movesets.txt') as f:
@@ -818,6 +877,142 @@ class shog_logic:
             return 1
         else:
             return 0
+
+    def checkDistanceThreats(self, oldMatrixPosX, oldMatrixPosY, pos):
+        potentialThreatPcsArr = []
+        if (self.gameState.isBlackTurn == True and pos[:-1] == 'B') or (self.gameState.isBlackTurn == False and pos[:-1] == 'W'):
+                with open('movesets.txt') as f:
+                    content = f.readlines()
+
+                    for index in range(len(content)):
+                        if pos[-1:] in content[index]:
+                            movesets = content[index].split('=')[1]
+                            #cast movesets to array
+                            possiblemovelayouts =  eval(movesets)
+
+                            for j in range(len(possiblemovelayouts)):
+                                x_dif = int((possiblemovelayouts[j])[0])
+                                y_dif = int((possiblemovelayouts[j])[1])
+
+                                if pos[:-1] == 'B':
+                                    x_dif = -1 * x_dif
+                                    y_dif = -1 * y_dif
+                                if pos[:-1] == 'W':
+                                    x_dif = 1 * x_dif
+                                    y_dif = 1 * y_dif
+
+
+                                try:
+                                    #If the piece is Black and youre black, stop
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == True):
+                                        break
+
+                                    #If the piece is White and youre White, stop
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and self.gameState.isBlackTurn == False):
+                                        break
+
+                                    #If the piece is White and youre Black, you can capture so color
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and self.gameState.isBlackTurn == True):
+                                        if (self.gameState.isBlackTurn == False and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'blue'):
+                                            pass
+                                        else:
+                                            self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='blue')
+                                            pc = (self.gameState.gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])
+
+                                            if ('r' == pc[-1]) or ('R' == pc[-1]) or ('b' == pc[-1]) or ('B' == pc[-1]):
+                                                potentialThreatPcsArr.append(str(pc))
+
+
+                                    #If the piece is Black and youre White, you can capture so color
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
+                                        if (self.gameState.isBlackTurn == False and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'pink') or (self.gameState.isBlackTurn == True and 'k' in pos and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'pink'):
+                                            pass
+                                        else:
+                                            self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='blue')
+                                            pc = (self.gameState.gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])
+
+                                            if ('r' == pc[-1]) or ('R' == pc[-1]) or ('b' == pc[-1]) or ('B' == pc[-1]):
+                                                potentialThreatPcsArr.append([str(pc), oldMatrixPosX + x_dif, oldMatrixPosY + y_dif])
+
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and self.gameState.isBlackTurn == True and (str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[1:] != 'k')):
+                                        break
+
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == False and (str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[1:] != 'k')):
+                                        break
+
+                                except Exception as e:
+                                    pass
+                return potentialThreatPcsArr
+        else:
+            return 0
+
+    def checkNearThreats(self, oldMatrixPosX, oldMatrixPosY, pos):
+        potentialThreatPcsArr = []
+        if (self.gameState.isBlackTurn == True and pos[:-1] == 'B') or (self.gameState.isBlackTurn == False and pos[:-1] == 'W'):
+                with open('movesets.txt') as f:
+                    content = f.readlines()
+
+                    for index in range(len(content)):
+                        if pos[-1:] in content[index]:
+                            movesets = content[index].split('=')[1]
+                            #cast movesets to array
+                            possiblemovelayouts =  eval(movesets)
+
+                            for j in range(len(possiblemovelayouts)):
+                                x_dif = int((possiblemovelayouts[j])[0])
+                                y_dif = int((possiblemovelayouts[j])[1])
+
+                                if pos[:-1] == 'B':
+                                    x_dif = -1 * x_dif
+                                    y_dif = -1 * y_dif
+                                if pos[:-1] == 'W':
+                                    x_dif = 1 * x_dif
+                                    y_dif = 1 * y_dif
+
+
+                                try:
+                                    #If the piece is Black and youre black, stop
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == True):
+                                        break
+
+                                    #If the piece is White and youre White, stop
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and self.gameState.isBlackTurn == False):
+                                        break
+
+                                    #If the piece is White and youre Black, you can capture so color
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and self.gameState.isBlackTurn == True):
+                                        if (self.gameState.isBlackTurn == False and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'blue'):
+                                            pass
+                                        else:
+                                            self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='green')
+                                            pc = (self.gameState.gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])
+
+                                            if ('W' == pc[1]):
+                                                return True
+
+
+                                    #If the piece is Black and youre White, you can capture so color
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
+                                        if (self.gameState.isBlackTurn == False and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'pink') or (self.gameState.isBlackTurn == True and 'k' in pos and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'pink'):
+                                            pass
+                                        else:
+                                            self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='green')
+                                            pc = (self.gameState.gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])
+
+                                            if ('B' == pc[1]):
+                                                return True
+
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and self.gameState.isBlackTurn == True and (str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[1:] != 'k')):
+                                        break
+
+                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == False and (str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[1:] != 'k')):
+                                        break
+
+                                except Exception as e:
+                                    pass
+                return False
+        else:
+            return False
 
     def promotion(self, pos):
         if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
@@ -1005,7 +1200,6 @@ class shog_logic:
 
     def populateSimulMoveArrays(self, oldMatrixPosX, oldMatrixPosY, pos, Turn):
 
-        kingspace = False
         if (self.gameState.isBlackTurn == True and pos[:-1] == 'B') or (self.gameState.isBlackTurn == False and pos[:-1] == 'W'):
             with open('movesets.txt') as f:
                 content = f.readlines()
@@ -1071,8 +1265,6 @@ class shog_logic:
             return 0
 
     def simulateMove(self, oldMatrixPosXlocal, oldMatrixPosYlocal, pos, newMatrixPosXlocal, newMatrixPosYlocal, iteration):
-        print('ITERATION: ' + str(iteration) + ' USING ' + str((oldMatrixPosXlocal, oldMatrixPosYlocal, pos, newMatrixPosXlocal, newMatrixPosYlocal)))
-
         #Get current pre-move position we are moving to
         old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
 
@@ -1201,226 +1393,6 @@ class shog_logic:
             self.gameState.isBlackTurn = True
 
         self.gameState.possibleMoveMatrix *= 0
-
-    def simulateDrop(self, pos, newMatrixPosXlocal, newMatrixPosYlocal):
-        #Get current pre-move position we are moving to
-        old_state_pos = self.getPieceFrmPos(newMatrixPosXlocal + 1, newMatrixPosYlocal + 1)
-        
-        #check if the drop is legal
-        row = newMatrixPosXlocal
-        col = newMatrixPosYlocal
-        print(('CHECKING IF DROP IS LEGAL' + str(self.getPieceFrmPos(row + 1, col + 1))))
-
-        if (str(self.getPieceFrmPos(row + 1, col + 1)) == '0'):
-            self.gameState.newMatrixPosX = row
-            self.gameState.newMatrixPosY = col
-            pos = None
-            if self.gameState.isBlackTurn == True:
-                print(('BLACK', len(self.gameState.blackcaptured), self.gameState.droprank, self.gameState.blackcaptured))
-                pos = self.gameState.blackcaptured[self.gameState.droprank]
-            else:
-                print(('WHITE', len(self.gameState.whitecaptured), self.gameState.droprank, self.gameState.whitecaptured))
-                pos = self.gameState.whitecaptured[self.gameState.droprank]
-
-            if 'n' in pos:
-                if (row <= 1 and self.gameState.isBlackTurn == True) or (row >= 7 and self.gameState.isBlackTurn == False):
-                    print('Too deep for knight. NOT LEGAL')
-                    self.resetBoardGraphics()
-                    pos = None
-                    self.softReset()
-                else:
-                    self.moveLegalDrop(pos, row, col)
-
-                    self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                    if self.gameState.isBlackTurn == True:                     
-                        self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-                    else:
-                        self.dropWhitePieces[self.gameState.droprank].pack_forget()
-                    self.ResetSwitchTurns()
-
-
-            elif 'l' in pos:
-                if (row == 0 and self.gameState.isBlackTurn == True) or (row == 8 and self.gameState.isBlackTurn == False):
-                    print('Too deep for lance')
-                    self.resetBoardGraphics()
-                    pos = None
-                    self.softReset()
-                else:
-
-                    self.moveLegalDrop(pos, row, col)
-
-                    self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                    if self.gameState.isBlackTurn == True:
-                        #self.gameState.blackcaptured.pop(self.gameState.droprank)
-                        self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-                    else:
-                        #self.gameState.whitecaptured.pop(self.gameState.droprank)
-                        self.dropWhitePieces[self.gameState.droprank].pack_forget()
-                    self.ResetSwitchTurns()
-
-            #no 2 pawn rule
-            elif 'p' in pos:
-                if (row == 0 and self.gameState.isBlackTurn == True) or (row == 8 and self.gameState.isBlackTurn == False):
-                    print('Too deep for pawn. NOT LEGAL')
-                    self.resetBoardGraphics()
-                    self.softReset()
-                    pos = None
-                else:
-                    colMat = []
-                    for y in range(0, self.gameState.board_size):
-                        colMat.append(self.gameState.gameMatrix[y][col])
-
-                    print(colMat)
-                    pawnTeam = 'p'
-                    if self.gameState.isBlackTurn == True:
-                        pawnTeam = 'B' + pawnTeam
-                    else:
-                        pawnTeam = 'W' + pawnTeam
-
-                    if pawnTeam in colMat:
-                        print('There is a pawn on this column. NOT LEGAL')
-                        pos = None
-                        self.resetBoardGraphics()
-                        self.softReset()
-
-                    else:
-                        #get pos of king
-                        kingTeam = 'k'
-                        if self.gameState.isBlackTurn == True:
-                            kingTeam = 'W' + kingTeam
-                        else:
-                            kingTeam = 'B' + kingTeam
-
-                        self.moveLegalDrop(pawnTeam, row, col)
-                        self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-
-
-                        if self.gameState.isBlackTurn == True:
-                            print('Removing from Black stack')
-                            #self.gameState.blackcaptured.pop(self.gameState.droprank)
-                            self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-
-                        else:
-                            print('Removing from White stack')
-                            #self.gameState.whitecaptured.pop(self.gameState.droprank)
-                            self.dropWhitePieces[self.gameState.droprank].pack_forget()
-
-                        self.ResetSwitchTurns()
-
-
-
-            elif 'p' not in pos and 'l' not in pos and 'n' not in pos:
-                pos = pos[-1:]
-                if self.gameState.isBlackTurn == True:
-                    pos = 'B' + pos
-                else:
-                    pos = 'W' + pos
-
-                self.moveLegalDrop(pos, row, col)
-
-                self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                if self.gameState.isBlackTurn == True:
-                    #self.gameState.blackcaptured.pop(self.gameState.droprank)
-                    self.dropBlacksPieces[self.gameState.droprank].pack_forget()
-                else:
-                    #self.gameState.whitecaptured.pop(self.gameState.droprank)
-                    self.dropWhitePieces[self.gameState.droprank].pack_forget()
-                self.ResetSwitchTurns()
-        else:
-            pass
-        
-
-        #No Capturing or Promotion
-        self.gameState.gameState = 0
-        self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
-
-        #Check for checks
-        #This method. Is. perfect.
-        if self.gameState.isCheck == False:
-            #Does our move reveal a check for the other team?
-            self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-            for i in range(0, self.gameState.board_size):
-                for j in range(0, self.gameState.board_size):
-                    p = self.getPieceFrmPos(i + 1, j + 1)
-                    if p != 0:
-                        self.isKingUnderCheck(i, j, p)
-
-                        if self.gameState.isCheck == True:
-                            print('ILLEGAL MOVE: Reveals check')
-                            break
-
-                if self.gameState.isCheck == True:
-                    break
-            self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-
-        if self.gameState.isCheck == False:
-            #Does our move give a check?
-            for i in range(0, self.gameState.board_size):
-                for j in range(0, self.gameState.board_size):
-                    p = self.getPieceFrmPos(i + 1, j + 1)
-                    if p != 0:
-                        self.isKingUnderCheck(i, j, p)
-
-        else:
-            #Does our move get us out of a check?
-            print('Now that the opponents move has been made, lets check if check is still valid')
-            self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-            for i in range(0, self.gameState.board_size):
-                for j in range(0, self.gameState.board_size):
-                    p = self.getPieceFrmPos(i + 1, j + 1)
-                    if p != 0:
-                        self.isKingUnderCheck(i, j, p)
-
-            #reminder: [y axis][x axis]
-            if self.gameState.isBlackTurn == True:
-                kingcolor = self.cells[self.getPosFromPiece('Wk')].cget('background')
-            else:
-                kingcolor = self.cells[self.getPosFromPiece('Bk')].cget('background')
-
-            if (kingcolor == 'cyan') :
-                print('Still in check, Restart that move')
-                old_fill = old_state_pos
-                if old_fill == 0:
-                    old_fill = ''
-
-                print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
-                #Load back or direct drop?
-                if (self.gameState.isBlackTurn == True):
-                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
-                else:
-                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
-
-                    #self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
-                self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = old_state_pos
-                self.resetBoardGraphics()
-
-                self.softReset()
-
-                return True
-
-            else:
-                print('King is out of check, continue play')
-                #self.CheckIndicator.configure(text='NO CHECK')
-                old_fill = old_state_pos
-                if old_fill == 0:
-                    old_fill = ''
-
-                print('Resetting old position: ' + str(old_fill) + ' as move ' + str(pos) + ' is illegal')
-                #Load back or direct drop?
-                if (self.gameState.isBlackTurn == True):
-                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
-                else:
-                    self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text='')
-
-                    #self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(text=upsidedown.convChartoUpsideDown(pos[-1:]))
-                self.gameState.isBlackTurn = not self.gameState.isBlackTurn
-                self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = old_state_pos
-                self.resetBoardGraphics()
-
-                self.softReset()
-
-                return False
 
 class AI_watcher(Thread, spem, shog_logic):
     def __init__(self, event, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
