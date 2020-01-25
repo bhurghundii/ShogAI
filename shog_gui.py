@@ -84,7 +84,7 @@ class shog_gui():
 
 
                     square_board = Button(cell, text=drawMatrix[row][column], bg='white', highlightbackground="black",
-                                 highlightcolor="black", highlightthickness=1, height=6, width=9, command =  lambda row=row, col=column: gameLogic.click(row, col))
+                                 highlightcolor="black", highlightthickness=1, height=5, width=6, command =  lambda row=row, col=column: gameLogic.click(row, col))
                     square_board.pack()
 
 
@@ -101,7 +101,7 @@ class shog_gui():
 
         self.dropWhites = Frame(left)
         self.dropWhites.grid(column=0)
-
+        
         TurnIndicator = Label(self.options, text='Blacks Turn', bg='white', highlightbackground="black", highlightcolor="black", highlightthickness=1, height=3, width=9)
         TurnIndicator.pack(padx=10, side=tk.LEFT)
 
@@ -118,7 +118,6 @@ class shog_gui():
                      highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.fullStepPlay())
         Load2Step.pack(padx=10, side=tk.LEFT)
 
-
         gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
 
         if self.gameState.isAI == True:
@@ -128,7 +127,5 @@ class shog_gui():
             thread = AI_watcher(stopFlag, self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
             thread.daemon = True
             thread.start()
-
-
 
         root.mainloop()

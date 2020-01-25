@@ -443,8 +443,9 @@ class shog_logic:
                                 if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == False):
                                     break
                             except Exception as e:
-                                print(e)
-                                print('Move not on board so ignoring')
+                                #print(e)
+                                #print('Move not on board so ignoring')
+                                pass
             #print(pos, (oldMatrixPosX), (oldMatrixPosY), oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1)
             return 1
         else:
@@ -946,7 +947,7 @@ class shog_logic:
                                         break
 
                             except Exception as e:
-                                print(e)
+                                #print(e)
                                 pass
             
             return 1
