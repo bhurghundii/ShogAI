@@ -285,6 +285,8 @@ class shog_logic:
                     dimCollected = (file.read().split('\n'))
                     file.close()
 
+                    #This is for feature collection
+                    #Moves are pulled to be converted as features
                     if dimCollected[2] == '1':
                         #TODO: CONV THE PIECE NAMES INTO NUMS!
                         whiteDrops, blackDrops = [], []
@@ -302,8 +304,7 @@ class shog_logic:
                             blackDrops.append('0')
 
                         rawMatrix = ([y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
-                        print(rawMatrix, len(rawMatrix))
-                        print('\n\n')
+                        
                         # + list(int(self.gameState.isBlackTurn)
                         pc2num = ''
                         file = open('ml/eval_pcs.map', 'r')
@@ -695,10 +696,14 @@ class shog_logic:
             
             if i == (len(self.simulMoveMatrix) - 1):
                     #Check if we can drop a piece to cover the check
-                    #nearestThreat = self.checkNearThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wp')
 
-                    potentialThreatPcsAr = self.checkDistanceThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wb')
-                    potentialThreatPcsAr = potentialThreatPcsAr + self.checkDistanceThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wr')
+                    if self.gameState.isBlackTurn == False:
+                        potentialThreatPcsAr = self.checkDistanceThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wb')
+                        potentialThreatPcsAr = potentialThreatPcsAr + self.checkDistanceThreats(self.getPosFromPiece('Wk')[0] , self.getPosFromPiece('Wk')[1] , 'Wr')
+                    
+                    if self.gameState.isBlackTurn == True:
+                        potentialThreatPcsAr = self.checkDistanceThreats(self.getPosFromPiece('Bk')[0] , self.getPosFromPiece('Bk')[1] , 'Bb')
+                        potentialThreatPcsAr = potentialThreatPcsAr + self.checkDistanceThreats(self.getPosFromPiece('Bk')[0] , self.getPosFromPiece('Bk')[1] , 'Br')
                     
                     print(potentialThreatPcsAr)
                     if len(potentialThreatPcsAr) > 1:
@@ -706,74 +711,144 @@ class shog_logic:
                     else:
                         #Alright, so there is a move and only one threat
                         #We can block. Right?
-                        dropAvailable = False
-                        
-                        #Get available drop pcs
-                        dropPcs = []
-                        for rank in range(0, len(self.dropWhitePieces)):
-                            if self.dropWhitePieces[rank].winfo_manager() == 'pack':
-                                dropPcs.append(self.dropWhitePieces[rank].cget('text'))
-                                
-                        print(dropPcs)
-                        for potentialThreats in potentialThreatPcsAr:
-                            if ('Wp' in dropPcs):
-                                if ((self.getPosFromPiece('Wk')[0] != 0) and potentialThreats[1] != 0):
-                                    print('No white pawn here!')
-                                else:
-                                    poissiblePawnDrops = (list(range(self.getPosFromPiece('Wk')[1], potentialThreats[2])))
-                                    for horiz in range(0,9):
-                                        for ver in range(0,9):
-                                            if (self.gameState.gameMatrix[ver][horiz]) == 'Wp':
-                                                if horiz in poissiblePawnDrops:
-                                                    poissiblePawnDrops.remove(horiz)
 
-                                    if len(poissiblePawnDrops) == 0:
-                                        filepcs = []
-                                        for ver in range(0,9):
-                                            filepcs.append(self.gameState.gameMatrix[ver][self.getPosFromPiece('Wk')[1]]) 
-                                        if ('Wp' in filepcs):
-                                            print('No white pawn can be dropped here')
+                        dropAvailable = False                      
+                        #Get available drop pcs
+                        if self.gameState.isBlackTurn == False:
+                            dropPcs = []
+                            for rank in range(0, len(self.dropWhitePieces)):
+                                if self.dropWhitePieces[rank].winfo_manager() == 'pack':
+                                    dropPcs.append(self.dropWhitePieces[rank].cget('text'))
+
+                            print(dropPcs)
+                            for potentialThreats in potentialThreatPcsAr:
+                                if ('Wp' in dropPcs):
+                                    if ((self.getPosFromPiece('Wk')[0] != 0) and potentialThreats[1] != 0):
+                                        print('No white pawn here!')
+                                    else:
+                                        poissiblePawnDrops = (list(range(self.getPosFromPiece('Wk')[1], potentialThreats[2])))
+                                        for horiz in range(0,9):
+                                            for ver in range(0,9):
+                                                if (self.gameState.gameMatrix[ver][horiz]) == 'Wp':
+                                                    if horiz in poissiblePawnDrops:
+                                                        poissiblePawnDrops.remove(horiz)
+
+                                        if len(poissiblePawnDrops) == 0:
+                                            filepcs = []
+                                            for ver in range(0,9):
+                                                filepcs.append(self.gameState.gameMatrix[ver][self.getPosFromPiece('Wk')[1]]) 
+                                            if ('Wp' in filepcs):
+                                                print('No white pawn can be dropped here')
+                                            else:
+                                                print('A white pawn can be played')
+                                                dropAvailable = True
+                                                break
                                         else:
                                             print('A white pawn can be played')
                                             dropAvailable = True
                                             break
+                                else:
+                                    print('No white pawns are available')
+
+                                if ('Wn' in dropPcs):
+                                    if ((self.getPosFromPiece('Wk')[0] <= 1) and potentialThreats[1] <= 1):
+                                        print('No white knight here!')
                                     else:
-                                        print('A white pawn can be played')
+                                        print('A white knight can be played')
                                         dropAvailable = True
                                         break
-                            else:
-                                print('No white pawns are available')
-
-                            if ('Wn' in dropPcs):
-                                if ((self.getPosFromPiece('Wk')[0] <= 1) and potentialThreats[1] <= 1):
-                                    print('No white knight here!')
                                 else:
-                                    print('A white knight can be played')
-                                    dropAvailable = True
-                                    break
-                            else:
-                                print('No white knights are available')
-                        
-                            if ('Wl' in dropPcs):
-                                if ((self.getPosFromPiece('Wk')[0] != 0) and potentialThreats[1] != 0):
-                                    print('No white lance here!')
-                                else: 
-                                    print('A white lance can be played')
-                                    dropAvailable = True
-                                    break
-                            else:
-                                print('No white lance are available')
-                        
-                        
+                                    print('No white knights are available')
+                            
+                                if ('Wl' in dropPcs):
+                                    if ((self.getPosFromPiece('Wk')[0] != 0) and potentialThreats[1] != 0):
+                                        print('No white lance here!')
+                                    else: 
+                                        print('A white lance can be played')
+                                        dropAvailable = True
+                                        break
+                                else:
+                                    print('No white lance are available')
+                            
+                            
 
-                        if dropAvailable == True:
-                            print('Moves available. Continue play.')
+                            if dropAvailable == True:
+                                print('Moves available. Continue play.')
+                            else:
+                                print('RESULT: Checkmate! GAMEOVER')
+
                         else:
-                            print('RESULT: Checkmate! GAMEOVER')
-                    
+                            dropPcs = []
+                            for rank in range(0, len(self.dropBlacksPieces)):
+                                if self.dropBlacksPieces[rank].winfo_manager() == 'pack':
+                                    dropPcs.append(self.dropBlacksPieces[rank].cget('text'))
+
+                            print(dropPcs)
+                            for potentialThreats in potentialThreatPcsAr:
+                                if ('Bp' in dropPcs):
+                                    if ((self.getPosFromPiece('Bk')[0] != 0) and potentialThreats[1] != 0):
+                                        print('No black pawn here!')
+                                    else:
+                                        poissiblePawnDrops = (list(range(self.getPosFromPiece('Bk')[1], potentialThreats[2])))
+                                        for horiz in range(0,9):
+                                            for ver in range(0,9):
+                                                if (self.gameState.gameMatrix[ver][horiz]) == 'Bp':
+                                                    if horiz in poissiblePawnDrops:
+                                                        poissiblePawnDrops.remove(horiz)
+
+                                        if len(poissiblePawnDrops) == 0:
+                                            filepcs = []
+                                            for ver in range(0,9):
+                                                filepcs.append(self.gameState.gameMatrix[ver][self.getPosFromPiece('Bk')[1]]) 
+                                            if ('Bp' in filepcs):
+                                                print('No black pawn can be dropped here')
+                                            else:
+                                                print('A black pawn can be played')
+                                                dropAvailable = True
+                                                break
+                                        else:
+                                            print('A black pawn can be played')
+                                            dropAvailable = True
+                                            break
+                                else:
+                                    print('No black pawns are available')
+
+                                if ('Bn' in dropPcs):
+                                    if ((self.getPosFromPiece('Bk')[0] <= 1) and potentialThreats[1] <= 1):
+                                        print('No black knight here!')
+                                    else:
+                                        print('A black knight can be played')
+                                        dropAvailable = True
+                                        break
+                                else:
+                                    print('No black knights are available')
+                            
+                                if ('Bl' in dropPcs):
+                                    if ((self.getPosFromPiece('Bk')[0] != 0) and potentialThreats[1] != 0):
+                                        print('No black lance here!')
+                                    else: 
+                                        print('A black lance can be played')
+                                        dropAvailable = True
+                                        break
+                                else:
+                                    print('No black lance are available')
+                            
+                            
+
+                            if dropAvailable == True:
+                                print('Moves available. Continue play.')
+                            else:
+                                print('RESULT: Checkmate! GAMEOVER')
+
             self.simulMoveMatrixPre *= 0
             self.simulMoveMatrix *= 0
         
+    def getTeamCharacter(self):
+        if self.gameState.isBlackTurn == True:
+            return 'B'
+        else:
+            return 'W'
+
     def getPosWhichCanMakeMove(self, oldMatrixPosX, oldMatrixPosY, pos, newMatrixPosX, newMatrixPosY):
         if (self.gameState.isBlackTurn == True and pos[:-1] == 'B') or (self.gameState.isBlackTurn == False and pos[:-1] == 'W'):
             with open('movesets.txt') as f:
@@ -945,74 +1020,6 @@ class shog_logic:
                 return potentialThreatPcsArr
         else:
             return 0
-
-    def checkNearThreats(self, oldMatrixPosX, oldMatrixPosY, pos):
-        potentialThreatPcsArr = []
-        if (self.gameState.isBlackTurn == True and pos[:-1] == 'B') or (self.gameState.isBlackTurn == False and pos[:-1] == 'W'):
-                with open('movesets.txt') as f:
-                    content = f.readlines()
-
-                    for index in range(len(content)):
-                        if pos[-1:] in content[index]:
-                            movesets = content[index].split('=')[1]
-                            #cast movesets to array
-                            possiblemovelayouts =  eval(movesets)
-
-                            for j in range(len(possiblemovelayouts)):
-                                x_dif = int((possiblemovelayouts[j])[0])
-                                y_dif = int((possiblemovelayouts[j])[1])
-
-                                if pos[:-1] == 'B':
-                                    x_dif = -1 * x_dif
-                                    y_dif = -1 * y_dif
-                                if pos[:-1] == 'W':
-                                    x_dif = 1 * x_dif
-                                    y_dif = 1 * y_dif
-
-
-                                try:
-                                    #If the piece is Black and youre black, stop
-                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == True):
-                                        break
-
-                                    #If the piece is White and youre White, stop
-                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and self.gameState.isBlackTurn == False):
-                                        break
-
-                                    #If the piece is White and youre Black, you can capture so color
-                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'B') and self.gameState.isBlackTurn == True):
-                                        if (self.gameState.isBlackTurn == False and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'blue'):
-                                            pass
-                                        else:
-                                            self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='green')
-                                            pc = (self.gameState.gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])
-
-                                            if ('W' == pc[1]):
-                                                return True
-
-
-                                    #If the piece is Black and youre White, you can capture so color
-                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] != 'W') and self.gameState.isBlackTurn == False):
-                                        if (self.gameState.isBlackTurn == False and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'pink') or (self.gameState.isBlackTurn == True and 'k' in pos and (self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].cget('background')) == 'pink'):
-                                            pass
-                                        else:
-                                            self.cells[(oldMatrixPosX + x_dif, oldMatrixPosY + y_dif)].configure(background='green')
-                                            pc = (self.gameState.gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])
-
-                                            if ('B' == pc[1]):
-                                                return True
-
-                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'W') and self.gameState.isBlackTurn == True and (str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[1:] != 'k')):
-                                        break
-
-                                    if ((str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[:-1] == 'B') and self.gameState.isBlackTurn == False and (str(self.getPieceFrmPos(oldMatrixPosX + x_dif + 1, oldMatrixPosY + y_dif + 1))[1:] != 'k')):
-                                        break
-
-                                except Exception as e:
-                                    pass
-                return False
-        else:
-            return False
 
     def promotion(self, pos):
         if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
