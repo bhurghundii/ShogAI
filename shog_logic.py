@@ -7,6 +7,7 @@ from shog_ext import *
 from shog_ext import shog_play_external_moves as spem
 from ml.move_gen import moveGeneration
 import itertools
+from ml.generateCSV import csvUtil as csvUtil
 
 class shog_logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
@@ -29,6 +30,7 @@ class shog_logic:
             self.gameState.gameState = 0
             self.click(0, 0, True)
             shog_ext = shog_play_external_moves()
+
             if (gameTurn().gameTurn >= shog_ext.getLengthOfPlay()):
                 self.gameState.isLoad = False
 
@@ -326,11 +328,15 @@ class shog_logic:
                                             break
                                         
                                 except:
-                                    #sys.exit(0)
                                     if (x == 0):
                                         convMatrix.append(0)
                                         break
                         print(convMatrix, len(convMatrix))
+                        print(self.gameState.loadFile)
+
+                        csvObj = csvUtil(self.gameState.loadFile[:-4])
+                        csvObj.createFeatureCSV(convMatrix)
+                        csvObj.createLabelCSV(csvObj.getOriginalFile())
                         
 
                     

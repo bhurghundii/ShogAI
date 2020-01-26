@@ -4,11 +4,12 @@ from shog_gui import shog_gui
 
 class GameManager():
 
-    def __init__(self, board_size, load = None, AI = None, pc = None):
+    def __init__(self, board_size, load = None, AI = None, pc = None, loadFile = None):
         self.playerSelected = pc
         self.board_size = board_size
         self.load = load
         self.AI = AI
+        self.loadFile = loadFile
 
     def run(self):
         #Load game board from standardlayout.txt and place here
@@ -30,6 +31,10 @@ class GameManager():
             gameState = shog_gamestate(self.board_size, gameMatrix)
             gameState.isLoad = self.load
             gameState.isAI = self.AI
+
+            if (self.loadFile != None):
+                gameState.loadFile = self.loadFile
+
             gameState.playerSelected = self.playerSelected
             boardGraphic = shog_gui(gameState)
             shog_gui.drawInitialBoard(boardGraphic)
@@ -43,10 +48,12 @@ class GameInitializer():
         board_size = int(configContent[0])
         print(('Setting board size of ' + str(board_size)))
         return board_size
-
-    def run(self, load = None, AI = None, pc = None):
+    def run(self, load = None, AI = None, pc = None, loadFile = None):
         print('====================GAME SET UP===========================')
         print('Doing warm up functions like checking settings and params')
+
+        if loadFile != None:
+            print("Loading from: ", loadFile)
 
         if load == True and AI == False:
             print('Loading a game from file selected')
@@ -56,7 +63,7 @@ class GameInitializer():
             print('Vanilla 2P selected')
 
         board_size = self.readConfig()
-        gameInstanceBegins = GameManager(board_size, load, AI, pc)
+        gameInstanceBegins = GameManager(board_size, load, AI, pc, loadFile)
         gameInstanceBegins.run()
 
 if __name__ == '__main__':

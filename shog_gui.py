@@ -123,9 +123,10 @@ class shog_gui():
         if self.gameState.isAI == True:
             stopFlag = Event()
             print('Starting the AI watcher')
-
+            '''
             thread = AI_watcher(stopFlag, self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
             thread.daemon = True
             thread.start()
+            '''
 
         root.mainloop()

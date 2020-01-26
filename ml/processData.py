@@ -1,4 +1,3 @@
-from googletrans import Translator
 import glob, os, sys
 from ml_util import ml_util
 
@@ -8,8 +7,10 @@ class processMoves():
     
     def run(self):
         log = ''
+        FILENAME = ''
         for file in glob.glob("*.csa"):
             fileRead = open(file, 'r')
+            FILENAME = file
             log = fileRead.readlines()
 
         index = 0
@@ -222,8 +223,11 @@ class processMoves():
                     print(e)
 
         for l in range(0, len(movesExtractedArray)):
-            print(str(l + 1) + ":" , movesExtractedArray[l])
+            print(str(l + 1) + ":" + movesExtractedArray[l])
+            with open (FILENAME + '.txt', 'a') as f: f.write (str(str(l + 1) + ":" + movesExtractedArray[l] + "\n"))
 
 
 #RUNNING ISSUES:
 #69: + is not regiestering?!
+
+processMoves().run()

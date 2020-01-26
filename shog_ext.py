@@ -156,7 +156,6 @@ class shog_recorder():
         except:
             return 1
 
-
 class gameTurn:
     gameTurn = 0
     recordSheet = ''

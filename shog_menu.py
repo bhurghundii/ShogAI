@@ -25,7 +25,7 @@ def sel():
        f = open('ext_data/load_game.txt', "w")
        f.write(replaygame)
        f.close()
-       GameInitializer().run(True, False)
+       GameInitializer().run(True, False, None, root.filename)
 
 try:
     f = open('ext_data/load_game.txt', "w", encoding='utf-8')

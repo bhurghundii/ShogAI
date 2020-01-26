@@ -18,5 +18,8 @@ class generateLabels():
                     label = 0
                     return (label)
 
+#USAGE
+'''
 FILEPATH = 'tmp-1-0.csa'
 print(generateLabels().run(FILEPATH))
+'''
