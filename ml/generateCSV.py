@@ -6,8 +6,8 @@ class csvUtil():
 
     def createFeatureCSV(self, feature):
         with open('features.csv', 'a', newline='') as csvfile:
-            spamwriter = csv.writer(csvfile, delimiter=' ')
-            spamwriter.writerow([feature])
+            spamwriter = csv.writer(csvfile, delimiter=',')
+            spamwriter.writerow(feature)
     
     def createLabelCSV(self, FILENAME):
         genLabel = generateLabels()

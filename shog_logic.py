@@ -1036,13 +1036,17 @@ class shog_logic:
             return 0
 
     def promotion(self, pos):
-        if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
-            MsgBox = messagebox.askquestion("Promotion!", "You have reached promotion. Would you like to promote your piece?")
-            if MsgBox == 'yes':
-                return pos.upper(), True
-            else:
-                return pos, False
-        return pos, False
+        if self.gameState.isLoad == False:
+            if 'g' not in pos and 'k' not in pos and pos[-1:].islower() == True:
+                MsgBox = messagebox.askquestion("Promotion!", "You have reached promotion. Would you like to promote your piece?")
+                if MsgBox == 'yes':
+                    return pos.upper(), True
+                else:
+                    return pos, False
+            return pos, False
+        else:
+            file = open('ext_data/movetoplay.txt', 'r') 
+            print(file.read())
 
     def clickDrop(self, row, piece):
 
