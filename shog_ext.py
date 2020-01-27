@@ -165,12 +165,17 @@ class gameTurn:
         gameTurn.gameTurn += 1
 
     def initRecordSheetFile(self):
-     now = datetime.datetime.now()
-     gameTurn.recordSheet = r'records/' + str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now.hour) + "_" + str(now.minute) + "_" + str(now.second) + "-RecordSheet.txt"
+        now = datetime.datetime.now()
+        gameTurn.recordSheet = r'records/' + str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now.hour) + "_" + str(now.minute) + "_" + str(now.second) + "-RecordSheet.txt"
 
-     f = open(gameTurn.recordSheet, "w")
-     f.close()
+        f = open(gameTurn.recordSheet, "w")
+        f.close()
 
-     t = showRecordGUI(gameTurn.recordSheet)
-     t.setDaemon(True)
-     t.start()
+
+
+        file_variable = open('configure.txt')
+        all_lines_variable = file_variable.readlines()
+        if (all_lines_variable[3]) != '0':
+            t = showRecordGUI(gameTurn.recordSheet)
+            t.setDaemon(True)
+            t.start()

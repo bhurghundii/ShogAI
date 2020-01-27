@@ -19,3 +19,4 @@ class shog_gamestate():
             self.recordingFile = ''
             self.loadFile = ''
             self.playerSelected = None
+            self.autoPlay = None

@@ -6,6 +6,7 @@ import upsidedown
 from shog_logic import shog_logic
 from shog_logic import AI_watcher
 from threading import Timer, Thread, Event
+import sys
 
 class shog_gui():
 
@@ -84,7 +85,7 @@ class shog_gui():
 
 
                     square_board = Button(cell, text=drawMatrix[row][column], bg='white', highlightbackground="black",
-                                 highlightcolor="black", highlightthickness=1, height=5, width=6, command =  lambda row=row, col=column: gameLogic.click(row, col))
+                                 highlightcolor="black", highlightthickness=1, height=5, width=9, command =  lambda row=row, col=column: gameLogic.click(row, col))
                     square_board.pack()
 
 
@@ -120,13 +121,19 @@ class shog_gui():
 
         gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
 
+        if self.gameState.autoPlay == True:
+            print('Autoplay for extraction')
+            gameLogic.fullStepPlay()
+            sys.exit(0)
+            
+
         if self.gameState.isAI == True:
             stopFlag = Event()
             print('Starting the AI watcher')
-            '''
+            
             thread = AI_watcher(stopFlag, self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
             thread.daemon = True
             thread.start()
-            '''
+            
 
         root.mainloop()

@@ -5,7 +5,10 @@ import random, os
 import copy
 from shog_ext import *
 from shog_ext import shog_play_external_moves as spem
-from ml.move_gen import moveGeneration
+try:
+    from ml.move_gen import moveGeneration
+except:
+    from ml.move_gen import moveGeneration
 import itertools
 from ml.generateCSV import csvUtil as csvUtil
 
@@ -307,7 +310,8 @@ class shog_logic:
 
                         rawMatrix = ([y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
                         
-                        # + list(int(self.gameState.isBlackTurn)
+                        #Convert the pieces into equivalent numbers because training  
+                        #process only uses numbers 
                         pc2num = ''
                         file = open('ml/eval_pcs.map', 'r')
                         pc2num = (file.read().split('\n'))
@@ -333,10 +337,13 @@ class shog_logic:
                                         break
                         print(convMatrix, len(convMatrix))
                         print(self.gameState.loadFile)
-
-                        csvObj = csvUtil(self.gameState.loadFile[:-4])
-                        csvObj.createFeatureCSV(convMatrix)
-                        csvObj.createLabelCSV(csvObj.getOriginalFile())
+                        #When we load a game, we try to generate features and labels
+                        try:
+                            csvObj = csvUtil(self.gameState.loadFile[:-4])
+                            csvObj.createFeatureCSV(convMatrix)
+                            csvObj.createLabelCSV(csvObj.getOriginalFile())
+                        except:
+                            print('No CSA found, so not generating labels / features')
                         
 
                     

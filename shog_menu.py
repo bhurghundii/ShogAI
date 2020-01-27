@@ -3,17 +3,23 @@ import os
 from shog_start import GameInitializer
 from tkinter import filedialog
 import tkinter as tk
+import glob
+import time
+from threading import Thread
+import threading
+import sys
+import random
 
 def sel():
-   if (var.get() == 1):
+    if (var.get() == 1):
        'Playing against the AI'
        #GameInitializer().run(False, True)
        import shog_AISettings
 
-   if (var.get() == 2):
+    if (var.get() == 2):
        GameInitializer().run(False, False)
 
-   if (var.get() == 3):
+    if (var.get() == 3):
        #I don't like initialdir ... find a more universal method
        root.filename =  filedialog.askopenfilename(initialdir = "/home/ubuntu/Documents/Shogi-DISS/src/records/",title = "Select file",filetypes = (("txt files","*.txt"),("all files","*.*")))
        print ('Preparing to load from ' + root.filename)
@@ -26,7 +32,24 @@ def sel():
        f.write(replaygame)
        f.close()
        GameInitializer().run(True, False, None, root.filename)
+    
+    if (var.get() == 4):
+      
+      for file in glob.glob("/home/ubuntu/Documents/Shogi-DISS/src/ml/storage/*.txt"):
+        print ('Preparing to load from ' + file) 
+        f = open(file, "r")
+        replaygame = f.read()
+        f.close()
 
+        f = open('ext_data/load_game.txt', "w")
+        f.write(replaygame)
+        f.close()
+        #TODO: AUTOMATIC FULL RUN SO WE CAN SPEED THIS SHIT
+        
+        GameInitializer().run(True, False, None, file, True)
+
+        break
+   
 try:
     f = open('ext_data/load_game.txt', "w", encoding='utf-8')
     f.write('')
@@ -37,7 +60,7 @@ try:
 
     root = tk.Tk()
     root.title("ShogAI: A Dissertation by Vikram Chhapwale")
-    root.geometry('600x500')
+    root.geometry('600x600')
     var = IntVar()
 
     path = "assets/INTRO.png"
@@ -45,7 +68,7 @@ try:
     label = tk.Label(image=image)
     label.pack()
 
-    T0 = Label(root, text="Welcome to ShogAI, a Dissertation by Vikramaditya Chhapwale from Nottingham")
+    T0 = Label(root, text="Welcome to ShogAI, a Dissertation by Vikramaditya Chhapwale from Nottingham \n")
     T0.pack( anchor = W )
 
     T1 = Label(root, text="Pick a Game Mode")
@@ -59,6 +82,9 @@ try:
 
     R3 = Radiobutton(root, text="Load a game", variable=var, value=3, command=sel)
     R3.pack( anchor = W )
+
+    R4 = Radiobutton(root, text="(Training) Process Games for Features", variable=var, value=4, command=sel)
+    R4.pack( anchor = W )
 
     label = Label(root)
     label.pack()
