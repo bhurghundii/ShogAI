@@ -60,7 +60,7 @@ try:
 
     root = tk.Tk()
     root.title("ShogAI: A Dissertation by Vikram Chhapwale")
-    root.geometry('600x600')
+    root.geometry('600x550')
     var = IntVar()
 
     path = "assets/INTRO.png"
@@ -83,8 +83,8 @@ try:
     R3 = Radiobutton(root, text="Load a game", variable=var, value=3, command=sel)
     R3.pack( anchor = W )
 
-    R4 = Radiobutton(root, text="(Training) Process Games for Features", variable=var, value=4, command=sel)
-    R4.pack( anchor = W )
+    #R4 = Radiobutton(root, text="(Training) Process Games for Features", variable=var, value=4, command=sel)
+    #R4.pack( anchor = W )
 
     label = Label(root)
     label.pack()
