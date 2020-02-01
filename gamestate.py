@@ -1,4 +1,5 @@
-class shog_gamestate():
+class gamestate(): 
+    #This file is a persistent constructor for the gamestate such as who's turn, a numerical representation etc.
     def __init__(self, board_size, gameMatrix):
             self.board_size = board_size
             self.isBlackTurn = True
@@ -20,3 +21,4 @@ class shog_gamestate():
             self.loadFile = ''
             self.playerSelected = None
             self.autoPlay = None
+            self.NumericalEncodingGameState = None

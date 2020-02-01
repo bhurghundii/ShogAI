@@ -1,3 +1,5 @@
+python3 generateCSVHeaders.py $file
+
 for entry in "ml/storage"/*
 
 do

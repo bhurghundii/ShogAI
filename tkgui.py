@@ -1,20 +1,20 @@
-from tkinter import *
-from tkinter import messagebox
-import tkinter as tk
-import copy
-import upsidedown
-from shog_logic import shog_logic
-from shog_logic import AI_watcher
-from threading import Timer, Thread, Event
-import sys
+#GUI implementation done using Tkinter graphics library 
+#Simple and cross platform
 
-class shog_gui():
+from tkinter import messagebox, Frame, Label, E,  Button, Tk
+import tkinter as tk
+import copy, upsidedown, sys
+from logic import logic, AI_watcher
+from threading import Timer, Thread, Event
+
+class tkgui():
 
     def __init__(self, gameState):
         self.gameState = gameState
         self.board_size = gameState.board_size
         self.gameMatrix = gameState.gameMatrix
-
+    
+    #Draw the board the user interacts with
     def drawInitialBoard(self):
         root = Tk()
         root.title('ShogAI')
@@ -31,7 +31,7 @@ class shog_gui():
         right = Frame(root, width=900, height=200, padx=3, pady=3)
         left = Frame(root, width=900, height=200, padx=3, pady=3)
 
-        # layout all of the main containers
+        # layout for all of the main containers
         root.grid_rowconfigure(self.board_size, weight=1)
         root.grid_columnconfigure(self.board_size, weight=1)
 
@@ -40,9 +40,7 @@ class shog_gui():
         right.grid(column=2, row=1, sticky="nsew")
         left.grid(column=0, row=1, sticky="nsew")
 
-
-
-        # create the center widgets
+        # create widgets which will hold game board, pcs to drop etc.
         center.grid_rowconfigure(0, weight=1)
         center.grid_columnconfigure(1, weight=1)
 
@@ -93,7 +91,8 @@ class shog_gui():
                     self.cells[(row, column)] = square_board
                 except:
                     pass
-
+        
+        # Store the button's on to a widget holder
         self.options = Frame(bottom)
         self.options.grid(column=0)
 
@@ -119,14 +118,10 @@ class shog_gui():
                      highlightcolor="black", highlightthickness=1, height=2, width=5, command = lambda : gameLogic.fullStepPlay())
         Load2Step.pack(padx=10, side=tk.LEFT)
 
-        gameLogic = shog_logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
-
-        if self.gameState.autoPlay == True:
-            print('Autoplay for extraction')
-            gameLogic.fullStepPlay()
-            sys.exit(0)
+        gameLogic = logic(self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
             
-
+        #We check whether the user has selected to play against the AI 
+        #Which triggers a seperate thread which the AI runs on
         if self.gameState.isAI == True:
             stopFlag = Event()
             print('Starting the AI watcher')
@@ -134,6 +129,18 @@ class shog_gui():
             thread = AI_watcher(stopFlag, self.gameState, self.cells, self.turnIndicator, self.dropBlacks, self.dropWhites, self.dropBlacksPieces, self.dropWhitePieces, self.CheckIndicator)
             thread.daemon = True
             thread.start()
-            
+
+        #---------------------------------------------------------------------------------------------------
+        #                                   INACESSIBLE TO THE USER
+        #---------------------------------------------------------------------------------------------------
+
+        #Check whether we need to process a load of games to create features and labels. 
+        #This isn't really accessible by the user and has to be triggered by using a bash script 
+        #which is GenerateDataset.sh
+        if self.gameState.autoPlay == True:
+            print('Autoplay for extraction')
+            gameLogic.fullStepPlay()
+            sys.exit(0)  
+        #---------------------------------------------------------------------------------------------------
 
         root.mainloop()

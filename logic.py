@@ -1,10 +1,10 @@
+#TODO: Shorten and split it 
+
 import upsidedown
-from tkinter import Button
-from tkinter import messagebox
-import random, os
-import copy
-from shog_ext import *
-from shog_ext import shog_play_external_moves as spem
+from tkinter import Button, messagebox
+import random, os, sys, copy, traceback, inspect
+from externalfileutil import *
+from externalfileutil import shog_play_external_moves as spem
 try:
     from ml.move_gen import moveGeneration
 except:
@@ -12,7 +12,7 @@ except:
 import itertools
 from ml.generateCSV import csvUtil as csvUtil
 
-class shog_logic:
+class logic:
     def __init__(self, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
         self.gameState = gameState
         self.cells = cells
@@ -25,6 +25,7 @@ class shog_logic:
         self.simulMoveMatrixPre = []
         self.CheckIndicator = CheckIndicator
 
+    #Single steps through a loaded game
     def singleStepPlay(self):
         if (self.gameState.isLoad != True):
             print ('Single Step is not available because load not selected')
@@ -32,41 +33,44 @@ class shog_logic:
             print ('Single Step')
             self.gameState.gameState = 0
             self.click(0, 0, True)
-            shog_ext = shog_play_external_moves()
+            externalfileutil = shog_play_external_moves()
 
-            if (gameTurn().gameTurn >= shog_ext.getLengthOfPlay()):
+            if (gameTurn().gameTurn >= externalfileutil.getLengthOfPlay()):
                 self.gameState.isLoad = False
-
-    def singlePlayNextMove_ext(self):
+    
+    #This is a single step to allow the AI to play a move
+    #By checking the movetoplay file and reading it
+    def PlayAIMove(self):
         if os.stat("ext_data/movetoplay.txt").st_size != 0:
             print('Playing the AI')
             self.gameState.isLoad = True
             self.click(0, 0, True)
         else:
             self.gameState.isLoad = False
-
+    
+    #Fullstep: we play every move to fully load a file
     def fullStepPlay(self):
         if (self.gameState.isLoad != True):
             print ('Full Step is not available because load not selected')
         else:
             print ('Full Step')
-            shog_ext = shog_play_external_moves()
-            for l in range(0, shog_ext.getLengthOfPlay()):
+            externalfileutil = shog_play_external_moves()
+            for l in range(0, externalfileutil.getLengthOfPlay()):
                 self.click(0, 0, True)
-            shog_ext.clearLoadGame()
+            externalfileutil.clearLoadGame()
             self.gameState.isLoad = False
-
+    
+    #Checks if number is even
     def isEven(self, n):
         if (n % 2) == 0:
             return True
         else:
             return False
 
+    #Click is the action user invokes when clicking. Different states can occur.
     def click(self, row, col, isLoad = None):
         movesPlayed = shog_recorder().getGameLength()
-        print('MOVES PLAYED:', movesPlayed)
         if (self.gameState.isAI == True):
-            print('YOU ARE:', self.gameState.playerSelected, ' USING AI? ', str(self.gameState.isAI))
             if (self.gameState.playerSelected == 'Black' and self.isEven(movesPlayed) == False):
                 self.actionSquare(row, col, isLoad)
             elif (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed) == True):
@@ -80,8 +84,6 @@ class shog_logic:
 
     def dropAction(self, row, col):
         self.cells[(row, col)].configure(background='RED')
-        print(('PIECE DROP:' + str(self.getPieceFrmPos(row + 1, col + 1))))
-
         if (str(self.getPieceFrmPos(row + 1, col + 1)) == '0'):
             self.gameState.newMatrixPosX = row
             self.gameState.newMatrixPosY = col
@@ -217,15 +219,15 @@ class shog_logic:
 
         elif self.gameState.gameState == 0:
             #AI parts
-            shog_ext = shog_play_external_moves()
-            if (self.gameState.isLoad == True and isLoad == True) or shog_ext.isThereAMoveToPlay_ext():
+            externalfileutil = shog_play_external_moves()
+            if (self.gameState.isLoad == True and isLoad == True) or externalfileutil.isThereAMoveToPlay_ext():
                 print('TURN: ' + str(gameTurn().gameTurn + 1))
-                shog_ext.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
+                externalfileutil.updateMoveToPlayIfNotEmpty(gameTurn().gameTurn)
 
-                if (shog_ext.isThereAMoveToPlay_ext()):
+                if (externalfileutil.isThereAMoveToPlay_ext()):
                     print('Playing from move')
 
-                    moveRead = shog_ext.convertTurnToGameMatrixCompatible()
+                    moveRead = externalfileutil.convertTurnToGameMatrixCompatible()
                     isPromote = moveRead[6]
                     isDrop = moveRead[7]
 
@@ -290,10 +292,12 @@ class shog_logic:
                     dimCollected = (file.read().split('\n'))
                     file.close()
 
+                
                     #This is for feature collection
                     #Moves are pulled to be converted as features
-                    if dimCollected[2] == '1':
-                        #TODO: CONV THE PIECE NAMES INTO NUMS!
+                    if dimCollected[2] == '1':                  
+                        #Convert the pieces into equivalent numbers because training  
+                        #process only uses numbers 
                         whiteDrops, blackDrops = [], []
                         for dropIndex in range(0, len(self.dropBlacksPieces)):
                             if self.dropBlacksPieces[dropIndex].winfo_manager() == 'pack':
@@ -309,9 +313,8 @@ class shog_logic:
                             blackDrops.append('0')
 
                         rawMatrix = ([y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
-                        
-                        #Convert the pieces into equivalent numbers because training  
-                        #process only uses numbers 
+                        self.gameState.NumericalEncodingGameState = rawMatrix
+                        print('ENCODING SET')
                         pc2num = ''
                         file = open('ml/eval_pcs.map', 'r')
                         pc2num = (file.read().split('\n'))
@@ -340,9 +343,9 @@ class shog_logic:
                         #When we load a game, we try to generate features and labels
                         try:
                             csvObj = csvUtil(self.gameState.loadFile[:-4])
-                            csvObj.createFeatureCSV(convMatrix)
-                            csvObj.createLabelCSV(csvObj.getOriginalFile())
-                        except:
+                            csvObj.createCombinedCSV(convMatrix, 'training.csv', csvObj.getOriginalFile())
+                        except Exception as e:
+                            print(e)
                             print('No CSA found, so not generating labels / features')
                         
 
@@ -537,13 +540,19 @@ class shog_logic:
                     pos = pos.upper()
                     resultPromotion = True
                 else:
-                    pos, resultPromotion = self.promotion(pos)
+                    try:
+                        pos, resultPromotion = self.promotion(pos)
+                    except:
+                        pass
             if (self.gameState.isBlackTurn == False and (newMatrixPosXlocal >= 6 or oldMatrixPosXlocal >= 6)):
                 if (pos[-1:] == 'p' and newMatrixPosXlocal >= 8) or (pos[-1:] == 'n' and newMatrixPosXlocal >= 7)  or (pos[-1:] == 'l' and newMatrixPosXlocal >= 8) or (isPromote == True):
                     pos = pos.upper()
                     resultPromotion = True
                 else:
-                    pos, resultPromotion = self.promotion(pos)
+                    try:
+                        pos, resultPromotion = self.promotion(pos)
+                    except:
+                        pass
 
             #Capture
             if (self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] != 0):
@@ -854,9 +863,29 @@ class shog_logic:
                             else:
                                 print('RESULT: Checkmate! GAMEOVER')
 
+            
+
             self.simulMoveMatrixPre *= 0
             self.simulMoveMatrix *= 0
         
+        #get raw numerical encoding
+        whiteDrops, blackDrops = [], []
+        for dropIndex in range(0, len(self.dropBlacksPieces)):
+            if self.dropBlacksPieces[dropIndex].winfo_manager() == 'pack':
+                blackDrops.append(self.dropBlacksPieces[dropIndex].cget('text'))
+        
+        for dropIndex in range(0, len(self.dropWhitePieces)):
+            if self.dropWhitePieces[dropIndex].winfo_manager() == 'pack':
+                whiteDrops.append(self.dropWhitePieces[dropIndex].cget('text'))
+
+        while len(whiteDrops) != 19:
+            whiteDrops.append('0')
+        while len(blackDrops) != 19:
+            blackDrops.append('0')
+
+        rawMatrix = ([y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
+        self.gameState.NumericalEncodingGameState = rawMatrix
+
     def getTeamCharacter(self):
         if self.gameState.isBlackTurn == True:
             return 'B'
@@ -1419,7 +1448,7 @@ class shog_logic:
 
         self.gameState.possibleMoveMatrix *= 0
 
-class AI_watcher(Thread, spem, shog_logic):
+class AI_watcher(Thread, spem, logic):
     def __init__(self, event, gameState, cells, turnIndicator, dropBlacks, dropWhites, dropBlacksPieces, dropWhitePieces, CheckIndicator):
         Thread.__init__(self)
         self.stopped = event
@@ -1451,7 +1480,11 @@ class AI_watcher(Thread, spem, shog_logic):
     def run(self):
         while not self.stopped.wait(5):
             #Grab record sheet so far...
+            #print('NUMERICALENCODING', self.gameState.NumericalEncodingGameState)
+
+            
             try:
+                
                 file = open(self.gameState.recordingFile, 'r')
                 print (file.read())
                 file.close()
@@ -1459,6 +1492,7 @@ class AI_watcher(Thread, spem, shog_logic):
                 if (((self.getLengthOfPlay() + 1) != 0) or self.isEven(self.getLengthOfPlay() + 1)):
                     mg = moveGeneration()
                     #self.getLengthOfPlay() + 2) + ":" +
+                
                     moveToPlay = str( mg.GenMoves(self.gameState.gameMatrix, self.isEven(self.getLengthOfPlay() + 1)))
                     print('MOVE TO PLAY IS:', moveToPlay)
                     mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
@@ -1469,7 +1503,7 @@ class AI_watcher(Thread, spem, shog_logic):
 
                     if os.stat("ext_data/movetoplay.txt").st_size != 0:
                         print('There is a move! Let us load it')
-                        shog_logic.singlePlayNextMove_ext(self)
+                        logic.PlayAIMove(self)
                         f = open('ext_data/load_game.txt', 'r+')
                         f.truncate(0)
                         f.close()
@@ -1485,13 +1519,13 @@ class AI_watcher(Thread, spem, shog_logic):
                     print('MOVE TO PLAY IS:', moveToPlay)
                     mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
 
-
+                    
                     print('Checking if a move is loaded by the AI')
 
 
                     if os.stat("ext_data/movetoplay.txt").st_size != 0:
                         print('There is a move! Let us load it')
-                        shog_logic.singlePlayNextMove_ext(self)
+                        logic.PlayAIMove(self)
                         f = open('ext_data/load_game.txt', 'r+')
                         f.truncate(0)
                         f.close()
@@ -1499,8 +1533,8 @@ class AI_watcher(Thread, spem, shog_logic):
                         f.truncate(0)
                         f.close()
                         #return
-
-
             except Exception as e:
-                print(e)
+                #TODO: FIX 'int' object is not iterable
+                traceback.print_exc(file=sys.stdout)
                 print('Game has not started yet or AI has not started making a move')
+            

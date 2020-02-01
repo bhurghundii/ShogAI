@@ -17,7 +17,6 @@ class processMoves():
             index = 0
             for l in range(1,len(log)):
                 if len(log[l]) == 2:
-                    print('Index: ' + str(l))
                     index = l + 1
 
             movesExtractedArray = []
@@ -175,10 +174,9 @@ class processMoves():
                         pc_mutate = 'S'
                         tmp = []
                         for j in range(0, len(movesExtractedArray)):
-                            if pc_mutate in str(movesExtractedArray[j]) or ('+' + pc_mutate) in str(movesExtractedArray[j]):
+                            if ('+' + pc_mutate) in str(movesExtractedArray[j]):
                                 if turn in str(movesExtractedArray[j]):
                                     if (str(movesDoneArray[j][3]) + str(movesDoneArray[j][4])) == (str(log[l][1]) + str(log[l][2])):
-                                        print('SSS', movesExtractedArray[j])
                                         tmp.append(movesExtractedArray[j])
                         
                         if (tmp != []):
@@ -194,6 +192,9 @@ class processMoves():
                             #This piece has never been played or used. Upgrade it
                             pc =  pc_mutate 
                             end_y = end_y + '+'
+                        
+                        
+                    
 
                     if 'UM' in log[l]:
                         pc_mutate = 'B'
@@ -219,9 +220,6 @@ class processMoves():
                             #This piece has never been played or used. Upgrade it
                             pc =  pc_mutate 
                             end_y = end_y + '+'               
-
-                            
-                        
 
                     if 'RY' in log[l]:
                         pc_mutate = 'R'

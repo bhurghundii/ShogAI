@@ -2,6 +2,9 @@
 #Get all available moves so far
 #class AIListener():
 import random, copy
+import itertools
+import csv
+from ml.demo.test_reuseModel import evaluatePositions
 
 class moveGeneration():
     def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos, gameMatrix, isBlackTurn):
@@ -113,11 +116,64 @@ class moveGeneration():
                                 possibleMoves += self.getPossibleMoves(i,j, pos, gameMatrix, isBlack)
                         except:
                             pass
-            
-        randomIndex = self.pickARandomMove(len(possibleMoves))
-        self.convMoveToNotation(possibleMoves[randomIndex][4], False, False, False, possibleMoves[randomIndex][3], possibleMoves[randomIndex][2], possibleMoves[randomIndex][1], possibleMoves[randomIndex][0])
-        return (self.convMoveToNotation(possibleMoves[randomIndex][4], False, False, False, possibleMoves[randomIndex][3], possibleMoves[randomIndex][2], possibleMoves[randomIndex][1], possibleMoves[randomIndex][0]))
+        
+        possibleStates = ''
+        for possibleUnconvertedGameSates in possibleMoves:
+            self.convertPossibleMovesIntoNumericalForm(possibleUnconvertedGameSates[5])
+        
 
+        #randomIndex = self.pickARandomMove(len(possibleMoves))
+        index = evaluatePositions().run()
+        print('SELECTED MOVE: ', index, ' with ', possibleMoves[index])
+        #self.convMoveToNotation(possibleMoves[randomIndex][4], False, False, False, possibleMoves[randomIndex][3], possibleMoves[randomIndex][2], possibleMoves[randomIndex][1], possibleMoves[randomIndex][0])
+        return (self.convMoveToNotation(possibleMoves[index][4], False, False, False, possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0]))
+
+    def writeToPotentialMoveCSV(self, array):
+        #csvObj = csvUtil()
+        #csvObj.createHeaders('moveposition.csv')
+        if (len(array) != 120):
+            lenToAdd = abs(120 - len(array))
+            for extra0 in range(0, lenToAdd):
+                array.append(0)
+        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/demo/moveposition.csv', 'a', newline='') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',')
+            spamwriter.writerow(array)
+
+    def convertPossibleMovesIntoNumericalForm(self, possibleUnconvertedGameSate):
+        #possibleMoves[0][5] should is the new gamestate after it's done up
+        print('POSSIBLE MOVES ARE', possibleUnconvertedGameSate)  
+        possibleGameState = list(itertools.chain.from_iterable(possibleUnconvertedGameSate))
+        print(possibleGameState)
+
+        #Convert the pieces into equivalent numbers because training  
+        #process only uses numbers 
+        pc2num = ''
+        file = open('ml/eval_pcs.map', 'r')
+        pc2num = (file.read().split('\n'))
+        file.close()
+        convMatrix = []
+        for x in possibleGameState:
+            for l in pc2num:
+                try: 
+                    if x[-1:] in l:
+                        if x[0] == 'W':
+                            convMatrix.append('-' + l.split('=')[1])
+                            break
+                        elif x[0] == 'B':
+                            convMatrix.append(l.split('=')[1])
+                            break
+                        elif x[0] == '0':
+                            convMatrix.append(l.split('=')[1])
+                            break
+                        
+                except:
+                    if (x == 0):
+                        convMatrix.append(0)
+                        break
+        self.writeToPotentialMoveCSV(convMatrix)
+        return (convMatrix)
+    
+   
     #orgx orgy newx newy pos matrix
     #  0   1   2     3   4    5
 
