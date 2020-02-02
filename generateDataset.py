@@ -1,11 +1,12 @@
+'''
+This script uses ShogAI's playing ability to generate a set of features and labels
+ARG 1 : The name of file to extract and analysis
+'''
+
 from gameinitializer import GameInitializer
 import sys, os, traceback
 from ml.generateCSV import csvUtil as csvUtil
 
-#/home/ubuntu/Documents/Shogi-DISS/src/ml/storage/tmp-2-6.csa.txt
-
-print('Number of arguments:', len(sys.argv), 'arguments.')
-print('Argument List:', str(sys.argv[1]))
 file = str(sys.argv[1])
 try:
 
@@ -17,7 +18,6 @@ try:
    f = open('ext_data/load_game.txt', "w")
    f.write(replaygame)
    f.close()
-   #TODO: AUTOMATIC FULL RUN SO WE CAN SPEED THIS SHIT
    print(os.getcwd())
 
    GameInitializer().run(True, False, None, file, True)

@@ -1,10 +1,17 @@
+'''
+This class handles data for external file manipulation such as counting how many turns has passed or reading a log
+playexternalmoves gives helper functions for playing back moves which have been loaded
+gamerecorder gives helper functions for reading moves to load
+'''
+
 # -*- coding: UTF-8 -*-
 import datetime
 from threading import Timer, Thread, Event
-from shog_showRecord import showRecordGUI
+from showrecord import showRecordGUI
 
-class shog_play_external_moves():
-
+#Helper functions for playing back moves which have been loaded
+class playexternalmoves():
+    #Check if a movt is available to play
     def isThereAMoveToPlay_ext(self):
         with open('ext_data/movetoplay.txt') as f:
             turnMove = f.read()
@@ -19,7 +26,7 @@ class shog_play_external_moves():
         with open('ext_data/load_game.txt') as f:
             turnMove = f.readlines()
         return len(turnMove)
-
+    #Clear out the load game.txt
     def clearLoadGame(self):
         f = open('ext_data/load_game.txt', "w", encoding='utf-8')
         f.close()
@@ -106,8 +113,9 @@ class shog_play_external_moves():
 
         #Now that we got the move... let's grab the matrix and find out who could've made the move!
 
-class shog_recorder():
-
+#Helper functions for reading moves to load
+class gamerecorder():
+    #Record move. Loads of lamda functions which basically check how the move should be represented
     def recordMove(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None):
 
         if gameTurn.gameTurn == 0:
@@ -156,22 +164,24 @@ class shog_recorder():
         except:
             return 1
 
+#Class handles game turn operations aka just increments
+#Also when game turn is > 0, it will initialise a record.
 class gameTurn:
     gameTurn = 0
     recordSheet = ''
 
+    #Increment the game turn
     @staticmethod
     def updateGameTurn():
         gameTurn.gameTurn += 1
 
+    #Initialise the record sheet file
     def initRecordSheetFile(self):
         now = datetime.datetime.now()
         gameTurn.recordSheet = r'records/' + str(now.year) + "_" + str(now.month) + "_" + str(now.day) + "_" + str(now.hour) + "_" + str(now.minute) + "_" + str(now.second) + "-RecordSheet.txt"
 
         f = open(gameTurn.recordSheet, "w")
         f.close()
-
-
 
         file_variable = open('configure.txt')
         all_lines_variable = file_variable.readlines()

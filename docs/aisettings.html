@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>aisettings.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>aisettings.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This lets the user decide what color they want to choose</span>
+<span class="sd">when they play the AI</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">IntVar</span><span class="p">,</span> <span class="n">Radiobutton</span><span class="p">,</span> <span class="n">Label</span><span class="p">,</span> <span class="n">W</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">gameinitializer</span> <span class="kn">import</span> <span class="n">GameInitializer</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>What to do if the user sets themselves as black
+Basically, just sets one of the parameters as Black</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">blackSelect</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Going black&#39;</span><span class="p">)</span>
+    <span class="n">GameInitializer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;Black&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>What to do if the user sets themselves as white
+Basically, just sets one of the parameters as White</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">WhiteSelect</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Going white&#39;</span><span class="p">)</span>
+    <span class="n">GameInitializer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;White&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Draw Graphical User Interface screen for selecting the player
+color when you choose to fight the AI</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+<span class="n">root</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;ShogAI: A Dissertation by Vikram Chhapwale&quot;</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s1">&#39;600x200&#39;</span><span class="p">)</span>
+<span class="n">colorSelection</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">()</span>
+
+<span class="n">T0</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Choose your color&quot;</span><span class="p">)</span>
+<span class="n">T0</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+<span class="n">R1</span> <span class="o">=</span> <span class="n">Radiobutton</span><span class="p">(</span>
+    <span class="n">root</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Black&quot;</span><span class="p">,</span>
+    <span class="n">variable</span><span class="o">=</span><span class="n">colorSelection</span><span class="p">,</span>
+    <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">command</span><span class="o">=</span><span class="n">blackSelect</span><span class="p">)</span>
+<span class="n">R1</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+<span class="n">R2</span> <span class="o">=</span> <span class="n">Radiobutton</span><span class="p">(</span>
+    <span class="n">root</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">&quot;White&quot;</span><span class="p">,</span>
+    <span class="n">variable</span><span class="o">=</span><span class="n">colorSelection</span><span class="p">,</span>
+    <span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">command</span><span class="o">=</span><span class="n">WhiteSelect</span><span class="p">)</span>
+<span class="n">R2</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+<span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<span class="n">label</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+<span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
