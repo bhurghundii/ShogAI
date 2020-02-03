@@ -16,7 +16,6 @@ class csvUtil():
     def __init__(self, gameFileName = None):
         self.gameFileName = gameFileName
 
-    @run_once
     def createHeaders(self, FILENAME):
         with open(FILENAME, 'w') as f:
             w = csv.writer(f)

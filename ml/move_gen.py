@@ -105,7 +105,6 @@ class moveGeneration():
         #Iterate through gameMatrix
         possibleMoves = []
 
-        print(isBlack)
         for i in range(0, 9):
                     for j in range(0, 9):
                         pos = (gameMatrix[i][j])
@@ -117,20 +116,14 @@ class moveGeneration():
                         except:
                             pass
         
-        possibleStates = ''
         for possibleUnconvertedGameSates in possibleMoves:
             self.convertPossibleMovesIntoNumericalForm(possibleUnconvertedGameSates[5])
         
-
-        #randomIndex = self.pickARandomMove(len(possibleMoves))
         index = evaluatePositions().run()
         print('SELECTED MOVE: ', index, ' with ', possibleMoves[index])
-        #self.convMoveToNotation(possibleMoves[randomIndex][4], False, False, False, possibleMoves[randomIndex][3], possibleMoves[randomIndex][2], possibleMoves[randomIndex][1], possibleMoves[randomIndex][0])
         return (self.convMoveToNotation(possibleMoves[index][4], False, False, False, possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0]))
 
     def writeToPotentialMoveCSV(self, array):
-        #csvObj = csvUtil()
-        #csvObj.createHeaders('moveposition.csv')
         if (len(array) != 120):
             lenToAdd = abs(120 - len(array))
             for extra0 in range(0, lenToAdd):
@@ -141,10 +134,8 @@ class moveGeneration():
 
     def convertPossibleMovesIntoNumericalForm(self, possibleUnconvertedGameSate):
         #possibleMoves[0][5] should is the new gamestate after it's done up
-        print('POSSIBLE MOVES ARE', possibleUnconvertedGameSate)  
         possibleGameState = list(itertools.chain.from_iterable(possibleUnconvertedGameSate))
-        print(possibleGameState)
-
+        
         #Convert the pieces into equivalent numbers because training  
         #process only uses numbers 
         pc2num = ''

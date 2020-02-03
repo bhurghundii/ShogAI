@@ -359,7 +359,7 @@ class logic:
                             [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
                         #Store the numerical encoding into gamestate
                         self.gameState.NumericalEncodingGameState = rawMatrix
-                        print('ENCODING SET')
+
                         pc2num = ''
                         file = open('ml/eval_pcs.map', 'r')
                         pc2num = (file.read().split('\n'))
@@ -384,8 +384,6 @@ class logic:
                                     if (x == 0):
                                         convMatrix.append(0)
                                         break
-                        print(convMatrix, len(convMatrix))
-                        print(self.gameState.loadFile)
                         # When we load a game, we try to generate features and
                         # labels
                         try:
@@ -1795,18 +1793,25 @@ class AI_watcher(Thread, spem, logic):
             return True
         else:
             return False
+    
+    def getPlayersColor(self):
+        if (self.gameState.playerSelected == 'Black'):
+            return True
+        else:
+            return False
+    def resetPotentialMovePositions(self):
+        print('Clearing moveposition')
+        csvObj = csvUtil()
+        csvObj.createHeaders('ml/demo/moveposition.csv')
 
     def run(self):
         while not self.stopped.wait(5):
             # Grab record sheet so far...
             try:
-
-                file = open(self.gameState.recordingFile, 'r')
-                print(file.read())
-                file.close()
-
-                if (((self.getLengthOfPlay() + 1) != 0)
-                        or self.isEven(self.getLengthOfPlay() + 1)):
+                self.resetPotentialMovePositions()
+                if (self.gameState.isBlackTurn != self.getPlayersColor()):
+                    #Reset the potential moves
+                    
                     mg = moveGeneration()
                     moveToPlay = str(
                         mg.GenMoves(
@@ -1828,30 +1833,8 @@ class AI_watcher(Thread, spem, logic):
                         f = open('ext_data/movetoplay.txt', 'r+')
                         f.truncate(0)
                         f.close()
-
-                if (((self.getLengthOfPlay() + 1) != 0)
-                        or (not self.isEven(self.getLengthOfPlay() + 1))):
-                    mg = moveGeneration()
-                    moveToPlay = str(
-                        mg.GenMoves(
-                            self.gameState.gameMatrix,
-                            self.isEven(
-                                self.getLengthOfPlay() +
-                                1)))
-                    print('MOVE TO PLAY IS:', moveToPlay)
-                    mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
-
-                    print('Checking if a move is loaded by the AI')
-
-                    if os.stat("ext_data/movetoplay.txt").st_size != 0:
-                        print('There is a move! Let us load it')
-                        logic.PlayAIMove(self)
-                        f = open('ext_data/load_game.txt', 'r+')
-                        f.truncate(0)
-                        f.close()
-                        f = open('ext_data/movetoplay.txt', 'r+')
-                        f.truncate(0)
-                        f.close()
+                                                
+                    
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
                 print('Game has not started yet or AI has not started making a move')

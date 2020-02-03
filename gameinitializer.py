@@ -4,8 +4,8 @@ from tkgui import tkgui
 
 class GameManager():
     #This basically just takes the config file settings and the game mode selected by user
-    def __init__(self, board_size, load = None, AI = None, pc = None, loadFile = None, autoPlay = None):
-        self.playerSelected = pc
+    def __init__(self, board_size, load = None, AI = None, playerSelected = None, loadFile = None, autoPlay = None):
+        self.playerSelected = playerSelected
         self.board_size = board_size
         self.load = load
         self.AI = AI
@@ -64,7 +64,7 @@ class GameInitializer():
 
     #Parameters passed in from menugui as per user's choice
     #Sets whether we are going to load a game, or the AI player should wake up
-    def run(self, load = None, AI = None, pc = None, loadFile = None, autoPlay = None):
+    def run(self, load = None, AI = None, playerSelected = None, loadFile = None, autoPlay = None):
         print('====================GAME SET UP===========================')
         print('Doing warm up functions like checking settings and params')
 
@@ -83,5 +83,5 @@ class GameInitializer():
         board_size = self.readConfig()
 
         #Pass the settings into the GameManager and begin playing
-        gameInstanceBegins = GameManager(board_size, load, AI, pc, loadFile, autoPlay)
+        gameInstanceBegins = GameManager(board_size, load, AI, playerSelected, loadFile, autoPlay)
         gameInstanceBegins.run()
