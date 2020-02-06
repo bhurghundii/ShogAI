@@ -38,6 +38,7 @@ class evaluatePositions():
             print("Predicted Win: {:.2%}".format(prediction[0]))
             if (prediction[0] > best_score):
                 best_solution = index
+                best_score = prediction[0]
             index += 1 
         
         return (best_solution)

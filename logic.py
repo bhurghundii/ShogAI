@@ -1838,3 +1838,6 @@ class AI_watcher(Thread, spem, logic):
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
                 print('Game has not started yet or AI has not started making a move')
+
+#NOTE: I think it's pulling the last game.
+#Can someone check this??

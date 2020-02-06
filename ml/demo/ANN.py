@@ -38,13 +38,11 @@ def pack(features, label):
 raw_train_data = get_dataset('features.csv')
 raw_test_data = get_dataset('eval.csv')
 
+
 print(type(raw_test_data))
 
 show_batch(raw_train_data)
 show_batch(raw_test_data)
-
-def pack(features, label):
-  return tf.stack(list(features.values()), axis=-1), label
 
 packed_train_data = raw_train_data.map(pack)
 test_data = raw_test_data.map(pack)
@@ -81,11 +79,11 @@ for prediction, win in zip(predictions[:10], list(test_data)[0][1][:10]):
 
 model.save('caterpillar.h5') 
 
-'''
+
 move_data = get_dataset('moveposition.csv')
 move_data_packed = move_data.map(pack)
 predictions = model.predict(move_data_packed)
 
 for prediction, win in zip(predictions[:10], list(move_data)[0][1][:10]):
   print("Predicted Win: {:.2%}".format(prediction[0]))
-'''
+
