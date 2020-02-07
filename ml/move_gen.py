@@ -3,13 +3,15 @@
 #class AIListener():
 import random, copy
 import itertools
-import csv
+import csv, traceback, sys
 from ml.demo.test_reuseModel import evaluatePositions
 
 class moveGeneration():
+
     def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos, gameMatrix, isBlackTurn):
         localMatrix = copy.deepcopy(gameMatrix)
         possibleMoveMatrix = []
+        #So we get every move available on the board
         with open('movesets.txt') as f:
             content = f.readlines()
             for index in range(len(content)):
@@ -56,9 +58,82 @@ class moveGeneration():
                             pass
         #Remove duplicates
         #possibleMoveMatrix = list(dict.fromkeys(possibleMoveMatrix))
-
+    
         #Remove negatives
         possibleMoveMatrix = [item for item in possibleMoveMatrix if item[0] >= 0 and item[1] >= 0]
+
+        #Get the moves that are available by dropping
+
+        return possibleMoveMatrix
+
+    #getPossibleDrops(i,j, dropWhitePcs, gameMatrix, isBlack)
+    def getPossibleDrops(self, oldMatrixPosX, oldMatrixPosY, dropPcs, gameMatrix, isBlackTurn):
+        localMatrix = copy.deepcopy(gameMatrix)
+        possibleMoveMatrix = []
+
+        print('blah blah', dropPcs)
+        try:
+            if (str(localMatrix[oldMatrixPosX][oldMatrixPosY]) == '0'):
+                for DropPiece in dropPcs:
+                    print(DropPiece)
+                    if 'n' in DropPiece:
+                        if (oldMatrixPosY <= 1 and isBlackTurn) or (
+                                oldMatrixPosY >= 7 and isBlackTurn == False):
+                            pass
+                        else:
+                            localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+                    #Check if drop location is legal for lance
+                    elif 'l' in DropPiece:
+                        if (oldMatrixPosY == 0 and isBlackTurn) or (
+                                oldMatrixPosY == 8 and isBlackTurn == False):
+                                pass
+                        else:
+                            localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+                    #This makes sure pawns are legal
+                    # no 2 pawn rule
+                    elif 'p' in DropPiece:
+                        if (oldMatrixPosY == 0 and isBlackTurn) or (
+                                oldMatrixPosY == 8 and isBlackTurn == False):
+                            print('Too deep for pawn')
+                            
+                        else:
+                            colMat = []
+                            for y in range(0, 9):
+                                colMat.append(localMatrix[y][oldMatrixPosY])
+
+                            print(colMat)
+                            pawnTeam = 'p'
+                            if isBlackTurn:
+                                pawnTeam = 'B' + pawnTeam
+                            else:
+                                pawnTeam = 'W' + pawnTeam
+
+                            if pawnTeam in colMat:
+                                print('There is a pawn on this column')
+                                
+
+                            else:
+                                # get pos of king
+                                kingTeam = 'k'
+                                if isBlackTurn:
+                                    kingTeam = 'W' + kingTeam
+                                else:
+                                    kingTeam = 'B' + kingTeam
+
+                                localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+                    #If the piece we want to drop isn't a pawn, lance or knight
+                    #There isn't a problem so it doesn't matter.
+                    elif 'p' not in DropPiece and 'l' not in DropPiece and 'n' not in DropPiece:
+                        localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+        except:
+            traceback.print_exc(file=sys.stdout)                 
+        
+        possibleMoveMatrix = possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, dropPcs, list(localMatrix)))
+        
+        #Remove duplicates
+       
+        #Get the moves that are available by dropping
+
         return possibleMoveMatrix
 
     def convMoveToNotation(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None):
@@ -101,10 +176,11 @@ class moveGeneration():
         f.write(move)
         f.close()
 
-    def GenMoves(self, gameMatrix, isBlack):
+    def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs):
         #Iterate through gameMatrix
         possibleMoves = []
 
+        #Get moves on board already
         for i in range(0, 9):
                     for j in range(0, 9):
                         pos = (gameMatrix[i][j])
@@ -115,6 +191,24 @@ class moveGeneration():
                                 possibleMoves += self.getPossibleMoves(i,j, pos, gameMatrix, isBlack)
                         except:
                             pass
+        
+        #Get moves you can drop
+    
+        for i in range(0, 9):
+                    for j in range(0, 9):
+                        try:
+                            if isBlack == False:
+                                if (len(dropWhitePcs) > 0):
+                                    possibleMoves += self.getPossibleDrops(i,j, dropWhitePcs, gameMatrix, isBlack)
+                                    print('possiblemoves', possibleMoves)
+                            elif isBlack == True:
+                                if (len(dropBlackpcs) > 0):
+                                    possibleMoves += self.getPossibleDrops(i,j, dropBlackpcs, gameMatrix, isBlack)
+                        except Exception as e:
+                            print(e)
+                            #NOTE: local variable 'pos' referenced before assignment
+        
+       
         
         for possibleUnconvertedGameSates in possibleMoves:
             self.convertPossibleMovesIntoNumericalForm(possibleUnconvertedGameSates[5])

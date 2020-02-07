@@ -327,74 +327,6 @@ class logic:
                                     self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
                                 open('ext_data/movetoplay.txt', 'w').close()
 
-                    dimCollected = 0
-                    file = open('configure.txt', 'r')
-                    dimCollected = (file.read().split('\n'))
-                    file.close()
-
-                    # This is for feature collection
-                    # Moves are pulled to be converted as features
-                    if dimCollected[2] == '1':
-                        # Convert the pieces into equivalent numbers because training
-                        # process only uses numbers
-                        whiteDrops, blackDrops = [], []
-                        for dropIndex in range(0, len(self.dropBlacksPieces)):
-                            if self.dropBlacksPieces[dropIndex].winfo_manager(
-                            ) == 'pack':
-                                blackDrops.append(
-                                    self.dropBlacksPieces[dropIndex].cget('text'))
-
-                        for dropIndex in range(0, len(self.dropWhitePieces)):
-                            if self.dropWhitePieces[dropIndex].winfo_manager(
-                            ) == 'pack':
-                                whiteDrops.append(
-                                    self.dropWhitePieces[dropIndex].cget('text'))
-
-                        while len(whiteDrops) != 19:
-                            whiteDrops.append('0')
-                        while len(blackDrops) != 19:
-                            blackDrops.append('0')
-
-                        rawMatrix = (
-                            [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
-                        #Store the numerical encoding into gamestate
-                        self.gameState.NumericalEncodingGameState = rawMatrix
-
-                        pc2num = ''
-                        file = open('ml/eval_pcs.map', 'r')
-                        pc2num = (file.read().split('\n'))
-                        file.close()
-                        convMatrix = []
-                        for x in rawMatrix:
-                            for l in pc2num:
-                                try:
-                                    if x[-1:] in l:
-                                        if x[0] == 'W':
-                                            convMatrix.append(
-                                                '-' + l.split('=')[1])
-                                            break
-                                        elif x[0] == 'B':
-                                            convMatrix.append(l.split('=')[1])
-                                            break
-                                        elif x[0] == '0':
-                                            convMatrix.append(l.split('=')[1])
-                                            break
-
-                                except BaseException:
-                                    if (x == 0):
-                                        convMatrix.append(0)
-                                        break
-                        # When we load a game, we try to generate features and
-                        # labels
-                        try:
-                            csvObj = csvUtil(self.gameState.loadFile[:-4])
-                            csvObj.createCombinedCSV(
-                                convMatrix, 'training.csv', csvObj.getOriginalFile())
-                        except Exception as e:
-                            print(e)
-                            print(
-                                'No CSA found, so not generating labels / features')
-
                 else:
                     print('As there are no more moves to load, proceed')
                     self.gameState.isLoad = False
@@ -432,7 +364,76 @@ class logic:
                 self.gameState.newMatrixPosX,
                 self.gameState.newMatrixPosY,
                 isPromote)
-    
+
+        dimCollected = 0
+        file = open('configure.txt', 'r')
+        dimCollected = (file.read().split('\n'))
+        file.close()
+
+        # This is for feature collection
+        # Moves are pulled to be converted as features
+        if dimCollected[2] == '1':
+            # Convert the pieces into equivalent numbers because training
+            # process only uses numbers
+            whiteDrops, blackDrops = [], []
+            for dropIndex in range(0, len(self.dropBlacksPieces)):
+                if self.dropBlacksPieces[dropIndex].winfo_manager(
+                ) == 'pack':
+                    blackDrops.append(
+                        self.dropBlacksPieces[dropIndex].cget('text'))
+
+            for dropIndex in range(0, len(self.dropWhitePieces)):
+                if self.dropWhitePieces[dropIndex].winfo_manager(
+                ) == 'pack':
+                    whiteDrops.append(
+                        self.dropWhitePieces[dropIndex].cget('text'))
+
+            self.gameState.dropBlackPcs = blackDrops
+            self.gameState.dropWhitePcs = whiteDrops
+
+            while len(whiteDrops) != 19:
+                whiteDrops.append('0')
+            while len(blackDrops) != 19:
+                blackDrops.append('0')
+
+            rawMatrix = (
+                [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
+            #Store the numerical encoding into gamestate
+            self.gameState.NumericalEncodingGameState = rawMatrix
+
+            pc2num = ''
+            file = open('ml/eval_pcs.map', 'r')
+            pc2num = (file.read().split('\n'))
+            file.close()
+            convMatrix = []
+            for x in rawMatrix:
+                for l in pc2num:
+                    try:
+                        if x[-1:] in l:
+                            if x[0] == 'W':
+                                convMatrix.append(
+                                    '-' + l.split('=')[1])
+                                break
+                            elif x[0] == 'B':
+                                convMatrix.append(l.split('=')[1])
+                                break
+                            elif x[0] == '0':
+                                convMatrix.append(l.split('=')[1])
+                                break
+
+                    except BaseException:
+                        if (x == 0):
+                            convMatrix.append(0)
+                            break
+            # When we load a game, we try to generate features and
+            # labels
+            try:
+                csvObj = csvUtil(self.gameState.loadFile[:-4])
+                csvObj.createCombinedCSV(
+                    convMatrix, 'training.csv', csvObj.getOriginalFile())
+            except Exception as e:
+                print(e)
+                print('No CSA found, so not generating labels / features')
     #Resets the games board colors 
     #TODO: Phase this out as we move from debug 
     def resetBoardGraphics(self):
@@ -1811,6 +1812,16 @@ class AI_watcher(Thread, spem, logic):
                 self.resetPotentialMovePositions()
                 if (self.gameState.isBlackTurn != self.getPlayersColor()):
                     #Reset the potential moves
+                    dropBlackState = []
+                    dropWhiteState = []
+                    try:
+                        dropBlackState = list(filter(('0').__ne__, self.gameState.dropBlackPcs))
+                    except:
+                        pass
+                    try:
+                       dropWhiteState = list(filter(('0').__ne__, self.gameState.dropWhitePcs))
+                    except:
+                        pass
                     
                     mg = moveGeneration()
                     moveToPlay = str(
@@ -1818,7 +1829,11 @@ class AI_watcher(Thread, spem, logic):
                             self.gameState.gameMatrix,
                             self.isEven(
                                 self.getLengthOfPlay() +
-                                1)))
+                                1,), dropBlackState,
+                                dropWhiteState)                                 
+                                )
+
+                                
                     print('MOVE TO PLAY IS:', moveToPlay)
                     mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
 
@@ -1838,6 +1853,3 @@ class AI_watcher(Thread, spem, logic):
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
                 print('Game has not started yet or AI has not started making a move')
-
-#NOTE: I think it's pulling the last game.
-#Can someone check this??

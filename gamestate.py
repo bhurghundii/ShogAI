@@ -22,3 +22,5 @@ class gamestate():
             self.playerSelected = None
             self.autoPlay = None
             self.NumericalEncodingGameState = None
+            self.dropBlackPcs = None
+            self.dropWhitePcs = None
