@@ -11,6 +11,7 @@ class moveGeneration():
     def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos, gameMatrix, isBlackTurn):
         localMatrix = copy.deepcopy(gameMatrix)
         possibleMoveMatrix = []
+        dropMove = promoteMove = False
         #So we get every move available on the board
         with open('movesets.txt') as f:
             content = f.readlines()
@@ -41,13 +42,13 @@ class moveGeneration():
                                 localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
                                 localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
                                 if (oldMatrixPosX >= 0 and oldMatrixPosY >= 0 and (oldMatrixPosX + x_dif) >= 0 and (oldMatrixPosY + y_dif) >= 0):
-                                    possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
+                                    possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix), dropMove, promoteMove))
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'W') and isBlackTurn == False):
                                 localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
                                 localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
                                 if (oldMatrixPosX >= 0 and oldMatrixPosY >= 0 and (oldMatrixPosX + x_dif) >= 0 and (oldMatrixPosY + y_dif) >= 0):
-                                    possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix)))
+                                    possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix), dropMove, promoteMove))
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == True):
                                 break
@@ -64,16 +65,19 @@ class moveGeneration():
 
         #Get the moves that are available by dropping
 
-        return possibleMoveMatrix
+        return (possibleMoveMatrix)
 
     #getPossibleDrops(i,j, dropWhitePcs, gameMatrix, isBlack)
     def getPossibleDrops(self, oldMatrixPosX, oldMatrixPosY, dropPcs, gameMatrix, isBlackTurn):
+        #Grab a copy of the gamematrix
         localMatrix = copy.deepcopy(gameMatrix)
         possibleMoveMatrix = []
-
-        print('blah blah', dropPcs)
+        dropMove = True
+        promoteMove = False
         try:
+            #Check if the space we are going to drop to is empty
             if (str(localMatrix[oldMatrixPosX][oldMatrixPosY]) == '0'):
+                #We try and check if a piece can be dropped using all the available pieces
                 for DropPiece in dropPcs:
                     print(DropPiece)
                     if 'n' in DropPiece:
@@ -82,6 +86,7 @@ class moveGeneration():
                             pass
                         else:
                             localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+                            possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, DropPiece, list(localMatrix), dropMove, promoteMove))
                     #Check if drop location is legal for lance
                     elif 'l' in DropPiece:
                         if (oldMatrixPosY == 0 and isBlackTurn) or (
@@ -89,6 +94,7 @@ class moveGeneration():
                                 pass
                         else:
                             localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+                            possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, DropPiece, list(localMatrix), dropMove, promoteMove))
                     #This makes sure pawns are legal
                     # no 2 pawn rule
                     elif 'p' in DropPiece:
@@ -121,20 +127,24 @@ class moveGeneration():
                                     kingTeam = 'B' + kingTeam
 
                                 localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
+                                possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, DropPiece, list(localMatrix), dropMove, promoteMove))
                     #If the piece we want to drop isn't a pawn, lance or knight
                     #There isn't a problem so it doesn't matter.
                     elif 'p' not in DropPiece and 'l' not in DropPiece and 'n' not in DropPiece:
                         localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
-        except:
+                        possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, DropPiece, list(localMatrix), dropMove, promoteMove))
+
+                    print('THIS WORKS')
+        except Exception as e:
             traceback.print_exc(file=sys.stdout)                 
-        
-        possibleMoveMatrix = possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, dropPcs, list(localMatrix)))
+            print (e)
+
         
         #Remove duplicates
        
         #Get the moves that are available by dropping
-
-        return possibleMoveMatrix
+        print('possiblemovematrix', possibleMoveMatrix)
+        return (possibleMoveMatrix)
 
     def convMoveToNotation(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None):
 
@@ -199,8 +209,11 @@ class moveGeneration():
                         try:
                             if isBlack == False:
                                 if (len(dropWhitePcs) > 0):
-                                    possibleMoves += self.getPossibleDrops(i,j, dropWhitePcs, gameMatrix, isBlack)
-                                    print('possiblemoves', possibleMoves)
+                                    
+                                    possibleMoveDrop = self.getPossibleDrops(i,j, dropWhitePcs, gameMatrix, isBlack)
+                                    if possibleMoveDrop != None:
+                                        possibleMoves += possibleMoveDrop
+                                    #print('possiblemoves', possibleMoves)
                             elif isBlack == True:
                                 if (len(dropBlackpcs) > 0):
                                     possibleMoves += self.getPossibleDrops(i,j, dropBlackpcs, gameMatrix, isBlack)
@@ -215,7 +228,8 @@ class moveGeneration():
         
         index = evaluatePositions().run()
         print('SELECTED MOVE: ', index, ' with ', possibleMoves[index])
-        return (self.convMoveToNotation(possibleMoves[index][4], False, False, False, possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0]))
+        #convMoveToNotation(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None)
+        return (self.convMoveToNotation(possibleMoves[index][4], possibleMoves[index][7], False, possibleMoves[index][6], possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0]))
 
     def writeToPotentialMoveCSV(self, array):
         if (len(array) != 120):
