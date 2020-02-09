@@ -44,11 +44,30 @@ class moveGeneration():
                                 if (oldMatrixPosX >= 0 and oldMatrixPosY >= 0 and (oldMatrixPosX + x_dif) >= 0 and (oldMatrixPosY + y_dif) >= 0):
                                     possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix), dropMove, promoteMove))
 
+                                    #Check if the oldmatrix or the new one is in the enemy area to give an option to promote
+                                    if (isBlackTurn and ((oldMatrixPosX + x_dif) <= 2 or (oldMatrixPosX + x_dif) <= 2)):
+                                        possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
+                                        print('WE PROMOTIN', pos.upper())
+                    
+                                    if (isBlackTurn == False and ((oldMatrixPosX + x_dif >= 6) or (oldMatrixPosX + x_dif) >= 6)):
+                                        possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
+                                        print('WE PROMOTIN', pos.upper())
+
+
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'W') and isBlackTurn == False):
                                 localMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif] = pos
                                 localMatrix[oldMatrixPosX][oldMatrixPosY] = 0
                                 if (oldMatrixPosX >= 0 and oldMatrixPosY >= 0 and (oldMatrixPosX + x_dif) >= 0 and (oldMatrixPosY + y_dif) >= 0):
                                     possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos, list(localMatrix), dropMove, promoteMove))
+
+                                    #Check if the oldmatrix or the new one is in the enemy area to give an option to promote
+                                    if (isBlackTurn and ((oldMatrixPosX + x_dif) <= 2 or (oldMatrixPosX + x_dif) <= 2)):
+                                        possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
+                                        print('WE PROMOTIN', pos.upper())
+                    
+                                    if (isBlackTurn == False and ((oldMatrixPosX + x_dif >= 6) or (oldMatrixPosX + x_dif) >= 6)):
+                                        possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
+                                        print('WE PROMOTIN', pos.upper())
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == True):
                                 break
@@ -186,7 +205,7 @@ class moveGeneration():
         f.write(move)
         f.close()
 
-    def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs):
+    def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, illegalMoves = None):
         #Iterate through gameMatrix
         possibleMoves = []
 
@@ -213,23 +232,19 @@ class moveGeneration():
                                     possibleMoveDrop = self.getPossibleDrops(i,j, dropWhitePcs, gameMatrix, isBlack)
                                     if possibleMoveDrop != None:
                                         possibleMoves += possibleMoveDrop
-                                    #print('possiblemoves', possibleMoves)
                             elif isBlack == True:
                                 if (len(dropBlackpcs) > 0):
                                     possibleMoves += self.getPossibleDrops(i,j, dropBlackpcs, gameMatrix, isBlack)
                         except Exception as e:
-                            print(e)
-                            #NOTE: local variable 'pos' referenced before assignment
-        
+                            print(e)        
        
-        
+        possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
         for possibleUnconvertedGameSates in possibleMoves:
             self.convertPossibleMovesIntoNumericalForm(possibleUnconvertedGameSates[5])
-        
+         
         index = evaluatePositions().run()
         print('SELECTED MOVE: ', index, ' with ', possibleMoves[index])
-        #convMoveToNotation(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None)
-        return (self.convMoveToNotation(possibleMoves[index][4], possibleMoves[index][7], False, possibleMoves[index][6], possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0]))
+        return (self.convMoveToNotation(possibleMoves[index][4], possibleMoves[index][7], False, possibleMoves[index][6], possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0])), possibleMoves[index]
 
     def writeToPotentialMoveCSV(self, array):
         if (len(array) != 120):

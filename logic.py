@@ -235,6 +235,7 @@ class logic:
                 self.SwitchTurns()
         else:
             print('A piece is already there. Move illegal.')
+            self.gameState.AIMessage = 'ILLEGAL'
             self.resetBoardGraphics()
     #This function handles the interactions when the user clicks
     #on a square on the board itself
@@ -350,6 +351,10 @@ class logic:
             self.gameState.newMatrixPosX = moveRead[4]
             self.gameState.newMatrixPosY = moveRead[5]
             self.gameState.pieceSelected = moveRead[1]
+            isPromote = moveRead[6]
+            isDrop = moveRead[7]
+            if isPromote == None: 
+                isPromote = False
 
             self.gameState.gameState = self.getPossibleMoves(
                 self.gameState.oldMatrixPosX, self.gameState.oldMatrixPosY, pos)
@@ -588,7 +593,7 @@ class logic:
 
             # Promotion
             if (self.gameState.isBlackTurn and (
-                    newMatrixPosXlocal <= 2 or oldMatrixPosXlocal <= 2)):
+                    newMatrixPosXlocal <= 2 or oldMatrixPosXlocal <= 2) and isPromote != False):
                 if (pos[-1:] == 'p' and newMatrixPosXlocal <= 0) or (pos[-1:] == 'n' and newMatrixPosXlocal <=
                                                                      1) or (pos[-1:] == 'l' and newMatrixPosXlocal <= 0) or (isPromote):
                     pos = pos.upper()
@@ -598,8 +603,9 @@ class logic:
                         pos, resultPromotion = self.promotion(pos)
                     except BaseException:
                         pass
+
             if (self.gameState.isBlackTurn == False and (
-                    newMatrixPosXlocal >= 6 or oldMatrixPosXlocal >= 6)):
+                    newMatrixPosXlocal >= 6 or oldMatrixPosXlocal >= 6) and isPromote != False):
                 if (pos[-1:] == 'p' and newMatrixPosXlocal >= 8) or (pos[-1:] == 'n' and newMatrixPosXlocal >=
                                                                      7) or (pos[-1:] == 'l' and newMatrixPosXlocal >= 8) or (isPromote):
                     pos = pos.upper()
@@ -676,6 +682,7 @@ class logic:
 
                             if self.gameState.isCheck:
                                 print('ILLEGAL MOVE: Reveals check')
+                                self.gameState.AIMessage = 'ILLEGAL'
                                 break
 
                     if self.gameState.isCheck:
@@ -721,6 +728,7 @@ class logic:
                         ' as move ' +
                         str(pos) +
                         ' is illegal')
+                    self.gameState.AIMessage = 'ILLEGAL'
                     # Load back or direct drop?
                     if (self.gameState.isBlackTurn):
                         self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(
@@ -1349,6 +1357,7 @@ class logic:
 
                         if self.gameState.isCheck:
                             print('ILLEGAL MOVE: Reveals check')
+                            self.gameState.AIMessage = 'ILLEGAL'
                             break
 
                 if self.gameState.isCheck:
@@ -1394,6 +1403,7 @@ class logic:
                     ' as move ' +
                     str(pos) +
                     ' is illegal')
+                self.gameState.AIMessage = 'ILLEGAL'
                 # Load back or direct drop?
                 if (self.gameState.isBlackTurn):
                     self.cells[(newMatrixPosXlocal,
@@ -1480,6 +1490,7 @@ class logic:
                             ' as move ' +
                             str(pos) +
                             ' is illegal')
+                        self.gameState.AIMessage = 'ILLEGAL'
                         # Load back or direct drop?
                         if (self.gameState.isBlackTurn):
                             self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(
@@ -1637,6 +1648,7 @@ class logic:
 
                         if self.gameState.isCheck:
                             print('ILLEGAL MOVE: Reveals check')
+                            self.gameState.AIMessage = 'ILLEGAL'
                             break
 
                 if self.gameState.isCheck:
@@ -1682,6 +1694,7 @@ class logic:
                     ' as move ' +
                     str(pos) +
                     ' is illegal')
+                self.gameState.AIMessage = 'ILLEGAL'
                 # Load back or direct drop?
                 if (self.gameState.board_size):
                     self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(
@@ -1754,6 +1767,7 @@ class logic:
             self.gameState.isBlackTurn = True
 
         self.gameState.possibleMoveMatrix *= 0
+        return False
 
 #This file is an abstraction of the AI agent
 #It passes game data to the model, which returns the move to play
@@ -1809,6 +1823,7 @@ class AI_watcher(Thread, spem, logic):
         while not self.stopped.wait(5):
             # Grab record sheet so far...
             try:
+                illegalMoveList = []
                 self.resetPotentialMovePositions()
                 if (self.gameState.isBlackTurn != self.getPlayersColor()):
                     #Reset the potential moves
@@ -1822,34 +1837,40 @@ class AI_watcher(Thread, spem, logic):
                        dropWhiteState = list(filter(('0').__ne__, self.gameState.dropWhitePcs))
                     except:
                         pass
-                    
-                    mg = moveGeneration()
-                    moveToPlay = str(
-                        mg.GenMoves(
-                            self.gameState.gameMatrix,
-                            self.isEven(
-                                self.getLengthOfPlay() +
-                                1,), dropBlackState,
-                                dropWhiteState)                                 
-                                )
+                    self.gameState.AIMessage = 'LEGAL'
 
-                                
-                    print('MOVE TO PLAY IS:', moveToPlay)
-                    mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
-
-                    print('Checking if a move is loaded by the AI')
-
-                    if os.stat("ext_data/movetoplay.txt").st_size != 0:
-                        print('There is a move! Let us load it')
-                        logic.PlayAIMove(self)
-                        f = open('ext_data/load_game.txt', 'r+')
-                        f.truncate(0)
-                        f.close()
-                        f = open('ext_data/movetoplay.txt', 'r+')
-                        f.truncate(0)
-                        f.close()
-                                                
-                    
+                    while True:
+                        mg = moveGeneration()
+                        moveToPlay, moveToCheck = mg.GenMoves(
+                                self.gameState.gameMatrix,
+                                self.isEven(
+                                    self.getLengthOfPlay() +
+                                    1,), dropBlackState,
+                                    dropWhiteState, illegalMoveList)                                 
+                                                                 
+                        print('MOVE TO PLAY IS:', moveToPlay)
+                        mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
+                        self.gameState.AIMessage = 'LEGAL'
+                        print('Checking if a move is loaded by the AI')
+                        if os.stat("ext_data/movetoplay.txt").st_size != 0:
+                            print('There is a move! Let us load it')
+                            logic.PlayAIMove(self)
+                            f = open('ext_data/load_game.txt', 'r+')
+                            f.truncate(0)
+                            f.close()
+                            f = open('ext_data/movetoplay.txt', 'r+')
+                            f.truncate(0)
+                            f.close()
+                            
+                        
+                        if self.gameState.AIMessage == 'ILLEGAL':
+                            illegalMoveList.append(moveToCheck)
+                        else:
+                            print(illegalMoveList)
+                            self.gameState.AIMessage == 'LEGAL'
+                            break
+                            
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
+                print(e)
                 print('Game has not started yet or AI has not started making a move')

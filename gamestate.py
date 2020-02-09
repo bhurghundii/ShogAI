@@ -24,3 +24,4 @@ class gamestate():
             self.NumericalEncodingGameState = None
             self.dropBlackPcs = None
             self.dropWhitePcs = None
+            self.AIMessage = ''
