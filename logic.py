@@ -1843,9 +1843,7 @@ class AI_watcher(Thread, spem, logic):
                         mg = moveGeneration()
                         moveToPlay, moveToCheck = mg.GenMoves(
                                 self.gameState.gameMatrix,
-                                self.isEven(
-                                    self.getLengthOfPlay() +
-                                    1,), dropBlackState,
+                                not self.getPlayersColor(), dropBlackState,
                                     dropWhiteState, illegalMoveList)                                 
                                                                  
                         print('MOVE TO PLAY IS:', moveToPlay)
