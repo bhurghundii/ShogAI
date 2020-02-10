@@ -566,6 +566,10 @@ class logic:
             newMatrixPosYlocal,
             isPromote=None):
 
+        #Take a snapshot of the turn prior
+        backupgamestateBlackcaptured = self.gameState.blackcaptured 
+        backupgamestateWhitecaptured = self.gameState.whitecaptured
+
         # For the game recorder
         resultPromotion = False
         resultCapture = False
@@ -617,12 +621,14 @@ class logic:
                         pass
 
             # Capture
+            newButton = None
             if (self.gameState.gameMatrix[newMatrixPosXlocal]
                     [newMatrixPosYlocal] != 0):
                 print(
                     'Captured: ' +
                     self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal])
                 cap_piece = self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]
+               
                 if self.gameState.isBlackTurn:
                     self.gameState.blackcaptured.append(
                         'B' + cap_piece[-1:].lower())
@@ -661,6 +667,8 @@ class logic:
                     self.dropWhitePieces.append(newButton)
                     resultCapture = True
 
+
+
             self.gameState.gameState = 0
 
             self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal] = pos
@@ -683,7 +691,13 @@ class logic:
                             if self.gameState.isCheck:
                                 print('ILLEGAL MOVE: Reveals check')
                                 self.gameState.AIMessage = 'ILLEGAL'
+                                
+                                try:
+                                    newButton.pack_forget()
+                                except:
+                                    pass
                                 break
+
 
                     if self.gameState.isCheck:
                         break
@@ -729,6 +743,11 @@ class logic:
                         str(pos) +
                         ' is illegal')
                     self.gameState.AIMessage = 'ILLEGAL'
+                    try:
+                        newButton.pack_forget()
+                    except:
+                        pass
+
                     # Load back or direct drop?
                     if (self.gameState.isBlackTurn):
                         self.cells[(newMatrixPosXlocal, newMatrixPosYlocal)].configure(
@@ -1802,12 +1821,6 @@ class AI_watcher(Thread, spem, logic):
         f = open('ext_data/movetoplay.txt', 'r+')
         f.truncate(0)
         f.close()
-    #IsEven function checks who's move it is... anyway
-    def isEven(self, n):
-        if (n % 2) == 0:
-            return True
-        else:
-            return False
     
     def getPlayersColor(self):
         if (self.gameState.playerSelected == 'Black'):
