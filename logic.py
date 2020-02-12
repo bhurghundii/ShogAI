@@ -89,19 +89,20 @@ class logic:
     # Click is the action user invokes when clicking. Different states can
     # occur.
     def click(self, row, col, isLoad=None):
-        movesPlayed = gamerecorder().getGameLength()
-        if (self.gameState.isAI):
-            if (self.gameState.playerSelected ==
-                    'Black' and self.isEven(movesPlayed) == False):
-                self.actionSquare(row, col, isLoad)
-            elif (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed)):
-                self.actionSquare(row, col, isLoad)
-            elif(isLoad):
-                self.actionSquare(row, col, isLoad, True)
+        if(not self.gameState.isPromotionMessageActive):
+            movesPlayed = gamerecorder().getGameLength()
+            if (self.gameState.isAI):
+                if (self.gameState.playerSelected ==
+                        'Black' and self.isEven(movesPlayed) == False):
+                    self.actionSquare(row, col, isLoad)
+                elif (self.gameState.playerSelected == 'White' and self.isEven(movesPlayed)):
+                    self.actionSquare(row, col, isLoad)
+                elif(isLoad):
+                    self.actionSquare(row, col, isLoad, True)
+                else:
+                    print('It is not your move yet!')
             else:
-                print('It is not your move yet!')
-        else:
-            self.actionSquare(row, col, isLoad)
+                self.actionSquare(row, col, isLoad)
     
     # Drops are handled here
     def dropAction(self, row, col):
@@ -938,6 +939,10 @@ class logic:
                                     break
                             else:
                                 print('No white lance are available')
+                        
+                            if ('Wb' in dropPcs or 'Wr' in dropPcs):
+                                dropAvailable = True
+                                break
 
                         if dropAvailable:
                             print('Moves available. Continue play.')
@@ -1012,6 +1017,11 @@ class logic:
                                     break
                             else:
                                 print('No black lance are available')
+
+                            if ('Bb' in dropPcs or 'Br' in dropPcs):
+                                dropAvailable = True
+                                break
+
                         #We check if we can drop a piece to block the check
                         if dropAvailable:
                             print('Moves available. Continue play.')
@@ -1312,18 +1322,23 @@ class logic:
 
     #Handles promotion mechanics by letting the user select if they want to promote
     def promotion(self, pos):
+        self.gameState.isPromotionMessageActive = True
         if not self.gameState.isLoad:
             if 'g' not in pos and 'k' not in pos and pos[-1:].islower():
                 MsgBox = messagebox.askquestion(
                     "Promotion!",
                     "You have reached promotion. Would you like to promote your piece?")
                 if MsgBox == 'yes':
+                    self.gameState.isPromotionMessageActive = False
                     return pos.upper(), True
                 else:
+                    self.gameState.isPromotionMessageActive = False
                     return pos, False
+            self.gameState.isPromotionMessageActive = False
             return pos, False
         else:
             #If we are loading a promotion move, we don't really give a choice
+            self.gameState.isPromotionMessageActive = False
             file = open('ext_data/movetoplay.txt', 'r')
             print(file.read())
 

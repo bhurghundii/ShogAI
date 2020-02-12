@@ -19,7 +19,7 @@ batch_size = 1000
 def get_dataset(file_path, **kwargs):
   dataset = tf.data.experimental.make_csv_dataset(
       file_path,
-      batch_size=100, # Artificially small to make examples easier to show.
+      batch_size=1000, # Artificially small to make examples easier to show.
       label_name='Win',
       na_value="?",
       num_epochs=1,
@@ -61,7 +61,8 @@ model.compile(
     optimizer='adam',
     metrics=['accuracy'])
 
-train_data = packed_train_data.shuffle(500)
+train_data = packed_train_data
+
 #test_data = packed_test_data
 
 model.fit(train_data, epochs=20)
@@ -77,9 +78,13 @@ for prediction, win in zip(predictions[:10], list(test_data)[0][1][:10]):
         " | Actual outcome: ",
         ("WIN" if bool(win) else "LOSS"))
 
+
 model.save('caterpillar.h5') 
 
 
+
+
+'''
 move_data = get_dataset('moveposition.csv')
 move_data_packed = move_data.map(pack)
 predictions = model.predict(move_data_packed)
@@ -87,3 +92,4 @@ predictions = model.predict(move_data_packed)
 for prediction, win in zip(predictions[:10], list(move_data)[0][1][:10]):
   print("Predicted Win: {:.2%}".format(prediction[0]))
 
+'''

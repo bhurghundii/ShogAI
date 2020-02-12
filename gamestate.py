@@ -25,3 +25,4 @@ class gamestate():
             self.dropBlackPcs = None
             self.dropWhitePcs = None
             self.AIMessage = ''
+            self.isPromotionMessageActive = False

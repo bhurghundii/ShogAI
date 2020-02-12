@@ -9,7 +9,7 @@ do
     file="$root/$entry" 
     echo $file  
     echo "python3 generateDataset.py $file"  
-    python3 generateDataset.py $file
+    timeout 30 python3 generateDataset.py $file
     fi
 done
 

@@ -5,3 +5,4 @@ ml/storage
 ml/tutorial
 *.csv
 *.h5
+*.csv.txt
