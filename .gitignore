@@ -1,1 +1,8 @@
 *.pyc
+*RecordSheet.txt
+ml/Data_Extraction
+ml/storage
+ml/tutorial
+*.csv
+*.h5
+*.csv.txt

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>menugui.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>menugui.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This file is the initial entry point for Shogi AI</span>
+<span class="sd">Access is done through the bash file outside src startgame.sh</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">Radiobutton</span><span class="p">,</span> <span class="n">IntVar</span><span class="p">,</span> <span class="n">filedialog</span><span class="p">,</span> <span class="n">Label</span><span class="p">,</span> <span class="n">W</span>
+<span class="kn">import</span> <span class="nn">tkinter</span> <span class="k">as</span> <span class="nn">tk</span>
+<span class="kn">from</span> <span class="nn">gameinitializer</span> <span class="kn">import</span> <span class="n">GameInitializer</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Depending on which option the user chooses, we define different modes</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">mode_selection</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>1 chooses to play against the AI</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="n">selectionChoice</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>GameInitializer().run(False, True)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="kn">import</span> <span class="nn">aisettings</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>2 chooses to play against another human player</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="n">selectionChoice</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>GameInitializer object where is where the game board and interactions
+are instantiated</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">GameInitializer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>3 chooses to load a game and play from it</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="n">selectionChoice</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>FIXME: I don&rsquo;t like initialdir &hellip; find a more universal method</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">root</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filedialog</span><span class="o">.</span><span class="n">askopenfilename</span><span class="p">(</span>
+            <span class="n">initialdir</span><span class="o">=</span><span class="s2">&quot;/home/ubuntu/Documents/Shogi-DISS/src/records/&quot;</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;mode_selectionect file&quot;</span><span class="p">,</span>
+            <span class="n">filetypes</span><span class="o">=</span><span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;txt files&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;*.txt&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;all files&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;*.*&quot;</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Preparing to load from &#39;</span> <span class="o">+</span> <span class="n">root</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Read the game we want to load</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">loadFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">replaygame</span> <span class="o">=</span> <span class="n">loadFile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">loadFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Store the game we want to load into a temporary file we can access easily and manipulate
+We load this into load_game, stored in ext_data
+FIXME: In the future, this may be better written as some kind of
+temporary file object.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">loadFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;ext_data/load_game.txt&#39;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">loadFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">replaygame</span><span class="p">)</span>
+        <span class="n">loadFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>GameInitializer object where is where the game board and interactions
+are instantiated</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">GameInitializer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">root</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>This function erases the contents of the file in the directory ext_data</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">reset_ext_data_file</span><span class="p">(</span><span class="n">FILENAME</span><span class="p">):</span>
+    <span class="n">resetFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;ext_data/&#39;</span> <span class="o">+</span> <span class="n">FILENAME</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="n">resetFile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">resetFile</span><span class="o">.</span><span class="n">close</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Reset the files that hold data which are games to load and the
+immediate move to play</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">reset_ext_data_file</span><span class="p">(</span><span class="s1">&#39;load_game.txt&#39;</span><span class="p">)</span>
+        <span class="n">reset_ext_data_file</span><span class="p">(</span><span class="s1">&#39;movetoplay.txt&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>Draw the menu user is greeted with when starting the program</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;ShogAI: A Dissertation by Vikram Chhapwale&quot;</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">geometry</span><span class="p">(</span><span class="s1">&#39;600x550&#39;</span><span class="p">)</span>
+        <span class="n">selectionChoice</span> <span class="o">=</span> <span class="n">IntVar</span><span class="p">()</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;assets/INTRO.png&quot;</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">PhotoImage</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Label</span><span class="p">(</span><span class="n">image</span><span class="o">=</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span>
+
+        <span class="n">T0</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Welcome to ShogAI, a Dissertation by Vikramaditya Chhapwale from Nottingham </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">T0</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+        <span class="n">T1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Pick a Game Mode&quot;</span><span class="p">)</span>
+        <span class="n">T1</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Buttons the user can interact with are drawn</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">R1</span> <span class="o">=</span> <span class="n">Radiobutton</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;VS AI&quot;</span><span class="p">,</span>
+            <span class="n">variable</span><span class="o">=</span><span class="n">selectionChoice</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">command</span><span class="o">=</span><span class="n">mode_selection</span><span class="p">)</span>
+        <span class="n">R1</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+        <span class="n">R2</span> <span class="o">=</span> <span class="n">Radiobutton</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;VS Another Player&quot;</span><span class="p">,</span>
+            <span class="n">variable</span><span class="o">=</span><span class="n">selectionChoice</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">command</span><span class="o">=</span><span class="n">mode_selection</span><span class="p">)</span>
+        <span class="n">R2</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+        <span class="n">R3</span> <span class="o">=</span> <span class="n">Radiobutton</span><span class="p">(</span>
+            <span class="n">root</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Load a game&quot;</span><span class="p">,</span>
+            <span class="n">variable</span><span class="o">=</span><span class="n">selectionChoice</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">command</span><span class="o">=</span><span class="n">mode_selection</span><span class="p">)</span>
+        <span class="n">R3</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">anchor</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Set up the activity loop</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">errormessage</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">errormessage</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Caught exception CTRL-C: Terminating ShogAI gracefully&#39;</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

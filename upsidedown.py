@@ -1,3 +1,11 @@
+'''
+This module converts chars upside down
+Taken from: https://github.com/rflynn/python-examples/blob/master/src/text/translate/upside-down.py
+
+TODO: Experiment with the upsidedown module from: 
+https://github.com/cburgmer/upsidedown
+'''
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
