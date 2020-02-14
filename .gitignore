@@ -3,6 +3,8 @@
 ml/Data_Extraction
 ml/storage
 ml/tutorial
+ml/white/storage
+ml/black/storage
 *.csv
 *.h5
 *.csv.txt
