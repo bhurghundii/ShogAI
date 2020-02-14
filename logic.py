@@ -379,73 +379,124 @@ class logic:
         # This is for feature collection
         # Moves are pulled to be converted as features
         if dimCollected[2] == '1':
+            self.processForTraining2()
             # Convert the pieces into equivalent numbers because training
             # process only uses numbers
-            whiteDrops, blackDrops = [], []
-            for dropIndex in range(0, len(self.dropBlacksPieces)):
-                if self.dropBlacksPieces[dropIndex].winfo_manager(
-                ) == 'pack':
-                    blackDrops.append(
-                        self.dropBlacksPieces[dropIndex].cget('text'))
-
-            for dropIndex in range(0, len(self.dropWhitePieces)):
-                if self.dropWhitePieces[dropIndex].winfo_manager(
-                ) == 'pack':
-                    whiteDrops.append(
-                        self.dropWhitePieces[dropIndex].cget('text'))
-
-            self.gameState.dropBlackPcs = blackDrops
-            self.gameState.dropWhitePcs = whiteDrops
-
-            while len(whiteDrops) != 19:
-                whiteDrops.append('0')
-            while len(blackDrops) != 19:
-                blackDrops.append('0')
-
-            rawMatrix = (
-                [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
-            #Store the numerical encoding into gamestate
-            self.gameState.NumericalEncodingGameState = rawMatrix
-
-            pc2num = ''
-            file = open('ml/eval_pcs.map', 'r')
-            pc2num = (file.read().split('\n'))
-            file.close()
-            convMatrix = []
-            for x in rawMatrix:
-                for l in pc2num:
-                    try:
-                        if x[-1:] in l:
-                            if x[0] == 'W':
-                                convMatrix.append(
-                                    '-' + l.split('=')[1])
-                                break
-                            elif x[0] == 'B':
-                                convMatrix.append(l.split('=')[1])
-                                break
-                            elif x[0] == '0':
-                                convMatrix.append(l.split('=')[1])
-                                break
-
-                    except BaseException:
-                        if (x == 0):
-                            convMatrix.append(0)
-                            break
-            # When we load a game, we try to generate features and
-            # labels
-            try:
-                csvObj = csvUtil(self.gameState.loadFile[:-4])
-                csvObj.createCombinedCSV(
-                    convMatrix, 'training.csv', csvObj.getOriginalFile())
-            except Exception as e:
-                print(e)
-                print('No CSA found, so not generating labels / features')
+            
     #Resets the games board colors 
     #TODO: Phase this out as we move from debug 
     def resetBoardGraphics(self):
         for i in range(0, self.gameState.board_size):
             for j in range(0, self.gameState.board_size):
                 self.cells[(i, j)].configure(background='white')
+
+    def processForTraining2(self):
+        #the plan 
+        #convert into binary bitmaps
+        whiteDrops, blackDrops = [], []
+        for dropIndex in range(0, len(self.dropBlacksPieces)):
+            if self.dropBlacksPieces[dropIndex].winfo_manager(
+            ) == 'pack':
+                blackDrops.append(
+                    self.dropBlacksPieces[dropIndex].cget('text'))
+
+        for dropIndex in range(0, len(self.dropWhitePieces)):
+            if self.dropWhitePieces[dropIndex].winfo_manager(
+            ) == 'pack':
+                whiteDrops.append(
+                    self.dropWhitePieces[dropIndex].cget('text'))
+
+        self.gameState.dropBlackPcs = blackDrops
+        self.gameState.dropWhitePcs = whiteDrops
+
+        while len(whiteDrops) != 19:
+            whiteDrops.append('0')
+        while len(blackDrops) != 19:
+            blackDrops.append('0')
+
+        rawMatrix = (
+            [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
+        #Store the numerical encoding into gamestate
+        self.gameState.NumericalEncodingGameState = rawMatrix
+
+        pcs = ['Wl', 'Wn', 'Ws', 'Wg', 'Wk', 'Wr', 'Wb', 'Wp', 'Bl', 'Bn', 'Bs', 'Bg', 'Bk', 'Br', 'Bb', 'Bp', 'WL', 'WN', 'WS', 'WR', 'WB', 'WP', 'BL', 'BN', 'BS', 'BR', 'BB', 'BP']
+        bitmap = []
+
+        for pc in pcs: 
+            for x in rawMatrix:
+                if x == pc:
+                    bitmap.append(1)
+                else:
+                    bitmap.append(0)
+        
+        try:
+            csvObj = csvUtil(self.gameState.loadFile[:-4])
+            csvObj.createCombinedCSV(
+                bitmap, 'training.csv', csvObj.getOriginalFile())
+        except Exception as e:
+            print(e)
+            print('No CSA found, so not generating labels / features')
+
+    def processForTraining1(self):
+        whiteDrops, blackDrops = [], []
+        for dropIndex in range(0, len(self.dropBlacksPieces)):
+            if self.dropBlacksPieces[dropIndex].winfo_manager(
+            ) == 'pack':
+                blackDrops.append(
+                    self.dropBlacksPieces[dropIndex].cget('text'))
+
+        for dropIndex in range(0, len(self.dropWhitePieces)):
+            if self.dropWhitePieces[dropIndex].winfo_manager(
+            ) == 'pack':
+                whiteDrops.append(
+                    self.dropWhitePieces[dropIndex].cget('text'))
+
+        self.gameState.dropBlackPcs = blackDrops
+        self.gameState.dropWhitePcs = whiteDrops
+
+        while len(whiteDrops) != 19:
+            whiteDrops.append('0')
+        while len(blackDrops) != 19:
+            blackDrops.append('0')
+
+        rawMatrix = (
+            [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
+        #Store the numerical encoding into gamestate
+        self.gameState.NumericalEncodingGameState = rawMatrix
+
+        pc2num = ''
+        file = open('ml/eval_pcs.map', 'r')
+        pc2num = (file.read().split('\n'))
+        file.close()
+        convMatrix = []
+        for x in rawMatrix:
+            for l in pc2num:
+                try:
+                    if x[-1:] in l:
+                        if x[0] == 'W':
+                            convMatrix.append(
+                                '-' + l.split('=')[1])
+                            break
+                        elif x[0] == 'B':
+                            convMatrix.append(l.split('=')[1])
+                            break
+                        elif x[0] == '0':
+                            convMatrix.append(l.split('=')[1])
+                            break
+
+                except BaseException:
+                    if (x == 0):
+                        convMatrix.append(0)
+                        break
+        # When we load a game, we try to generate features and
+        # labels
+        try:
+            csvObj = csvUtil(self.gameState.loadFile[:-4])
+            csvObj.createCombinedCSV(
+                convMatrix, 'training.csv', csvObj.getOriginalFile())
+        except Exception as e:
+            print(e)
+            print('No CSA found, so not generating labels / features')
 
     #Cleans the board, resets the variables and changes the turn around
     #For the next player to play
@@ -1845,7 +1896,7 @@ class AI_watcher(Thread, spem, logic):
     def resetPotentialMovePositions(self):
         print('Clearing moveposition')
         csvObj = csvUtil()
-        csvObj.createHeaders('ml/demo/moveposition.csv')
+        csvObj.createHeaders('ml/prototype/moveposition.csv')
 
     def run(self):
         while not self.stopped.wait(5):

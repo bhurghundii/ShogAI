@@ -4,7 +4,7 @@
 import random, copy
 import itertools
 import csv, traceback, sys
-from ml.demo.test_reuseModel import evaluatePositions
+from ml.prototype.test_reuseModel import evaluatePositions
 
 class moveGeneration():
 
@@ -251,7 +251,7 @@ class moveGeneration():
             lenToAdd = abs(120 - len(array))
             for extra0 in range(0, lenToAdd):
                 array.append(0)
-        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/demo/moveposition.csv', 'a', newline='') as csvfile:
+        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/prototype/moveposition.csv', 'a', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=',')
             spamwriter.writerow(array)
 
@@ -287,7 +287,7 @@ class moveGeneration():
         self.writeToPotentialMoveCSV(convMatrix)
         return (convMatrix)
     
-   
+    def convertPossibleMovesIntoNumericalForm2(self, possibleUnconvertedGameSate):
     #orgx orgy newx newy pos matrix
     #  0   1   2     3   4    5
 
