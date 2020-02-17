@@ -1896,7 +1896,7 @@ class AI_watcher(Thread, spem, logic):
     def resetPotentialMovePositions(self):
         print('Clearing moveposition')
         csvObj = csvUtil()
-        csvObj.createHeaders('ml/prototype/moveposition.csv')
+        csvObj.createHeaders('ml/pharoah/moveposition.csv')
 
     def run(self):
         while not self.stopped.wait(5):
@@ -1943,7 +1943,6 @@ class AI_watcher(Thread, spem, logic):
                         if self.gameState.AIMessage == 'ILLEGAL':
                             illegalMoveList.append(moveToCheck)
                         else:
-                            print(illegalMoveList)
                             self.gameState.AIMessage == 'LEGAL'
                             break
                             

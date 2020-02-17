@@ -7,8 +7,6 @@ from tkinter import Radiobutton, IntVar, filedialog, Label, W
 import tkinter as tk
 from gameinitializer import GameInitializer
 
-
-
 # Depending on which option the user chooses, we define different modes
 
 

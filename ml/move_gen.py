@@ -3,8 +3,23 @@
 #class AIListener():
 import random, copy
 import itertools
-import csv, traceback, sys
-from ml.prototype.test_reuseModel import evaluatePositions
+import csv, traceback, sys, subprocess
+from treelib import Node, Tree
+import numpy as np
+import pandas as pd
+import itertools, random
+
+import math
+import logging
+logging.basicConfig(level=logging.DEBUG)
+import scipy.io as sio # The library to deal with .mat
+from sklearn.metrics import classification_report
+import tensorflow as tf
+np.random.seed(1337)  # for reproducibility
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+import datetime
+
 
 class moveGeneration():
 
@@ -47,11 +62,9 @@ class moveGeneration():
                                     #Check if the oldmatrix or the new one is in the enemy area to give an option to promote
                                     if (isBlackTurn and ((oldMatrixPosX + x_dif) <= 2 or (oldMatrixPosX + x_dif) <= 2)):
                                         possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
-                                        print('WE PROMOTIN', pos.upper())
                     
                                     if (isBlackTurn == False and ((oldMatrixPosX + x_dif >= 6) or (oldMatrixPosX + x_dif) >= 6)):
                                         possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
-                                        print('WE PROMOTIN', pos.upper())
 
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] != 'W') and isBlackTurn == False):
@@ -63,11 +76,9 @@ class moveGeneration():
                                     #Check if the oldmatrix or the new one is in the enemy area to give an option to promote
                                     if (isBlackTurn and ((oldMatrixPosX + x_dif) <= 2 or (oldMatrixPosX + x_dif) <= 2)):
                                         possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
-                                        print('WE PROMOTIN', pos.upper())
                     
                                     if (isBlackTurn == False and ((oldMatrixPosX + x_dif >= 6) or (oldMatrixPosX + x_dif) >= 6)):
                                         possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX + x_dif, oldMatrixPosY + y_dif, pos.upper(), list(localMatrix), dropMove, True))
-                                        print('WE PROMOTIN', pos.upper())
 
                             if ((str(gameMatrix[oldMatrixPosX + x_dif][oldMatrixPosY + y_dif])[:-1] == 'W') and isBlackTurn == True):
                                 break
@@ -98,7 +109,6 @@ class moveGeneration():
             if (str(localMatrix[oldMatrixPosX][oldMatrixPosY]) == '0'):
                 #We try and check if a piece can be dropped using all the available pieces
                 for DropPiece in dropPcs:
-                    print(DropPiece)
                     if 'n' in DropPiece:
                         if (oldMatrixPosY <= 1 and isBlackTurn) or (
                                 oldMatrixPosY >= 7 and isBlackTurn == False):
@@ -126,7 +136,6 @@ class moveGeneration():
                             for y in range(0, 9):
                                 colMat.append(localMatrix[y][oldMatrixPosY])
 
-                            print(colMat)
                             pawnTeam = 'p'
                             if isBlackTurn:
                                 pawnTeam = 'B' + pawnTeam
@@ -152,8 +161,6 @@ class moveGeneration():
                     elif 'p' not in DropPiece and 'l' not in DropPiece and 'n' not in DropPiece:
                         localMatrix[oldMatrixPosX][oldMatrixPosY] = DropPiece
                         possibleMoveMatrix.append((oldMatrixPosX, oldMatrixPosY, oldMatrixPosX, oldMatrixPosY, DropPiece, list(localMatrix), dropMove, promoteMove))
-
-                    print('THIS WORKS')
         except Exception as e:
             traceback.print_exc(file=sys.stdout)                 
             print (e)
@@ -162,7 +169,7 @@ class moveGeneration():
         #Remove duplicates
        
         #Get the moves that are available by dropping
-        print('possiblemovematrix', possibleMoveMatrix)
+        #print('possiblemovematrix', possibleMoveMatrix)
         return (possibleMoveMatrix)
 
     def convMoveToNotation(self, piece, isPromotion, isCapture, isDrop, newMatrixPosY, newMatrixPosX, i = None, j = None):
@@ -205,10 +212,8 @@ class moveGeneration():
         f.write(move)
         f.close()
 
-    def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, illegalMoves = None):
-        #Iterate through gameMatrix
+    def generatePossibleMovesForTree(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs):
         possibleMoves = []
-
         #Get moves on board already
         for i in range(0, 9):
                     for j in range(0, 9):
@@ -220,9 +225,8 @@ class moveGeneration():
                                 possibleMoves += self.getPossibleMoves(i,j, pos, gameMatrix, isBlack)
                         except:
                             pass
-        
-        #Get moves you can drop
     
+        #Get moves you can drop
         for i in range(0, 9):
                     for j in range(0, 9):
                         try:
@@ -236,22 +240,59 @@ class moveGeneration():
                                 if (len(dropBlackpcs) > 0):
                                     possibleMoves += self.getPossibleDrops(i,j, dropBlackpcs, gameMatrix, isBlack)
                         except Exception as e:
-                            print(e)        
-       
-        possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
-        for possibleUnconvertedGameSates in possibleMoves:
-            self.convertPossibleMovesIntoNumericalForm(possibleUnconvertedGameSates[5])
+                            print(e)  
+        return possibleMoves
+
+    def GenTree(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, depth, rootname, tree, illegalMoves = None):
+        if depth > 0:
+            #print(loadmodelclass.checkLoad())
+            #label = loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(gameMatrix)))
+            #print('LABEL: ', label)
+            possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
+            possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
+
+            print(len(possibleMoves))
+            for possibleUnconvertedGameStates in possibleMoves:
+                try: 
+                    #label = loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(possibleUnconvertedGameStates)))  
+                    #print(label)
+                    tree.create_node(str(possibleUnconvertedGameStates), str(possibleUnconvertedGameStates[5]), parent=str(rootname))
+                    self.GenTree(possibleUnconvertedGameStates[5], not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, str(possibleUnconvertedGameStates[5]), tree, illegalMoves)
+                except Exception as e:
+                    traceback.print_exc(file=sys.stdout) 
+                    print(e)
+        
+    def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, illegalMoves = None):
+        #Iterate through gameMatrix
+        possibleMoves = []
+        tree = Tree()
+        tree.create_node("Root", "Root")  # root node
+        rootname = "Root"
+        DEPTH = 2
+        
+        self.GenTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, rootname, tree, illegalMoves)   
+        
+        #Get the child nodes
+        try:
+            for possibleUnconvertedGameStates in possibleMoves:
+                self.convertPossibleMovesIntoNumericalForm2(possibleUnconvertedGameStates[5])
+        except Exception as e:
+            print(e)
          
-        index = evaluatePositions().run()
+
+        tree.show()
+        tree.save2file('tree.txt')
+
+        index = 0 #evaluatePositions().run()
         print('SELECTED MOVE: ', index, ' with ', possibleMoves[index])
         return (self.convMoveToNotation(possibleMoves[index][4], possibleMoves[index][7], False, possibleMoves[index][6], possibleMoves[index][3], possibleMoves[index][2], possibleMoves[index][1], possibleMoves[index][0])), possibleMoves[index]
 
     def writeToPotentialMoveCSV(self, array):
-        if (len(array) != 120):
-            lenToAdd = abs(120 - len(array))
-            for extra0 in range(0, lenToAdd):
-                array.append(0)
-        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/prototype/moveposition.csv', 'a', newline='') as csvfile:
+        #if (len(array) != 120):
+        #    lenToAdd = abs(120 - len(array))
+        #    for extra0 in range(0, lenToAdd):
+        #        array.append(0)
+        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/moveposition.csv', 'a', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=',')
             spamwriter.writerow(array)
 
@@ -288,8 +329,80 @@ class moveGeneration():
         return (convMatrix)
     
     def convertPossibleMovesIntoNumericalForm2(self, possibleUnconvertedGameSate):
+        whiteDrops, blackDrops = [], []
+        '''
+        for dropIndex in range(0, len(self.dropBlacksPieces)):
+            if self.dropBlacksPieces[dropIndex].winfo_manager(
+            ) == 'pack':
+                blackDrops.append(
+                    self.dropBlacksPieces[dropIndex].cget('text'))
+
+        for dropIndex in range(0, len(self.dropWhitePieces)):
+            if self.dropWhitePieces[dropIndex].winfo_manager(
+            ) == 'pack':
+                whiteDrops.append(
+                    self.dropWhitePieces[dropIndex].cget('text'))
+
+        self.gameState.dropBlackPcs = blackDrops
+        self.gameState.dropWhitePcs = whiteDrops
+        '''
+
+        while len(whiteDrops) != 19:
+            whiteDrops.append('0')
+        while len(blackDrops) != 19:
+            blackDrops.append('0')
+
+        possibleUnconvertedGameSate = (
+            [y for x in possibleUnconvertedGameSate for y in x] + whiteDrops + blackDrops)
+
+        pcs = ['Wl', 'Wn', 'Ws', 'Wg', 'Wk', 'Wr', 'Wb', 'Wp', 'Bl', 'Bn', 'Bs', 'Bg', 'Bk', 'Br', 'Bb', 'Bp', 'WL', 'WN', 'WS', 'WR', 'WB', 'WP', 'BL', 'BN', 'BS', 'BR', 'BB', 'BP']
+        bitmap = []
+        print(possibleUnconvertedGameSate)
+        for pc in pcs: 
+            for x in possibleUnconvertedGameSate:
+                if x == pc:
+                    bitmap.append(1)
+                else:
+                    bitmap.append(0)
+        
+        self.writeToPotentialMoveCSV(bitmap)
+        return (bitmap)
+
     #orgx orgy newx newy pos matrix
     #  0   1   2     3   4    5
 
+class loadmodelclass():
 
+  def checkLoad(self):
+    return(True)
+  
+  def getlabel(self, feature):
+    from dbn_v2.tensorflow import SupervisedDBNClassification, UnsupervisedDBN
+
+    m_test = np.asarray(feature)
+    X_test = np.reshape(m_test, (1, 3332))
+    # Restore it
+    classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/model.pkl')
+    # Test
+    Y_pred = classifier.predict(X_test)
+    return (Y_pred)
+
+  def loadmodel(self, CSVFILE):
+    raw_data = pd.read_csv(CSVFILE)
+    Y_LABEL = 'Win'
+
+    KEYS = [i for i in raw_data.keys().tolist() if i != Y_LABEL]
+    X_test = raw_data[KEYS].values
+    Y_test = raw_data[Y_LABEL].values
+
+    class_names = list(raw_data.columns.values)
+    # Splitting data
+
+    # Restore it
+    classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/model.pkl')
+
+    # Test
+    Y_pred = classifier.predict(X_test)
+    return(Y_pred)
+    #READ CSV FILE, ATTACH POTENTIAL WIN AT THE END
 

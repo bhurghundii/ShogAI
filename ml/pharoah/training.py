@@ -13,7 +13,7 @@ np.random.seed(1337)  # for reproducibility
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 from sklearn.metrics.classification import accuracy_score
-from dbn.tensorflow import SupervisedDBNClassification, UnsupervisedDBN
+from dbn_v2.tensorflow import SupervisedDBNClassification, UnsupervisedDBN
 import datetime
 
 # use "from dbn import SupervisedDBNClassification" for computations on CPU with numpy
