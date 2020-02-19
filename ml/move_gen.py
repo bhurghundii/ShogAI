@@ -8,6 +8,8 @@ from treelib import Node, Tree
 import numpy as np
 import pandas as pd
 import itertools, random
+from dbn_v2.tensorflow import SupervisedDBNClassification
+classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/model.pkl')
 
 import math
 import logging
@@ -20,6 +22,10 @@ from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 import datetime
 
+class alphabeta_data():
+    def __init__(self, value, move):
+        self.value = value
+        self.move = move
 
 class moveGeneration():
 
@@ -243,65 +249,72 @@ class moveGeneration():
                             print(e)  
         return possibleMoves
 
-    def GenTree(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, depth, rootname, tree, illegalMoves = None):
-        if depth > 0:
-            #print(loadmodelclass.checkLoad())
-            #label = loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(gameMatrix)))
-            #print('LABEL: ', label)
+    #TODO: Something is up
+    def alphabeta(self, gameMatrix, gamedata, isBlack, dropBlackpcs, dropWhitePcs, depth, alpha, beta, illegalMoves = None):
+        if depth <= 0:
+            value = alphabeta_data(loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(gameMatrix))), gamedata)
+            return value
+       
+        if (isBlack == True):
+            value = alphabeta_data(float('-inf'), gamedata)
+            possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
+            possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
+            for possibleUnconvertedGameStates in possibleMoves:
+                try: 
+                    print('Thinking alpha')
+                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
+                    if (np.asarray(alpha.value).flat[0] > value.value.flat[0]):
+                        alpha = alpha
+                    else:
+                        alpha = value
+                    
+                    if np.asarray(alpha.value).flat[0] >= np.asarray(beta.value).flat[0]:
+                        break
+                except Exception as e:
+                    traceback.print_exc(file=sys.stdout)
+                    print(e)
+            return value
+            
+        else:
+            value = alphabeta_data(float('inf'), gamedata)
             possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
             possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
 
             print(len(possibleMoves))
             for possibleUnconvertedGameStates in possibleMoves:
                 try: 
-                    tree.create_node(str(possibleUnconvertedGameStates), str(possibleUnconvertedGameStates[5]), parent=str(rootname))
-                    self.GenTree(possibleUnconvertedGameStates[5], not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, str(possibleUnconvertedGameStates[5]), tree, illegalMoves)
+                    #tree.create_node(str(possibleUnconvertedGameStates), str(possibleUnconvertedGameStates[5]), parent=str(rootname))
+                    print('Thinking beta')
+                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
+                    
+                    
+                    if ((1 - np.asarray(beta.value).flat[0]) < value.value.flat[1]):
+                        beta = beta
+                    else:
+                        beta = value
+                    
+                    if np.asarray(alpha.value).flat[0] >= (1 - np.asarray(beta.value).flat[0]):
+                        break
                 except Exception as e:
-                    pass
-        
+                    traceback.print_exc(file=sys.stdout)
+                    print(e)
+            return value
+    
     def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, illegalMoves = None):
         #Iterate through gameMatrix
         possibleMoves = []
-        tree = Tree()
-        tree.create_node("Root", "Root")  # root node
-        rootname = "Root"
-        DEPTH = 1
+        print(gameMatrix)
+        alpha = alphabeta_data(float('-inf'), gameMatrix)
+        #alpha = np.asarray(alpha)
+        beta = alphabeta_data(float('inf'), gameMatrix)
+        #beta = np.asarray(beta)
+        DEPTH = 3
         
-        self.GenTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, rootname, tree, illegalMoves)   
+        bestMove = self.alphabeta(gameMatrix, None, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, alpha, beta, illegalMoves)
+        print('Value', bestMove.value, bestMove.move)   
         
-        #Get the child nodes
-        try:
-            for possibleUnconvertedGameStates in possibleMoves:
-                self.convertPossibleMovesIntoNumericalForm2(possibleUnconvertedGameStates[5])
-        except Exception as e:
-            print(e)
-         
-
-        #tree.show()
-        tree.save2file('tree.txt')
-        leaves = str(tree.leaves())
-
-
-        f = (leaves.split('Node(tag='))
-
-        leaf_pos = []
-        print(len(f))
-        for x in range(1, len(f)):
-            leaf_pos.append(eval(f[x].split(', identifier=')[0]))
-        
-        bestMove = None
-        best_score = 0
-        for x in leaf_pos:
-            bitmap = (self.convertPossibleMovesIntoNumericalForm2(x[5]))
-            pred = loadmodelclass().getlabel(bitmap)[0]
-            if best_score < pred:
-                bestMove = x
-                best_score = pred
-
-        print(bestMove, best_score)
-        index = 0 
-        print('SELECTED MOVE: ', index, ' with ', bestMove)
-        return (self.convMoveToNotation(bestMove[4], bestMove[7], False, bestMove[6], bestMove[3], bestMove[2], bestMove[1], bestMove[0])), bestMove
+        bestmove = bestMove.move
+        return (self.convMoveToNotation(bestmove[4], bestmove[7], False, bestmove[6], bestmove[3], bestmove[2], bestmove[1], bestmove[0])), bestmove
 
     def writeToPotentialMoveCSV(self, array):
         #if (len(array) != 120):
@@ -388,18 +401,25 @@ class moveGeneration():
 
 class loadmodelclass():
 
-  def checkLoad(self):
-    return(True)
+    def checkLoad(self):
+        return(True)
   
-  def getlabel(self, feature):
-    from dbn_v2.tensorflow import SupervisedDBNClassification, UnsupervisedDBN
-
-    m_test = np.asarray(feature)
-    X_test = np.reshape(m_test, (1, 3332))
-    # Restore it
-    classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/model.pkl')
-    # Test
-    Y_pred = classifier.predict_proba(X_test)
-    return (Y_pred[0])
-
-#print(loadmodelclass().getlabel([1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,1,0,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]))
+    def getlabel(self, feature):
+        m_test = np.asarray(feature)
+        X_test = np.reshape(m_test, (1, 3332))
+        # Restore it
+        # Test
+        Y_pred = classifier.predict_proba(X_test)
+        return (Y_pred[0])
+    
+    def getlabelBatch(self, featureset):
+        Y_pred = []
+        for feature in featureset:
+            print('PERFORMACNE')
+            m_test = np.asarray(feature)
+            X_test = np.reshape(m_test, (1, 3332))
+            # Restore it
+            
+            # Test
+            Y_pred.append((classifier.predict_proba(X_test).flat[0]))                    
+        return (Y_pred)
