@@ -3,7 +3,7 @@ This file is the initial entry point for Shogi AI
 Access is done through the bash file outside src startgame.sh
 '''
 
-from tkinter import Radiobutton, IntVar, filedialog, Label, W
+from tkinter import Radiobutton, IntVar, filedialog, Label, W, CENTER, Button, S, SW
 import tkinter as tk
 from gameinitializer import GameInitializer
 
@@ -54,7 +54,6 @@ def reset_ext_data_file(FILENAME):
     resetFile.write('')
     resetFile.close
 
-
 if __name__ == "__main__":
     try:
         # Reset the files that hold data which are games to load and the
@@ -76,10 +75,10 @@ if __name__ == "__main__":
         T0 = Label(
             root,
             text="Welcome to ShogAI, a Dissertation by Vikramaditya Chhapwale from Nottingham \n")
-        T0.pack(anchor=W)
+        T0.pack(anchor=CENTER)
 
         T1 = Label(root, text="Pick a Game Mode")
-        T1.pack(anchor=W)
+        T1.pack(anchor=CENTER)
 
         # Buttons the user can interact with are drawn
         R1 = Radiobutton(
@@ -88,14 +87,14 @@ if __name__ == "__main__":
             variable=selectionChoice,
             value=1,
             command=mode_selection)
-        R1.pack(anchor=W)
+        R1.pack(anchor=CENTER)
         R2 = Radiobutton(
             root,
             text="VS Another Player",
             variable=selectionChoice,
             value=2,
             command=mode_selection)
-        R2.pack(anchor=W)
+        R2.pack(anchor=CENTER)
 
         R3 = Radiobutton(
             root,
@@ -103,7 +102,14 @@ if __name__ == "__main__":
             variable=selectionChoice,
             value=3,
             command=mode_selection)
-        R3.pack(anchor=W)
+        R3.pack(anchor=CENTER)
+
+        R4 = Button(
+            root,
+            text="Language Options")
+        R4.pack(anchor=SW)
+
+        
 
         label = Label(root)
         label.pack()

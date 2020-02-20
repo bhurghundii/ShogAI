@@ -11,6 +11,7 @@ from gameinitializer import GameInitializer
 #Basically, just sets one of the parameters as Black
 def blackSelect():
     print('Going black')
+    root.destroy()
     GameInitializer().run(False, True, 'Black')
 
 
@@ -19,6 +20,7 @@ def blackSelect():
 #Basically, just sets one of the parameters as White
 def WhiteSelect():
     print('Going white')
+    root.destroy()
     GameInitializer().run(False, True, 'White')
 
 
