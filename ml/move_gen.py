@@ -288,12 +288,12 @@ class moveGeneration():
                     value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
                     
                     
-                    if ((1 - np.asarray(beta.value).flat[0]) < value.value.flat[1]):
+                    if ((np.asarray(beta.value).flat[0]) < (value.value.flat[1])):
                         beta = beta
                     else:
                         beta = value
                     
-                    if np.asarray(alpha.value).flat[0] >= (1 - np.asarray(beta.value).flat[0]):
+                    if (np.asarray(alpha.value).flat[0]) >= ( np.asarray(beta.value).flat[1]):
                         break
                 except Exception as e:
                     traceback.print_exc(file=sys.stdout)

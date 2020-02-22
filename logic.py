@@ -388,7 +388,7 @@ class logic:
     def resetBoardGraphics(self):
         for i in range(0, self.gameState.board_size):
             for j in range(0, self.gameState.board_size):
-                self.cells[(i, j)].configure(background='white')
+                self.cells[(i, j)].configure(background='#ffffb1')
 
     def processForTraining2(self):
         #the plan 
@@ -688,6 +688,10 @@ class logic:
                            str(len(self.gameState.blackcaptured))))
                     newButton = Button(
                         self.dropBlacks,
+                        highlightcolor="black",
+                        bg='#F6A379',
+                        height=1,
+                        width=1,
                         text='B' + str(
                             self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[
                             -1:],
@@ -707,6 +711,10 @@ class logic:
                         'W' + cap_piece[-1:].lower())
                     newButton = Button(
                         self.dropWhites,
+                        highlightcolor="black",
+                        bg='#F6A379',
+                        height=1,
+                        width=1,
                         text='W' + str(
                             self.gameState.gameMatrix[newMatrixPosXlocal][newMatrixPosYlocal]).lower()[
                             -1:],

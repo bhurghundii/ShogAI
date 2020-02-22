@@ -1,14 +1,13 @@
 # GUI implementation done using Tkinter graphics library
 # Simple and cross platform
 
-from tkinter import messagebox, Frame, Label, E, Button, Tk, N
+from tkinter import messagebox, Frame, Label, E, Button, Tk, N, font
 import tkinter as tk
 import copy
 import upsidedown
 import sys
 from logic import logic, AI_watcher
 from threading import Timer, Thread, Event
-
 
 class tkgui():
 
@@ -21,7 +20,7 @@ class tkgui():
     def drawInitialBoard(self):
         root = Tk()
         root.title('ShogAI')
-        root.geometry('1009x1009')
+        root.geometry('959x809')
         self.cells = {}
         self.turnIndicator = None
         self.CheckIndicator = None
@@ -30,16 +29,15 @@ class tkgui():
 
         # create main containers for board, like dropped pieces, actual board
         # etc.
-        center = Frame(root, bg='white', width=900, height=900, padx=3, pady=3)
+        center = Frame(root, bg='#DBDBDB', width=900, height=900)
         bottom = Frame(
             root,
-            bg='yellow',
+            bg='#DBDBDB',
             width=200,
             height=900,
-            padx=3,
             pady=3)
-        right = Frame(root, width=900, height=200, padx=3, pady=3)
-        left = Frame(root, width=900, height=200, padx=3, pady=3)
+        right = Frame(root, width=900, height=200, padx=15)
+        left = Frame(root, width=900, height=200, padx=30)
 
         # layout for all of the main containers
         root.grid_rowconfigure(self.board_size, weight=1)
@@ -61,6 +59,7 @@ class tkgui():
         right.grid_columnconfigure(1, weight=1)
 
         left.grid_rowconfigure(0, weight=1)
+        left.grid_columnconfigure(1, weight=1)
         left.grid_columnconfigure(0, weight=1)
         # we copy the matrix to another one purely for drawing because we want this to be used again
         # since python sets variables as references to variables, and we have a 2d array, we use deepcopy
@@ -78,7 +77,7 @@ class tkgui():
 
                 if column == self.board_size:
                     T2 = Label(cell, text=(chr(row + 65), row),
-                               background='white')
+                               background='#DBDBDB')
                     T2.pack(anchor=E)
                 try:
                     if (drawMatrix[row][column] == 0):
@@ -92,21 +91,23 @@ class tkgui():
                     if row == 0:
                         T1 = Label(cell, text=(10 - (column + 1), column))
                         T1.pack(anchor=N)
-
+                    
+                    pcFont = font.Font(family = "Arial", size = 32, weight = "bold")
                     square_board = Button(
                         cell,
                         text=drawMatrix[row][column],
-                        bg='white',
+                        bg='#ffffb1',
+                        font=pcFont,
                         highlightbackground="black",
                         highlightcolor="black",
                         highlightthickness=1,
-                        height=5,
-                        width=9,
+                        height=3,
+                        width=5,
                         command=lambda row=row,
                         col=column: gamelogic.click(
                             row,
                             col))
-                    square_board.pack()
+                    square_board.pack(fill="both", expand=False)
 
                     self.cells[(row, column)] = square_board
                 except BaseException:

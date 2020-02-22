@@ -11,7 +11,7 @@ from gameinitializer import GameInitializer
 #Basically, just sets one of the parameters as Black
 def blackSelect():
     print('Going black')
-    root.destroy()
+    root2.destroy()
     GameInitializer().run(False, True, 'Black')
 
 
@@ -20,22 +20,22 @@ def blackSelect():
 #Basically, just sets one of the parameters as White
 def WhiteSelect():
     print('Going white')
-    root.destroy()
+    root2.destroy()
     GameInitializer().run(False, True, 'White')
 
 
 # Draw Graphical User Interface screen for selecting the player
 # color when you choose to fight the AI
-root = tk.Tk()
-root.title("ShogAI: A Dissertation by Vikram Chhapwale")
-root.geometry('600x200')
+root2 = tk.Tk()
+root2.title("ShogAI: A Dissertation by Vikram Chhapwale")
+root2.geometry('600x200')
 colorSelection = IntVar()
 
-T0 = Label(root, text="Choose your color")
+T0 = Label(root2, text="Choose your color")
 T0.pack(anchor=W)
 
 R1 = Radiobutton(
-    root,
+    root2,
     text="Black",
     variable=colorSelection,
     value=1,
@@ -43,13 +43,13 @@ R1 = Radiobutton(
 R1.pack(anchor=W)
 
 R2 = Radiobutton(
-    root,
+    root2,
     text="White",
     variable=colorSelection,
     value=2,
     command=WhiteSelect)
 R2.pack(anchor=W)
 
-label = Label(root)
+label = Label(root2)
 label.pack()
-root.mainloop()
+root2.mainloop()
