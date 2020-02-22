@@ -1,7 +1,7 @@
 # GUI implementation done using Tkinter graphics library
 # Simple and cross platform
 
-from tkinter import messagebox, Frame, Label, E, Button, Tk, N, font
+from tkinter import messagebox, Frame, Label, E, Button, Tk, N, font, PhotoImage
 import tkinter as tk
 import copy
 import upsidedown
@@ -92,12 +92,13 @@ class tkgui():
                         T1 = Label(cell, text=(10 - (column + 1), column))
                         T1.pack(anchor=N)
                     
-                    pcFont = font.Font(family = "Arial", size = 32, weight = "bold")
+                    #pcFont = font.Font(family = "Arial", size = 32, weight = "bold")
+
                     square_board = Button(
                         cell,
                         text=drawMatrix[row][column],
                         bg='#ffffb1',
-                        font=pcFont,
+                        #font=pcFont,
                         highlightbackground="black",
                         highlightcolor="black",
                         highlightthickness=1,

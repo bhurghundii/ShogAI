@@ -253,6 +253,7 @@ class moveGeneration():
     def alphabeta(self, gameMatrix, gamedata, isBlack, dropBlackpcs, dropWhitePcs, depth, alpha, beta, illegalMoves = None):
         if depth <= 0:
             value = alphabeta_data(loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(gameMatrix))), gamedata)
+            print(gameMatrix, 'VALUES', value.value)
             return value
        
         if (isBlack == True):
@@ -262,7 +263,8 @@ class moveGeneration():
             for possibleUnconvertedGameStates in possibleMoves:
                 try: 
                     print('Thinking alpha')
-                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
+                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, True, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
+                    
                     if (np.asarray(alpha.value).flat[0] > value.value.flat[0]):
                         alpha = alpha
                     else:
@@ -273,6 +275,7 @@ class moveGeneration():
                 except Exception as e:
                     traceback.print_exc(file=sys.stdout)
                     print(e)
+            print(gameMatrix, 'VALUES', value)        
             return value
             
         else:
@@ -285,7 +288,7 @@ class moveGeneration():
                 try: 
                     #tree.create_node(str(possibleUnconvertedGameStates), str(possibleUnconvertedGameStates[5]), parent=str(rootname))
                     print('Thinking beta')
-                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, not isBlack, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
+                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, False, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
                     
                     
                     if ((np.asarray(beta.value).flat[0]) < (value.value.flat[1])):
@@ -308,7 +311,7 @@ class moveGeneration():
         #alpha = np.asarray(alpha)
         beta = alphabeta_data(float('inf'), gameMatrix)
         #beta = np.asarray(beta)
-        DEPTH = 3
+        DEPTH = 1
         
         bestMove = self.alphabeta(gameMatrix, None, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, alpha, beta, illegalMoves)
         print('Value', bestMove.value, bestMove.move)   

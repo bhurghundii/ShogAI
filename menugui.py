@@ -34,7 +34,7 @@ def mode_selection():
         root2.title("ShogAI: A Dissertation by Vikram Chhapwale")
         root2.geometry('800x550')
 
-        sidebar = tk.Frame(root2, width=100, bg='white', height=500, relief='sunken', borderwidth=0)
+        sidebar = tk.Frame(root2, width=60, bg='white', height=500, relief='sunken', borderwidth=0)
         sidebar.pack(expand=False, fill='both', side='left', anchor='nw')
 
         #Assign background colors
@@ -46,7 +46,8 @@ def mode_selection():
 
         T0 = Label(root2, text="Choose your color", 
             fg="white",
-            bg="#303030")
+            bg="#303030",
+            padx=10)
 
         T0.config(font=("Arial", 36))
         T0.pack(anchor=W)
@@ -60,6 +61,7 @@ def mode_selection():
             highlightthickness = 0,
             fg='white',
             bg="#303030",
+            padx=10,
             activebackground="#303030")
         R1.config(font=("Arial", 22))
         R1.pack(anchor=W)
@@ -73,6 +75,7 @@ def mode_selection():
             highlightthickness = 0,
             fg='white',
             bg="#303030",
+            padx=10,
             activebackground="#303030")
         R2.config(font=("Arial", 22))
         R2.pack(anchor=W)
@@ -231,20 +234,7 @@ if __name__ == "__main__":
 
         R4text = tk.StringVar()
 
-        R4 = Button(
-            sidebar,
-            textvariable = R4text,
-            height=3,
-            width=5,
-            bg='#4ca64c',
-            highlightthickness=0,
-            borderwidth=0,
-            font = ("Arial", 20),
-            padx=20
-            )
-        R4.pack(anchor=E)
-
-        R4text.set("⚐")
+       
 
 
         # Set up the activity loop
