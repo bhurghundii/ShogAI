@@ -22,11 +22,6 @@ from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 import datetime
 
-class alphabeta_data():
-    def __init__(self, value, move):
-        self.value = value
-        self.move = move
-
 class moveGeneration():
 
     def getPossibleMoves(self, oldMatrixPosX, oldMatrixPosY, pos, gameMatrix, isBlackTurn):
@@ -249,74 +244,76 @@ class moveGeneration():
                             print(e)  
         return possibleMoves
 
-    #TODO: Something is up
-    def alphabeta(self, gameMatrix, gamedata, isBlack, dropBlackpcs, dropWhitePcs, depth, alpha, beta, illegalMoves = None):
+    import random
+    #TODO: I SUSPECT ITS JUST ACCEPTING THE LAST MOVE FOR SOME REASON
+
+    def alphabetaroot(self, gameMatrix, gamedata, isBlack, dropBlackpcs, dropWhitePcs, depth, alpha, beta, rootmove = None, illegalMoves = None):
+        possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
+        bestMove = float('-inf')
+        bestMoveFinal = None
+        for possibleUnconvertedGameStates in possibleMoves: 
+            value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, True , dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, possibleUnconvertedGameStates, illegalMoves)
+            if (value > bestMove):
+                bestMove = value
+                bestMoveFinal = possibleUnconvertedGameStates
+        return bestMoveFinal
+
+
+    def alphabeta(self, gameMatrix, gamedata, isBlack, dropBlackpcs, dropWhitePcs, depth, alpha, beta, rootmove = None, illegalMoves = None):
         if depth <= 0:
-            value = alphabeta_data(loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(gameMatrix))), gamedata)
-            print(gameMatrix, 'VALUES', value.value)
+            value = loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(gameMatrix)))
+            #score = random.uniform(0, 1)
+            #value = alphabeta_data(np.asarray(score), gamedata, rootmove)
             return value
-       
+
         if (isBlack == True):
-            value = alphabeta_data(float('-inf'), gamedata)
+            value = float('-inf')
             possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
             possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
-            for possibleUnconvertedGameStates in possibleMoves:
-                try: 
-                    print('Thinking alpha')
-                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, True, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
-                    
-                    if (np.asarray(alpha.value).flat[0] > value.value.flat[0]):
-                        alpha = alpha
-                    else:
-                        alpha = value
-                    
-                    if np.asarray(alpha.value).flat[0] >= np.asarray(beta.value).flat[0]:
+            for possibleUnconvertedGameStates in possibleMoves: 
+                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, True , dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, possibleUnconvertedGameStates, illegalMoves)
+        
+                    alpha = max(alpha, value)
+
+                    if alpha >= beta:
                         break
-                except Exception as e:
-                    traceback.print_exc(file=sys.stdout)
-                    print(e)
-            print(gameMatrix, 'VALUES', value)        
+
             return value
-            
+
         else:
-            value = alphabeta_data(float('inf'), gamedata)
+            value = float('inf')
             possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
             possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
 
-            print(len(possibleMoves))
             for possibleUnconvertedGameStates in possibleMoves:
-                try: 
-                    #tree.create_node(str(possibleUnconvertedGameStates), str(possibleUnconvertedGameStates[5]), parent=str(rootname))
-                    print('Thinking beta')
-                    value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, False, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, illegalMoves)
-                    
-                    
-                    if ((np.asarray(beta.value).flat[0]) < (value.value.flat[1])):
-                        beta = beta
-                    else:
-                        beta = value
-                    
-                    if (np.asarray(alpha.value).flat[0]) >= ( np.asarray(beta.value).flat[1]):
-                        break
-                except Exception as e:
-                    traceback.print_exc(file=sys.stdout)
-                    print(e)
+                value = self.alphabeta(possibleUnconvertedGameStates[5], possibleUnconvertedGameStates, False, dropBlackpcs, dropWhitePcs, depth - 1, alpha, beta, possibleUnconvertedGameStates, illegalMoves)          
+                beta = min(beta, value)
+                #print('A1', np.asarray(alpha.value).flat[0], 'B1', np.asarray(beta.value).flat[0], 'V1', value.value.flat[0])
+                if alpha >= beta:
+                    break
             return value
     
+    def minmax(self, gameMatrix, gamedata, isBlack, dropBlackpcs, dropWhitePcs, depth, alpha, beta, rootmove = None, illegalMoves = None):
+        possibleMoves = self.generatePossibleMovesForTree(gameMatrix, isBlack, dropBlackpcs, dropWhitePcs)
+        possibleMoves = [i for i in possibleMoves if i not in illegalMoves]
+        bestMove = None
+        bestScore = 0
+        for possibleUnconvertedGameStates in possibleMoves:
+            score = alphabeta_data(loadmodelclass().getlabel(list(self.convertPossibleMovesIntoNumericalForm2(possibleUnconvertedGameStates[5]))), gamedata, rootmove)
+            if bestScore < score.value.flat[0]:
+                bestScore = score.value.flat[0]
+                bestMove = possibleUnconvertedGameStates
+        
+        return bestMove
+
+
     def GenMoves(self, gameMatrix, isBlack, dropBlackpcs, dropWhitePcs, illegalMoves = None):
         #Iterate through gameMatrix
-        possibleMoves = []
         print(gameMatrix)
-        alpha = alphabeta_data(float('-inf'), gameMatrix)
-        #alpha = np.asarray(alpha)
-        beta = alphabeta_data(float('inf'), gameMatrix)
-        #beta = np.asarray(beta)
-        DEPTH = 1
-        
-        bestMove = self.alphabeta(gameMatrix, None, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, alpha, beta, illegalMoves)
-        print('Value', bestMove.value, bestMove.move)   
-        
-        bestmove = bestMove.move
+        alpha = float('-inf')
+        beta = float('inf')
+        DEPTH = 3
+        bestmove = self.alphabetaroot(gameMatrix, None, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, alpha, beta, None, illegalMoves)
         return (self.convMoveToNotation(bestmove[4], bestmove[7], False, bestmove[6], bestmove[3], bestmove[2], bestmove[1], bestmove[0])), bestmove
 
     def writeToPotentialMoveCSV(self, array):
@@ -413,7 +410,7 @@ class loadmodelclass():
         # Restore it
         # Test
         Y_pred = classifier.predict_proba(X_test)
-        return (Y_pred[0])
+        return (np.asarray(Y_pred[0]).flat[0])
     
     def getlabelBatch(self, featureset):
         Y_pred = []

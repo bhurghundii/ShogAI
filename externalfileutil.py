@@ -35,7 +35,7 @@ class playexternalmoves():
         convMove = self.getTurnFromFile()
         isPromote = None
         isDrop = None
-        print (convMove)
+        print ('BEFORE', convMove)
         if ('☗' in convMove):
             IsBlackMove = False
             convMove = convMove.replace('☗', '')
@@ -69,11 +69,11 @@ class playexternalmoves():
 
         #Autopromote piece if it is required
         
-        if ('+' in convMove[len(convMove) - 1]):
+        if ('+' in convMove):
             isPromote = True
             convMove = (convMove.replace('+', ''))
 
-        print(convMove)
+        print('AFTER', convMove)
         convMove = convMove.strip()
         if (len(convMove) == 4):
             oldMatrixPosY = (9 - int(convMove[0]))

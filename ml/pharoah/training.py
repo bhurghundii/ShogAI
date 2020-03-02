@@ -51,18 +51,18 @@ def dbn_siamese(CSVFILE):
 
 
   # Splitting data
-  X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25, random_state=0)
+  X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=None, shuffle=True, stratify=Y)
 
   print(X_train)
   print(Y_train)
 
   # Training
-  classifier = SupervisedDBNClassification(hidden_layers_structure=[119, 50, 25],
+  classifier = SupervisedDBNClassification(hidden_layers_structure=[119, 75, 50, 25],
                                           learning_rate_rbm=0.05,
                                          learning_rate=0.1,
                                          n_epochs_rbm=40,
                                          n_iter_backprop=20,
-                                         batch_size=32,
+                                         batch_size=500,
                                          activation_function='relu',
                                          dropout_p=0.2)
 

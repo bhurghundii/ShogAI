@@ -1953,7 +1953,53 @@ class AI_watcher(Thread, spem, logic):
                         else:
                             self.gameState.AIMessage == 'LEGAL'
                             break
+                 
+
+
+                '''
+                elif (self.gameState.isBlackTurn == self.getPlayersColor()):
+                    #Reset the potential moves
+                    dropBlackState = []
+                    dropWhiteState = []
+                    try:
+                        dropBlackState = list(filter(('0').__ne__, self.gameState.dropBlackPcs))
+                    except:
+                        pass
+                    try:
+                       dropWhiteState = list(filter(('0').__ne__, self.gameState.dropWhitePcs))
+                    except:
+                        pass
+                    self.gameState.AIMessage = 'LEGAL'
+
+                    while True:
+                        mg = moveGeneration()
+                        moveToPlay, moveToCheck = mg.GenMoves(
+                                self.gameState.gameMatrix,
+                                self.getPlayersColor(), dropBlackState,
+                                    dropWhiteState, illegalMoveList)                                 
+                                                                 
+                        print('MOVE TO PLAY IS:', moveToPlay)
+                        mg.writeMoveToBuffer(moveToPlay, "ext_data/movetoplay.txt")
+                        self.gameState.AIMessage = 'LEGAL'
+                        print('Checking if a move is loaded by the AI')
+                        if os.stat("ext_data/movetoplay.txt").st_size != 0:
+                            print('There is a move! Let us load it')
+                            logic.PlayAIMove(self)
+                            f = open('ext_data/load_game.txt', 'r+')
+                            f.truncate(0)
+                            f.close()
+                            f = open('ext_data/movetoplay.txt', 'r+')
+                            f.truncate(0)
+                            f.close()
                             
+                        
+                        if self.gameState.AIMessage == 'ILLEGAL':
+                            illegalMoveList.append(moveToCheck)
+                        else:
+                            self.gameState.AIMessage == 'LEGAL'
+                            break
+                
+                '''
             except Exception as e:
                 traceback.print_exc(file=sys.stdout)
                 print(e)

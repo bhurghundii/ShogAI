@@ -5,6 +5,7 @@ ml/storage
 ml/tutorial
 ml/white/storage
 ml/black/storage
+training.txt
 *.csv
 *.h5
 *.csv.txt
