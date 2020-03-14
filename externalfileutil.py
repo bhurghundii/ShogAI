@@ -186,6 +186,7 @@ class gameTurn:
         file_variable = open('configure.txt')
         all_lines_variable = file_variable.readlines()
         if (all_lines_variable[3]) != '0':
-            t = showRecordGUI(gameTurn.recordSheet)
-            t.setDaemon(True)
-            t.start()
+            pass
+            #t = showRecordGUI(gameTurn.recordSheet)
+            #t.setDaemon(True)
+            #t.start()

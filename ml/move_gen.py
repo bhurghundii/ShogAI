@@ -11,6 +11,11 @@ import itertools, random
 from dbn_v2.tensorflow import SupervisedDBNClassification
 classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/model.pkl')
 
+from keras.models import load_model
+
+# load model
+model = load_model('model.h5')
+
 import math
 import logging
 logging.basicConfig(level=logging.DEBUG)

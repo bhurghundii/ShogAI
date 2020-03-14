@@ -390,52 +390,56 @@ class logic:
             for j in range(0, self.gameState.board_size):
                 self.cells[(i, j)].configure(background='#ffffb1')
 
-    def processForTraining2(self):
+    def processForTraining2(self, randomSelection = True):
         #the plan 
         #convert into binary bitmaps
-        whiteDrops, blackDrops = [], []
-        for dropIndex in range(0, len(self.dropBlacksPieces)):
-            if self.dropBlacksPieces[dropIndex].winfo_manager(
-            ) == 'pack':
-                blackDrops.append(
-                    self.dropBlacksPieces[dropIndex].cget('text'))
+        if (randomSelection):
+            randomSelectionValue = random.randint(1,101)
+            #Why 5? I like 5... seemed like a low enough chance 
+            if (randomSelectionValue < 5):
+                    whiteDrops, blackDrops = [], []
+                    for dropIndex in range(0, len(self.dropBlacksPieces)):
+                        if self.dropBlacksPieces[dropIndex].winfo_manager(
+                        ) == 'pack':
+                            blackDrops.append(
+                                self.dropBlacksPieces[dropIndex].cget('text'))
 
-        for dropIndex in range(0, len(self.dropWhitePieces)):
-            if self.dropWhitePieces[dropIndex].winfo_manager(
-            ) == 'pack':
-                whiteDrops.append(
-                    self.dropWhitePieces[dropIndex].cget('text'))
+                    for dropIndex in range(0, len(self.dropWhitePieces)):
+                        if self.dropWhitePieces[dropIndex].winfo_manager(
+                        ) == 'pack':
+                            whiteDrops.append(
+                                self.dropWhitePieces[dropIndex].cget('text'))
 
-        self.gameState.dropBlackPcs = blackDrops
-        self.gameState.dropWhitePcs = whiteDrops
+                    self.gameState.dropBlackPcs = blackDrops
+                    self.gameState.dropWhitePcs = whiteDrops
 
-        while len(whiteDrops) != 19:
-            whiteDrops.append('0')
-        while len(blackDrops) != 19:
-            blackDrops.append('0')
+                    while len(whiteDrops) != 19:
+                        whiteDrops.append('0')
+                    while len(blackDrops) != 19:
+                        blackDrops.append('0')
 
-        rawMatrix = (
-            [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
-        #Store the numerical encoding into gamestate
-        self.gameState.NumericalEncodingGameState = rawMatrix
+                    rawMatrix = (
+                        [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
+                    #Store the numerical encoding into gamestate
+                    self.gameState.NumericalEncodingGameState = rawMatrix
 
-        pcs = ['Wl', 'Wn', 'Ws', 'Wg', 'Wk', 'Wr', 'Wb', 'Wp', 'Bl', 'Bn', 'Bs', 'Bg', 'Bk', 'Br', 'Bb', 'Bp', 'WL', 'WN', 'WS', 'WR', 'WB', 'WP', 'BL', 'BN', 'BS', 'BR', 'BB', 'BP']
-        bitmap = []
+                    pcs = ['Wl', 'Wn', 'Ws', 'Wg', 'Wk', 'Wr', 'Wb', 'Wp', 'Bl', 'Bn', 'Bs', 'Bg', 'Bk', 'Br', 'Bb', 'Bp', 'WL', 'WN', 'WS', 'WR', 'WB', 'WP', 'BL', 'BN', 'BS', 'BR', 'BB', 'BP']
+                    bitmap = []
 
-        for pc in pcs: 
-            for x in rawMatrix:
-                if x == pc:
-                    bitmap.append(1)
-                else:
-                    bitmap.append(0)
-        
-        try:
-            csvObj = csvUtil(self.gameState.loadFile[:-4])
-            csvObj.createCombinedCSV(
-                bitmap, 'training.csv', csvObj.getOriginalFile())
-        except Exception as e:
-            print(e)
-            print('No CSA found, so not generating labels / features')
+                    for pc in pcs: 
+                        for x in rawMatrix:
+                            if x == pc:
+                                bitmap.append(1)
+                            else:
+                                bitmap.append(0)
+                    
+                    try:
+                        csvObj = csvUtil(self.gameState.loadFile[:-4])
+                        csvObj.createCombinedCSV(
+                            bitmap, 'training.csv', csvObj.getOriginalFile())
+                    except Exception as e:
+                        print(e)
+                        print('No CSA found, so not generating labels / features')
 
     def processForTraining1(self):
         whiteDrops, blackDrops = [], []
