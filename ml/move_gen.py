@@ -14,7 +14,7 @@ classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS
 from keras.models import load_model
 
 # load model
-model = load_model('model.h5')
+
 
 import math
 import logging
@@ -22,7 +22,6 @@ logging.basicConfig(level=logging.DEBUG)
 import scipy.io as sio # The library to deal with .mat
 from sklearn.metrics import classification_report
 import tensorflow as tf
-np.random.seed(1337)  # for reproducibility
 from sklearn.datasets import load_digits
 from sklearn.model_selection import train_test_split
 import datetime

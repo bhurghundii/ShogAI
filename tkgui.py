@@ -23,7 +23,6 @@ class tkgui():
         root.geometry('959x809')
         self.cells = {}
         self.turnIndicator = None
-        self.CheckIndicator = None
         self.dropBlacksPieces = []
         self.dropWhitePieces = []
 
@@ -180,7 +179,7 @@ class tkgui():
             self.dropWhites,
             self.dropBlacksPieces,
             self.dropWhitePieces,
-            self.CheckIndicator)
+            CheckIndicator)
 
         # We check whether the user has selected to play against the AI
         # Which triggers a seperate thread which the AI runs on
@@ -197,7 +196,7 @@ class tkgui():
                 self.dropWhites,
                 self.dropBlacksPieces,
                 self.dropWhitePieces,
-                self.CheckIndicator)
+                CheckIndicator)
             thread.daemon = True
             thread.start()
 

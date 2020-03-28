@@ -626,6 +626,7 @@ class logic:
         backupgamestateBlackcaptured = self.gameState.blackcaptured 
         backupgamestateWhitecaptured = self.gameState.whitecaptured
 
+        priorCheckCondition = self.CheckIndicator.cget("text")
         # For the game recorder
         resultPromotion = False
         resultCapture = False
@@ -742,7 +743,7 @@ class logic:
 
             # Check for checks
             # This method. Is. perfect.
-            print('CHECK??', self.gameState.isCheck)
+            #print('CHECK??', self.gameState.isCheck)
             if not self.gameState.isCheck:
                 # Does our move reveal a check for the other team?
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
@@ -835,7 +836,6 @@ class logic:
 
                 else:
                     print('King is out of check, continue play')
-                    #self.CheckIndicator.configure(text='NO CHECK')
                     self.gameState.isCheck = False
                     self.gameState.isBlackTurn = not self.gameState.isBlackTurn
             #We set the new position we are moving to as the old piece
@@ -928,6 +928,7 @@ class logic:
                 print(potentialThreatPcsAr)
                 if len(potentialThreatPcsAr) > 1:
                     print('RESULT: Checkmate! GAMEOVER')
+                    self.CheckIndicator.configure(text='Checkmate')
                 else:
                     # Alright, so there is a move and only one threat
                     # We can block. Right?
@@ -1011,6 +1012,7 @@ class logic:
                             print('Moves available. Continue play.')
                         else:
                             print('RESULT: Checkmate! GAMEOVER')
+                            self.CheckIndicator.configure(text='Checkmate')
 
                     else:
                         dropPcs = []
@@ -1090,6 +1092,7 @@ class logic:
                             print('Moves available. Continue play.')
                         else:
                             print('RESULT: Checkmate! GAMEOVER')
+                            self.CheckIndicator.configure(text='Checkmate')
 
             self.simulMoveMatrixPre *= 0
             self.simulMoveMatrix *= 0
@@ -1109,6 +1112,9 @@ class logic:
             whiteDrops.append('0')
         while len(blackDrops) != 19:
             blackDrops.append('0')
+
+        if (priorCheckCondition == 'Black Check') or (priorCheckCondition == 'White Check'):
+            self.CheckIndicator.configure(text='No Check')
 
         rawMatrix = (
             [y for x in self.gameState.gameMatrix for y in x] + whiteDrops + blackDrops)
@@ -1236,6 +1242,8 @@ class logic:
                                                 oldMatrixPosX + x_dif + 1,
                                                 oldMatrixPosY + y_dif + 1)) == 'Wk':
                                             print('BLACK CHECK!')
+                                            self.CheckIndicator.configure(text='Black Check')
+
                                             self.gameState.isCheck = True
 
                                         self.cells[(
@@ -1248,6 +1256,8 @@ class logic:
                                                 oldMatrixPosX + x_dif + 1,
                                                 oldMatrixPosY + y_dif + 1)) == 'Bk':
                                             print('WHITE CHECK!')
+                                            self.CheckIndicator.configure(text='White Check')
+
                                             self.gameState.isCheck = True
 
                                         self.cells[(
@@ -1266,7 +1276,6 @@ class logic:
                                         break
 
                             except Exception as e:
-                                # print(e)
                                 pass
 
             return 1
@@ -1519,7 +1528,6 @@ class logic:
 
             else:
                 print('King is out of check, continue play')
-                #self.CheckIndicator.configure(text='NO CHECK')
                 self.gameState.isCheck = False
                 self.gameState.isBlackTurn = not self.gameState.isBlackTurn
 
@@ -1575,6 +1583,7 @@ class logic:
                 if i == (len(self.simulMoveMatrix) - 1):
                     if ('p' not in pos):
                         print('Checkmate!')
+                        self.CheckIndicator.configure(text='Checkmate')
                     else:
                         print('You can not check mate by dropping a pawn')
                         old_fill = old_state_pos
@@ -1837,7 +1846,6 @@ class logic:
                 self.softReset()
 
                 print('King is out of check, continue play')
-                #self.CheckIndicator.configure(text='NO CHECK')
                 self.gameState.isCheck = False
                 return False
 
