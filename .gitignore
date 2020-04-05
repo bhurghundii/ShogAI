@@ -8,4 +8,5 @@ ml/black/storage
 training.txt
 *.csv
 *.h5
+*.pkl
 *.csv.txt
