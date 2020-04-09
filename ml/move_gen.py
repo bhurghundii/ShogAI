@@ -4,14 +4,13 @@
 import random, copy
 import itertools
 import csv, traceback, sys, subprocess
-from treelib import Node, Tree
-import numpy as np
-import pandas as pd
 import itertools, random
-from dbn_v2.tensorflow import SupervisedDBNClassification
-classifier = SupervisedDBNClassification.load('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/model.pkl')
+from tensorflow.keras.models import load_model
+import numpy as np
 
-from keras.models import load_model
+classifier = load_model('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah2/model_single.h5')
+autoencoder = load_model('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah2/autoencoder.h5')
+
 
 # load model
 
@@ -316,7 +315,7 @@ class moveGeneration():
         print(gameMatrix)
         alpha = float('-inf')
         beta = float('inf')
-        DEPTH = 3
+        DEPTH = 2
         bestmove = self.alphabetaroot(gameMatrix, None, isBlack, dropBlackpcs, dropWhitePcs, DEPTH, alpha, beta, None, illegalMoves)
         return (self.convMoveToNotation(bestmove[4], bestmove[7], False, bestmove[6], bestmove[3], bestmove[2], bestmove[1], bestmove[0])), bestmove
 
@@ -325,7 +324,7 @@ class moveGeneration():
         #    lenToAdd = abs(120 - len(array))
         #    for extra0 in range(0, lenToAdd):
         #        array.append(0)
-        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah/moveposition.csv', 'a', newline='') as csvfile:
+        with open('/home/ubuntu/Documents/Shogi-DISS/src/ml/pharoah2/moveposition.csv', 'a', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=',')
             spamwriter.writerow(array)
 
@@ -413,8 +412,11 @@ class loadmodelclass():
         X_test = np.reshape(m_test, (1, 3332))
         # Restore it
         # Test
-        Y_pred = classifier.predict_proba(X_test)
-        return (np.asarray(Y_pred[0]).flat[0])
+        #1 - because white optimized
+        
+        Y_pred = classifier.predict(autoencoder.predict(X_test))
+        
+        return (Y_pred)
     
     def getlabelBatch(self, featureset):
         Y_pred = []

@@ -1916,7 +1916,7 @@ class AI_watcher(Thread, spem, logic):
     def resetPotentialMovePositions(self):
         print('Clearing moveposition')
         csvObj = csvUtil()
-        csvObj.createHeaders('ml/pharoah/moveposition.csv')
+        csvObj.createHeaders('ml/pharoah2/moveposition.csv')
 
     def run(self):
         while not self.stopped.wait(5):
